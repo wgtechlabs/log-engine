@@ -84,6 +84,154 @@ The log messages will be formatted as follows:
 [2025-05-20T16:57:45.678Z] [4:57 PM] [INFO] Message here.
 ```
 
+## Testing
+
+The log-engine project includes a comprehensive test suite to ensure reliability and functionality. The tests are organized into focused, maintainable files covering different aspects of the logging system.
+
+### Test Structure
+
+The test suite is organized as follows:
+
+```
+src/__tests__/
+├── test-utils.ts              # Shared test utilities and mocking helpers
+├── log-engine.test.ts         # LogEngine core functionality tests
+├── logger.test.ts             # Logger class unit tests
+├── formatter.test.ts          # LogFormatter functionality tests
+├── environment.test.ts        # Environment-based configuration tests
+├── log-level.test.ts          # LogLevel enum validation tests
+└── integration.test.ts        # End-to-end integration tests
+```
+
+### Running Tests
+
+#### Run All Tests
+```bash
+npm test
+```
+
+#### Run Tests with Coverage
+```bash
+npm run test:coverage
+```
+
+#### Run Tests in Watch Mode
+```bash
+npm run test:watch
+```
+
+#### Run Specific Test Files
+```bash
+# Run only LogEngine tests
+npm test log-engine
+
+# Run only Logger class tests
+npm test logger
+
+# Run only integration tests
+npm test integration
+
+# Run only formatter tests
+npm test formatter
+```
+
+### Test Coverage
+
+The project maintains high test coverage:
+
+- **Statements**: ~94%
+- **Branches**: ~87%
+- **Functions**: ~90%
+- **Lines**: ~94%
+
+Coverage reports are generated in the `coverage/` directory after running `npm run test:coverage`.
+
+### Test Categories
+
+#### Unit Tests
+- **LogEngine** (`log-engine.test.ts`): Core logging functionality, configuration, and level filtering
+- **Logger** (`logger.test.ts`): Logger class behavior and configuration
+- **LogFormatter** (`formatter.test.ts`): Message formatting with timestamps and levels
+- **LogLevel** (`log-level.test.ts`): Enum values and ordering validation
+
+#### Configuration Tests
+- **Environment** (`environment.test.ts`): Auto-configuration based on `NODE_ENV`
+
+#### Integration Tests
+- **Integration** (`integration.test.ts`): End-to-end scenarios and workflows
+
+### Writing Tests
+
+When contributing to the project, follow these testing guidelines:
+
+#### Test Structure
+```typescript
+import { LogEngine, LogLevel } from '../index';
+import { setupConsoleMocks, restoreConsoleMocks, ConsoleMocks } from './test-utils';
+
+describe('Feature Name', () => {
+  let mocks: ConsoleMocks;
+
+  beforeEach(() => {
+    mocks = setupConsoleMocks();
+    // Setup test state
+  });
+
+  afterEach(() => {
+    restoreConsoleMocks(mocks);
+    // Cleanup
+  });
+
+  it('should describe the expected behavior', () => {
+    // Arrange
+    LogEngine.configure({ level: LogLevel.INFO });
+    
+    // Act
+    LogEngine.info('Test message');
+    
+    // Assert
+    expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
+      expect.stringContaining('[INFO] Test message')
+    );
+  });
+});
+```
+
+#### Best Practices
+- Use descriptive test names that explain the expected behavior
+- Follow the Arrange-Act-Assert pattern
+- Use the shared `test-utils` for console mocking
+- Clean up after each test to avoid side effects
+- Test both positive and negative scenarios
+- Include edge cases and error conditions
+
+#### Console Mocking
+The project uses shared console mocking utilities:
+
+```typescript
+import { setupConsoleMocks, restoreConsoleMocks, ConsoleMocks } from './test-utils';
+
+// In your test setup
+const mocks = setupConsoleMocks();
+
+// In your test cleanup
+restoreConsoleMocks(mocks);
+
+// In your assertions
+expect(mocks.mockConsoleLog).toHaveBeenCalledWith(expected);
+expect(mocks.mockConsoleWarn).toHaveBeenCalledTimes(1);
+expect(mocks.mockConsoleError).not.toHaveBeenCalled();
+```
+
+### Continuous Integration
+
+Tests are automatically run on:
+- Pull requests
+- Pushes to main branch
+- Release workflows
+
+Ensure all tests pass before submitting contributions.
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a pull request or open an issue for any enhancements or bugs.
