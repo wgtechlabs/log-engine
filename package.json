@@ -1,0 +1,38 @@
+{
+  "name": "@wgtechlabs/log-engine",
+  "version": "1.0.0",
+  "description": "A lightweight and efficient logging utility designed specifically for bot applications running on Node.js.",
+  "keywords": [
+    "logging",
+    "bot",
+    "discord",
+    "telegram",
+    "nodejs",
+    "typescript"
+  ],
+  "license": "AGPL-3.0",
+  "author": "WG Tech Labs <opensource@wgtechlabs.com> (https://wgtechlabs.com)",
+  "contributors": [
+    "Waren Gonzaga <opensource@warengonzaga.com> (https://warengonzaga.com)"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wgtechlabs/log-engine.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^4.0.0",
+    "ts-node": "^10.0.0",
+    "@types/node": "^18.0.0"
+  }
+}
