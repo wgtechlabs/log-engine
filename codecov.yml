@@ -1,0 +1,21 @@
+coverage:
+  status:
+    project:
+      default:
+        target: 90%
+        threshold: 2%
+    patch:
+      default:
+        target: 85%
+  
+  ignore:
+    - "src/**/*.test.ts"
+    - "src/**/*.d.ts"
+    - "dist/**/*"
+    - "coverage/**/*"
+    - "node_modules/**/*"
+
+comment:
+  layout: "reach,diff,flags,tree"
+  behavior: default
+  require_changes: false

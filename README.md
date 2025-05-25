@@ -1,5 +1,8 @@
 # Log Engine
 
+[![Test](https://github.com/wgtechlabs/log-engine/actions/workflows/test.yml/badge.svg)](https://github.com/wgtechlabs/log-engine/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/wgtechlabs/log-engine/branch/main/graph/badge.svg)](https://codecov.io/gh/wgtechlabs/log-engine)
+
 WG's Log Engine is a lightweight and efficient logging utility designed specifically for bot applications running on Node.js.
 
 ## Features

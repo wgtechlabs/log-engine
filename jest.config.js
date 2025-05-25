@@ -12,4 +12,16 @@ module.exports = {
     '!src/**/*.d.ts',
     '!src/**/*.test.ts',
   ],
+  // Coverage configuration for Codecov
+  coverageReporters: ['text', 'lcov', 'clover', 'json'],
+  coverageDirectory: 'coverage',
+  // Coverage thresholds
+  coverageThreshold: {
+    global: {
+      statements: 90,
+      branches: 85,
+      functions: 90,
+      lines: 90
+    }
+  }
 };
