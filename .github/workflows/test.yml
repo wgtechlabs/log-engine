@@ -30,11 +30,8 @@ jobs:
     - name: Run tests
       run: yarn test:ci
 
-    - name: Upload coverage reports
+    - name: Upload coverage reports to Codecov
       if: matrix.node-version == '18.x'
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v5
       with:
-        file: ./coverage/lcov.info
-        flags: unittests
-        name: codecov-umbrella
-        fail_ci_if_error: false
+        token: ${{ secrets.CODECOV_TOKEN }}
