@@ -20,7 +20,6 @@
   "files": [
     "dist/**/*",
     "README.md",
-    "TESTING.md",
     "LICENSE"
   ],
   "repository": {
