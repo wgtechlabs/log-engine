@@ -2,9 +2,35 @@
 
 [![made by](https://img.shields.io/badge/made%20by-WG%20Technology%20Labs-0060a0.svg?logo=github&longCache=true&labelColor=181717&style=flat-square)](https://github.com/wgtechlabs) [![sponsors](https://img.shields.io/badge/sponsor-%E2%9D%A4-%23db61a2.svg?&logo=github&logoColor=white&labelColor=181717&style=flat-square)](https://github.com/sponsors/wgtechlabs) [![release](https://img.shields.io/github/release/wgtechlabs/log-engine.svg?logo=github&labelColor=181717&color=green&style=flat-square)](https://github.com/wgtechlabs/log-engine/releases) [![star](https://img.shields.io/github/stars/wgtechlabs/log-engine.svg?&logo=github&labelColor=181717&color=yellow&style=flat-square)](https://github.com/wgtechlabs/log-engine/stargazers) [![license](https://img.shields.io/github/license/wgtechlabs/log-engine.svg?&logo=github&labelColor=181717&style=flat-square)](https://github.com/wgtechlabs/log-engine/blob/main/license)
 
-WG's Log Engine is a lightweight and efficient logging utility designed specifically for bot applications running on Node.js. Built with performance and simplicity in mind, it provides structured logging with configurable levels and automatic environment-based configuration.
+WG's Log Engine is the **ultimate logging solution for Node.js developers** - a lightweight, battle-tested utility specifically engineered for Discord bots, Telegram bots, web servers, APIs, and server-side applications. Born from real-world development challenges and proven in production environments like the [Unthread Discord Bot](https://github.com/wgtechlabs/unthread-discord-bot/), Log Engine delivers enterprise-grade logging with zero complexity.
 
-Whether you're building Discord bots, Telegram bots, or any Node.js application that needs reliable logging, Log Engine delivers the tools you need with minimal overhead and maximum flexibility.
+**Stop wrestling with logging configurations and start building amazing applications.** Whether you're creating the next viral Discord community bot, building high-performance APIs, developing microservices, or deploying production servers, Log Engine provides intelligent terminal-based logging that scales with your application's growth - from your first "Hello World" to handling millions of requests across distributed systems.
+
+## ❣️ Motivation
+
+Picture this: It's 2 AM, your server is crashing in production, and you're staring at a terminal filled with thousands of debug messages mixed with critical errors. Sound familiar? I've been there too many times. I created Log Engine because every developer deserves to sleep peacefully, knowing their logs are working intelligently in the background.
+
+Log Engine transforms your development experience from chaotic debugging sessions into confident, data-driven problem solving. No more guessing what went wrong, no more drowning in irrelevant logs, no more manual configuration headaches. Just clear, contextual information exactly when and where you need it. Because great applications deserve great logging, and great developers deserve tools that just work.
+
+## ✨ Key Features
+
+- **Lightweight & Fast**: Minimal overhead with maximum performance - designed to enhance your application, not slow it down.
+- **No Learning Curve**: Dead simple API that you can master in seconds. No extensive documentation, complex configurations, or setup required - Log Engine works instantly.
+- **Multiple Log Levels**: Support for DEBUG, INFO, WARN, ERROR, and SILENT levels with smart filtering - just set your level and let it handle the rest.
+- **Auto-Configuration**: Intelligent environment-based setup using NODE_ENV variables. No config files, initialization scripts, or manual setup - Log Engine works perfectly out of the box.
+- **Timestamp Support**: Formatted timestamps with both ISO and human-readable formats - all the formatting you need built right in.
+- **TypeScript Ready**: Full TypeScript support with comprehensive type definitions for a seamless development experience.
+- **Zero Dependencies**: No external dependencies for maximum compatibility and security - keeps your bundle clean and your project simple.
+- **Easy Integration**: Simple API that works seamlessly with existing Node.js applications. Just `import` and start logging - no middleware, plugins, or configuration required.
+
+## 🤔 How It Works
+
+1. Log Engine automatically detects your environment using `NODE_ENV` and sets appropriate log levels for optimal performance
+2. When you call logging methods, messages are filtered based on the configured severity level (only messages at or above the set level are displayed)
+3. Each log message is instantly formatted with precise timestamps in both ISO and human-readable formats
+4. Messages are output to the console with clear level indicators, making debugging and monitoring effortless
+
+Ready to streamline your application logging? Get started in seconds with our [simple installation](#📦-installation)!
 
 ## 🤗 Special Thanks
 
@@ -14,16 +40,6 @@ Whether you're building Discord bots, Telegram bots, or any Node.js application 
 | <a href="https://unthread.com"><img src="https://raw.githubusercontent.com/wgtechlabs/unthread-discord-bot/main/.github/assets/sponsors/platinum_unthread.png" width="250" alt="Unthread"></a> |
 | <div align="center"><a href="https://unthread.com" target="_blank"><b>Unthread</b></a><br/>Streamlined support ticketing for modern teams.</div> |
 <!-- markdownlint-enable MD033 -->
-
-## ✨ Key Features
-
-- **Lightweight & Fast**: Minimal overhead with maximum performance for production applications
-- **Multiple Log Levels**: Support for DEBUG, INFO, WARN, ERROR, and SILENT levels with smart filtering
-- **Auto-Configuration**: Intelligent environment-based setup using NODE_ENV variables
-- **Timestamp Support**: Formatted timestamps with both ISO and human-readable formats
-- **TypeScript Ready**: Full TypeScript support with comprehensive type definitions
-- **Zero Dependencies**: No external dependencies for maximum compatibility and security
-- **Easy Integration**: Simple API that works seamlessly with existing Node.js applications
 
 ## 📦 Installation
 
@@ -69,7 +85,7 @@ if (env === 'production') {
     LogEngine.configure({ level: LogLevel.DEBUG });
 }
 
-// Now use the logger - only messages at or above the configured level will be shown
+// Now use Log Engine - only messages at or above the configured level will be shown
 LogEngine.debug('This will only show in development');
 LogEngine.info('General information');
 LogEngine.warn('Warning message');
@@ -78,7 +94,7 @@ LogEngine.error('Error message');
 
 ### Log Levels
 
-The logger supports the following levels (in order of severity):
+Log Engine supports the following levels (in order of severity):
 
 - `LogLevel.DEBUG` (0) - Detailed information for debugging
 - `LogLevel.INFO` (1) - General information
@@ -88,7 +104,7 @@ The logger supports the following levels (in order of severity):
 
 ### Auto-Configuration
 
-The logger automatically configures itself based on the `NODE_ENV` environment variable:
+Log Engine automatically configures itself based on the `NODE_ENV` environment variable:
 
 - `production` → `LogLevel.WARN`
 - `development` → `LogLevel.DEBUG`
@@ -102,50 +118,6 @@ Log messages are formatted with timestamps and levels:
 ```
 [2025-05-20T16:57:45.678Z] [4:57 PM] [INFO] Message here.
 ```
-
-## 🧪 Testing
-
-The log-engine project includes a comprehensive test suite to ensure reliability and functionality. The tests are organized into focused, maintainable files covering different aspects of the logging system.
-
-### Test Structure
-
-```
-src/__tests__/
-├── test-utils.ts              # Shared test utilities and mocking helpers
-├── log-engine.test.ts         # LogEngine core functionality tests
-├── logger.test.ts             # Logger class unit tests
-├── formatter.test.ts          # LogFormatter functionality tests
-├── environment.test.ts        # Environment-based configuration tests
-├── log-level.test.ts          # LogLevel enum validation tests
-└── integration.test.ts        # End-to-end integration tests
-```
-
-### Running Tests
-
-```bash
-# Run all tests
-npm test
-
-# Run tests with coverage
-npm run test:coverage
-
-# Run tests in watch mode
-npm run test:watch
-
-# Run specific test files
-npm test log-engine
-npm test logger
-npm test integration
-```
-
-### Test Coverage
-
-The project maintains high test coverage:
-
-- **Statements**: ~94%
-- **Branches**: ~87%
-- **Functions**: ~90%
-- **Lines**: ~94%
 
 ## 💬 Community Discussions
 
@@ -182,44 +154,7 @@ Your contributions to improving this project are greatly appreciated! 🙏✨
 
 Contributions are welcome, create a pull request to this repo and I will review your code. Please consider to submit your pull request to the `dev` branch. Thank you!
 
-Read the project's [contributing guide](./contributing.md) for more info.
-
-### Writing Tests
-
-When contributing to the project, follow these testing guidelines:
-
-#### Test Structure
-```typescript
-import { LogEngine, LogLevel } from '../index';
-import { setupConsoleMocks, restoreConsoleMocks, ConsoleMocks } from './test-utils';
-
-describe('Feature Name', () => {
-  let mocks: ConsoleMocks;
-
-  beforeEach(() => {
-    mocks = setupConsoleMocks();
-    // Setup test state
-  });
-
-  afterEach(() => {
-    restoreConsoleMocks(mocks);
-    // Cleanup
-  });
-
-  it('should describe the expected behavior', () => {
-    // Arrange
-    LogEngine.configure({ level: LogLevel.INFO });
-    
-    // Act
-    LogEngine.info('Test message');
-    
-    // Assert
-    expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
-      expect.stringContaining('[INFO] Test message')
-    );
-  });
-});
-```
+Read the project's [contributing guide](./CONTRIBUTING.md) for more info, including testing guidelines and requirements.
 
 ## 🙏 Sponsor
 
