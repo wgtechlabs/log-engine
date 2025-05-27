@@ -43,6 +43,9 @@ Ready to streamline your application logging? Get started in seconds with our [s
 | <div align="center"><a href="https://unthread.com" target="_blank"><b>Unthread</b></a><br/>Streamlined support ticketing for modern teams.</div> |
 <!-- markdownlint-enable MD033 -->
 
+## 💲 GitAds Sponsored
+[![Sponsored by GitAds](https://gitads.dev/v1/ad-serve?source=wgtechlabs/log-engine@github)](https://gitads.dev/v1/ad-track?source=wgtechlabs/log-engine@github)
+
 ## 📦 Installation
 
 Install the package using npm:
