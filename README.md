@@ -1,6 +1,6 @@
-# Log Engine 📝 ![gitHub actions workflow status](https://img.shields.io/github/actions/workflow/status/wgtechlabs/log-engine/test.yml?branch=main&style=flat-square&logo=github&labelColor=181717&link=https%3A%2F%2Fgithub.com%2Fwgtechlabs%2Flog-engine%2Factions%2Fworkflows%2Ftest.yml) ![codecov](https://img.shields.io/codecov/c/github/wgtechlabs/log-engine?token=PWRJTBVKQ9&style=flat-square&logo=codecov&labelColor=181717&link=https%3A%2F%2Fcodecov.io%2Fgh%2Fwgtechlabs%2Flog-engine)
+# Log Engine 📜🚂
 
-[![made by](https://img.shields.io/badge/made%20by-WG%20Technology%20Labs-0060a0.svg?logo=github&longCache=true&labelColor=181717&style=flat-square)](https://github.com/wgtechlabs) [![sponsors](https://img.shields.io/badge/sponsor-%E2%9D%A4-%23db61a2.svg?&logo=github&logoColor=white&labelColor=181717&style=flat-square)](https://github.com/sponsors/wgtechlabs) [![release](https://img.shields.io/github/release/wgtechlabs/log-engine.svg?logo=github&labelColor=181717&color=green&style=flat-square)](https://github.com/wgtechlabs/log-engine/releases) [![star](https://img.shields.io/github/stars/wgtechlabs/log-engine.svg?&logo=github&labelColor=181717&color=yellow&style=flat-square)](https://github.com/wgtechlabs/log-engine/stargazers) [![license](https://img.shields.io/github/license/wgtechlabs/log-engine.svg?&logo=github&labelColor=181717&style=flat-square)](https://github.com/wgtechlabs/log-engine/blob/main/license)
+[![made by](https://img.shields.io/badge/made%20by-WG%20Technology%20Labs-0060a0.svg?logo=github&longCache=true&labelColor=181717&style=flat-square)](https://github.com/wgtechlabs) ![gitHub actions workflow status](https://img.shields.io/github/actions/workflow/status/wgtechlabs/log-engine/test.yml?branch=main&style=flat-square&logo=github&labelColor=181717&link=https%3A%2F%2Fgithub.com%2Fwgtechlabs%2Flog-engine%2Factions%2Fworkflows%2Ftest.yml) ![codecov](https://img.shields.io/codecov/c/github/wgtechlabs/log-engine?token=PWRJTBVKQ9&style=flat-square&logo=codecov&labelColor=181717&link=https%3A%2F%2Fcodecov.io%2Fgh%2Fwgtechlabs%2Flog-engine) ![npm downloads](https://img.shields.io/npm/d18m/%40wgtechlabs%2Flog-engine?style=flat-square&logo=npm&label=installs&labelColor=181717&color=%23CD0000&link=https%3A%2F%2Fwww.npmjs.com%2Fpackage%2F%40wgtechlabs%2Flog-engine) [![sponsors](https://img.shields.io/badge/sponsor-%E2%9D%A4-%23db61a2.svg?&logo=github&logoColor=white&labelColor=181717&style=flat-square)](https://github.com/sponsors/wgtechlabs) [![release](https://img.shields.io/github/release/wgtechlabs/log-engine.svg?logo=github&labelColor=181717&color=green&style=flat-square)](https://github.com/wgtechlabs/log-engine/releases) [![star](https://img.shields.io/github/stars/wgtechlabs/log-engine.svg?&logo=github&labelColor=181717&color=yellow&style=flat-square)](https://github.com/wgtechlabs/log-engine/stargazers) [![license](https://img.shields.io/github/license/wgtechlabs/log-engine.svg?&logo=github&labelColor=181717&style=flat-square)](https://github.com/wgtechlabs/log-engine/blob/main/license)
 
 [![banner](https://raw.githubusercontent.com/wgtechlabs/log-engine/main/.github/assets/repo_banner.jpg)](https://github.com/wgtechlabs/log-engine)
 
@@ -43,8 +43,11 @@ Ready to streamline your application logging? Get started in seconds with our [s
 | <div align="center"><a href="https://unthread.com" target="_blank"><b>Unthread</b></a><br/>Streamlined support ticketing for modern teams.</div> |
 <!-- markdownlint-enable MD033 -->
 
-## 💲 GitAds Sponsored
-[![Sponsored by GitAds](https://gitads.dev/v1/ad-serve?source=wgtechlabs/log-engine@github)](https://gitads.dev/v1/ad-track?source=wgtechlabs/log-engine@github)
+## 💸 Sponsored Ads
+
+Open source development is resource-intensive. These **sponsored ads help keep Log Engine free and actively maintained** while connecting you with tools and services that support open-source development.
+
+[![sponsored ads](https://gitads.dev/v1/ad-serve?source=wgtechlabs/log-engine@github)](https://gitads.dev/v1/ad-track?source=wgtechlabs/log-engine@github)
 
 ## 📦 Installation
 
