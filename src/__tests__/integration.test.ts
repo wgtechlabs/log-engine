@@ -1,3 +1,8 @@
+/**
+ * Integration tests for the complete LogEngine system
+ * Tests end-to-end functionality, configuration changes, and real-world usage patterns
+ */
+
 import { LogEngine, LogLevel } from '../index';
 import { setupConsoleMocks, restoreConsoleMocks, ConsoleMocks } from './test-utils';
 
@@ -5,49 +10,56 @@ describe('Integration tests', () => {
   let mocks: ConsoleMocks;
 
   beforeEach(() => {
-    // Create fresh mocks for each test
+    // Set up console mocks to capture all output
     mocks = setupConsoleMocks();
   });
 
   afterEach(() => {
-    // Restore console methods after each test
+    // Clean up console mocks after each test
     restoreConsoleMocks(mocks);
   });
 
   it('should work end-to-end with multiple log levels', () => {
+    // Test complete workflow with mixed log levels and INFO threshold
     LogEngine.configure({ level: LogLevel.INFO });
     
-    LogEngine.debug('Debug message');
-    LogEngine.info('Info message');
-    LogEngine.warn('Warning message');
-    LogEngine.error('Error message');
+    LogEngine.debug('Debug message');    // Should be filtered
+    LogEngine.info('Info message');      // Should show
+    LogEngine.warn('Warning message');   // Should show
+    LogEngine.error('Error message');    // Should show
     
-    expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
-    expect(mocks.mockConsoleWarn).toHaveBeenCalledTimes(1);
-    expect(mocks.mockConsoleError).toHaveBeenCalledTimes(1);
+    // Verify correct number of calls to each console method
+    expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);    // info only
+    expect(mocks.mockConsoleWarn).toHaveBeenCalledTimes(1);   // warn only
+    expect(mocks.mockConsoleError).toHaveBeenCalledTimes(1);  // error only
   });
 
   it('should handle rapid configuration changes', () => {
+    // Test that configuration changes take effect immediately
     LogEngine.configure({ level: LogLevel.DEBUG });
-    LogEngine.debug('Debug 1');
+    LogEngine.debug('Debug 1');          // Should show with DEBUG level
     
     LogEngine.configure({ level: LogLevel.ERROR });
-    LogEngine.debug('Debug 2');
-    LogEngine.error('Error 1');
+    LogEngine.debug('Debug 2');          // Should be filtered with ERROR level
+    LogEngine.error('Error 1');          // Should show with ERROR level
     
+    // Verify only first debug and the error were logged
     expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
     expect(mocks.mockConsoleError).toHaveBeenCalledTimes(1);
   });
 
   it('should maintain state across multiple method calls', () => {
+    // Test that configuration persists across many logging calls
     LogEngine.configure({ level: LogLevel.WARN });
     
+    // Simulate burst logging with mixed levels
     for (let i = 0; i < 5; i++) {
-      LogEngine.info(`Info ${i}`);
-      LogEngine.warn(`Warning ${i}`);
+      LogEngine.info(`Info ${i}`);      // All should be filtered
+      LogEngine.warn(`Warning ${i}`);   // All should show
     }
     
-    expect(mocks.mockConsoleLog).not.toHaveBeenCalled();
-    expect(mocks.mockConsoleWarn).toHaveBeenCalledTimes(5);
+    // Verify filtering consistency across multiple calls
+    expect(mocks.mockConsoleLog).not.toHaveBeenCalled();      // No info messages
+    expect(mocks.mockConsoleWarn).toHaveBeenCalledTimes(5);   // All warning messages
   });
 });

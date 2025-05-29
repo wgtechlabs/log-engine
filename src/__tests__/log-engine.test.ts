@@ -1,3 +1,8 @@
+/**
+ * Integration tests for the LogEngine main API
+ * Tests the complete public interface and log level filtering behavior
+ */
+
 import { LogEngine, LogLevel } from '../index';
 import { setupConsoleMocks, restoreConsoleMocks, ConsoleMocks } from './test-utils';
 
@@ -5,20 +10,21 @@ describe('LogEngine', () => {
   let mocks: ConsoleMocks;
 
   beforeEach(() => {
-    // Create fresh mocks for each test
+    // Set up console mocks to capture log output
     mocks = setupConsoleMocks();
     
-    // Reset LogEngine to default state
+    // Reset LogEngine to consistent default state for each test
     LogEngine.configure({ level: LogLevel.INFO });
   });
 
   afterEach(() => {
-    // Restore console methods after each test
+    // Clean up console mocks after each test
     restoreConsoleMocks(mocks);
   });
 
   describe('Basic logging functionality', () => {
     it('should log debug messages when level is DEBUG', () => {
+      // Test that DEBUG level enables debug message output
       LogEngine.configure({ level: LogLevel.DEBUG });
       LogEngine.debug('Debug message');
       
@@ -29,6 +35,7 @@ describe('LogEngine', () => {
     });
 
     it('should log info messages when level is INFO or lower', () => {
+      // Test that INFO level shows info messages
       LogEngine.configure({ level: LogLevel.INFO });
       LogEngine.info('Info message');
       
@@ -39,6 +46,7 @@ describe('LogEngine', () => {
     });
 
     it('should log warn messages when level is WARN or lower', () => {
+      // Test that WARN level shows warning messages using console.warn
       LogEngine.configure({ level: LogLevel.WARN });
       LogEngine.warn('Warning message');
       
@@ -49,6 +57,7 @@ describe('LogEngine', () => {
     });
 
     it('should log error messages when level is ERROR or lower', () => {
+      // Test that ERROR level shows error messages using console.error
       LogEngine.configure({ level: LogLevel.ERROR });
       LogEngine.error('Error message');
       
@@ -61,6 +70,7 @@ describe('LogEngine', () => {
 
   describe('Log level filtering', () => {
     it('should not log debug messages when level is INFO', () => {
+      // Test that higher log levels filter out lower priority messages
       LogEngine.configure({ level: LogLevel.INFO });
       LogEngine.debug('Debug message');
       
@@ -68,6 +78,7 @@ describe('LogEngine', () => {
     });
 
     it('should not log info messages when level is WARN', () => {
+      // Test that WARN level filters out INFO messages
       LogEngine.configure({ level: LogLevel.WARN });
       LogEngine.info('Info message');
       
@@ -75,6 +86,7 @@ describe('LogEngine', () => {
     });
 
     it('should not log warn messages when level is ERROR', () => {
+      // Test that ERROR level filters out WARN messages
       LogEngine.configure({ level: LogLevel.ERROR });
       LogEngine.warn('Warning message');
       
@@ -82,12 +94,14 @@ describe('LogEngine', () => {
     });
 
     it('should not log any messages when level is SILENT', () => {
+      // Test that SILENT level completely disables all logging
       LogEngine.configure({ level: LogLevel.SILENT });
       LogEngine.debug('Debug message');
       LogEngine.info('Info message');
       LogEngine.warn('Warning message');
       LogEngine.error('Error message');
       
+      // No console methods should be called with SILENT level
       expect(mocks.mockConsoleLog).not.toHaveBeenCalled();
       expect(mocks.mockConsoleWarn).not.toHaveBeenCalled();
       expect(mocks.mockConsoleError).not.toHaveBeenCalled();
@@ -96,6 +110,7 @@ describe('LogEngine', () => {
 
   describe('Configuration', () => {
     it('should accept partial configuration', () => {
+      // Test that partial config updates work (only changing level)
       LogEngine.configure({ level: LogLevel.DEBUG });
       LogEngine.debug('Debug message');
       
@@ -105,10 +120,12 @@ describe('LogEngine', () => {
     });
 
     it('should maintain configuration between calls', () => {
+      // Test that configuration persists across multiple logging calls
       LogEngine.configure({ level: LogLevel.ERROR });
       LogEngine.info('Should not appear');
       LogEngine.error('Should appear');
       
+      // Only ERROR should be logged based on configuration
       expect(mocks.mockConsoleLog).not.toHaveBeenCalled();
       expect(mocks.mockConsoleError).toHaveBeenCalledTimes(1);
     });
