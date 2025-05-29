@@ -47,7 +47,7 @@ describe('Environment-based configuration', () => {
     
     // DEBUG should be visible in development
     expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
-      expect.stringContaining('[DEBUG] Debug message')
+      expect.stringContaining('Debug message')
     );
   });
 
@@ -79,7 +79,7 @@ describe('Environment-based configuration', () => {
     // Should default to INFO level (DEBUG filtered, INFO shown)
     expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
     expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
-      expect.stringContaining('[INFO] Info message')
+      expect.stringContaining('Info message')
     );
   });
 
@@ -96,7 +96,7 @@ describe('Environment-based configuration', () => {
     // Should default to INFO level when NODE_ENV is undefined
     expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
     expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
-      expect.stringContaining('[INFO] Info message')
+      expect.stringContaining('Info message')
     );
   });
 });

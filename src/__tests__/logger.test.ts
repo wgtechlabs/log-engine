@@ -31,7 +31,7 @@ describe('Logger class', () => {
     // Only INFO should be logged with default settings
     expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
     expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
-      expect.stringContaining('[INFO] Info message')
+      expect.stringContaining('Info message')
     );
   });
 
@@ -42,7 +42,7 @@ describe('Logger class', () => {
     
     // DEBUG should now be visible after configuration change
     expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
-      expect.stringContaining('[DEBUG] Debug message')
+      expect.stringContaining('Debug message')
     );
   });
 

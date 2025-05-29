@@ -30,7 +30,7 @@ describe('LogEngine', () => {
       
       expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
       expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
-        expect.stringContaining('[DEBUG] Debug message')
+        expect.stringContaining('Debug message')
       );
     });
 
@@ -41,7 +41,7 @@ describe('LogEngine', () => {
       
       expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
       expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
-        expect.stringContaining('[INFO] Info message')
+        expect.stringContaining('Info message')
       );
     });
 
@@ -52,7 +52,7 @@ describe('LogEngine', () => {
       
       expect(mocks.mockConsoleWarn).toHaveBeenCalledTimes(1);
       expect(mocks.mockConsoleWarn).toHaveBeenCalledWith(
-        expect.stringContaining('[WARN] Warning message')
+        expect.stringContaining('Warning message')
       );
     });
 
@@ -63,7 +63,7 @@ describe('LogEngine', () => {
       
       expect(mocks.mockConsoleError).toHaveBeenCalledTimes(1);
       expect(mocks.mockConsoleError).toHaveBeenCalledWith(
-        expect.stringContaining('[ERROR] Error message')
+        expect.stringContaining('Error message')
       );
     });
   });
@@ -115,7 +115,7 @@ describe('LogEngine', () => {
       LogEngine.debug('Debug message');
       
       expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
-        expect.stringContaining('[DEBUG] Debug message')
+        expect.stringContaining('Debug message')
       );
     });
 

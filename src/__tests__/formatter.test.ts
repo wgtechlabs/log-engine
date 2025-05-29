@@ -11,8 +11,11 @@ describe('LogFormatter', () => {
     // Test complete message formatting with all components
     const formatted = LogFormatter.format(LogLevel.INFO, 'Test message');
     
-    // Verify format: [ISO_TIMESTAMP] [LOCAL_TIME] [LEVEL] message
-    expect(formatted).toMatch(/^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\] \[\d{1,2}:\d{2} [AP]M\] \[INFO\] Test message$/);
+    // Remove ANSI color codes for pattern matching
+    const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+    
+    // Verify format: [ISO_TIMESTAMP][LOCAL_TIME][LEVEL]: message
+    expect(cleanFormatted).toMatch(/^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]\[\d{1,2}:\d{2} [AP]M\]\[INFO\]: Test message$/);
   });
 
   it('should format different log levels correctly', () => {
@@ -22,11 +25,11 @@ describe('LogFormatter', () => {
     const warnFormatted = LogFormatter.format(LogLevel.WARN, 'Warn test');
     const errorFormatted = LogFormatter.format(LogLevel.ERROR, 'Error test');
     
-    // Verify each level appears correctly in formatted output
-    expect(debugFormatted).toContain('[DEBUG]');
-    expect(infoFormatted).toContain('[INFO]');
-    expect(warnFormatted).toContain('[WARN]');
-    expect(errorFormatted).toContain('[ERROR]');
+    // Remove ANSI color codes and verify each level appears correctly
+    expect(debugFormatted.replace(/\x1b\[[0-9;]*m/g, '')).toContain('[DEBUG]');
+    expect(infoFormatted.replace(/\x1b\[[0-9;]*m/g, '')).toContain('[INFO]');
+    expect(warnFormatted.replace(/\x1b\[[0-9;]*m/g, '')).toContain('[WARN]');
+    expect(errorFormatted.replace(/\x1b\[[0-9;]*m/g, '')).toContain('[ERROR]');
   });
 
   it('should include the message in the formatted output', () => {
@@ -41,8 +44,11 @@ describe('LogFormatter', () => {
     // Test edge case: empty message should still produce valid format
     const formatted = LogFormatter.format(LogLevel.INFO, '');
     
+    // Remove ANSI color codes for pattern matching
+    const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+    
     // Should have timestamps and level but empty message at end
-    expect(formatted).toMatch(/^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\] \[\d{1,2}:\d{2} [AP]M\] \[INFO\] $/);
+    expect(cleanFormatted).toMatch(/^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]\[\d{1,2}:\d{2} [AP]M\]\[INFO\]: $/);
   });
 
   it('should handle special characters in messages', () => {
