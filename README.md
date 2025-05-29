@@ -27,7 +27,7 @@ Log Engine transforms your development experience from chaotic debugging session
 - **Easy Integration**: Simple API that works seamlessly with existing Node.js applications. Just `import` and start logging - no middleware, plugins, or configuration required.
 
 ## 🤔 How It Works
-
+<!-- markdownlint-disable MD051 -->
 1. Log Engine automatically detects your environment using `NODE_ENV` and sets appropriate log levels for optimal performance
 2. When you call logging methods, messages are filtered based on the configured severity level (only messages at or above the set level are displayed)
 3. Each log message is instantly formatted with precise timestamps in both ISO and human-readable formats
@@ -35,7 +35,7 @@ Log Engine transforms your development experience from chaotic debugging session
 5. ANSI color codes ensure compatibility across different terminal environments while maintaining beautiful, readable output
 
 Ready to streamline your application logging? Get started in seconds with our [simple installation](#📦-installation)!
-
+<!-- markdownlint-enable MD051 -->
 ## 🤗 Special Thanks
 
 <!-- markdownlint-disable MD033 -->
@@ -148,13 +148,14 @@ Log messages are beautifully formatted with colorized timestamps, levels, and sm
 
 ```bash
 # Example colorized output (colors visible in terminal)
-[2025-05-29T16:57:45.678Z] [4:57 PM] [DEBUG]: Debugging application flow
-[2025-05-29T16:57:46.123Z] [4:57 PM] [INFO]: Server started successfully  
-[2025-05-29T16:57:47.456Z] [4:57 PM] [WARN]: API rate limit approaching
-[2025-05-29T16:57:48.789Z] [4:57 PM] [ERROR]: Database connection failed
+[2025-05-29T16:57:45.678Z][4:57 PM][DEBUG]: Debugging application flow
+[2025-05-29T16:57:46.123Z][4:57 PM][INFO]: Server started successfully  
+[2025-05-29T16:57:47.456Z][4:57 PM][WARN]: API rate limit approaching
+[2025-05-29T16:57:48.789Z][4:57 PM][ERROR]: Database connection failed
 ```
 
 **Color Scheme:**
+
 - 🟣 **DEBUG**: Magenta/Purple - Detailed debugging information
 - 🔵 **INFO**: Blue - General informational messages  
 - 🟡 **WARN**: Yellow - Warning messages that need attention
@@ -176,11 +177,12 @@ Join our community discussions to get help, share ideas, and connect with other 
 ### Getting Help
 
 Need assistance with the library? Here's how to get help:
-
+<!-- markdownlint-disable MD051 -->
 - **Community Support**: Check the [Help & Support](https://github.com/wgtechlabs/log-engine/discussions/categories/help-support) category in our GitHub Discussions for answers to common questions.
 - **Ask a Question**: Create a [new discussion](https://github.com/wgtechlabs/log-engine/discussions/new?category=help-support) if you can't find answers to your specific issue.
 - **Documentation**: Review the [usage instructions](#🕹️-usage) in this README for common examples and configurations.
 - **Known Issues**: Browse [existing issues](https://github.com/wgtechlabs/log-engine/issues) to see if your problem has already been reported.
+<!-- markdownlint-enable MD051 -->
 
 ### Reporting Issues
 
