@@ -11,6 +11,7 @@ module.exports = {
     'src/**/*.ts',
     '!src/**/*.d.ts',
     '!src/**/*.test.ts',
+    '!src/**/__tests__/**',
   ],
   // Coverage configuration for Codecov
   coverageReporters: ['text', 'lcov', 'clover', 'json'],

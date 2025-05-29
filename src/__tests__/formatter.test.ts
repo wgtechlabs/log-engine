@@ -58,4 +58,23 @@ describe('LogFormatter', () => {
     
     expect(formatted).toContain(message);
   });
+
+  it('should format SILENT level correctly', () => {
+    // Test SILENT level formatting (covers missing branch)
+    const formatted = LogFormatter.format(LogLevel.SILENT, 'Silent message');
+    const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+    
+    expect(cleanFormatted).toContain('[SILENT]');
+    expect(cleanFormatted).toContain('Silent message');
+  });
+
+  it('should handle unknown log levels with default case', () => {
+    // Test default case for unknown log levels (covers missing branch)
+    // @ts-ignore - intentionally passing invalid enum value for testing
+    const formatted = LogFormatter.format(999 as LogLevel, 'Unknown level message');
+    const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+    
+    expect(cleanFormatted).toContain('[UNKNOWN]');
+    expect(cleanFormatted).toContain('Unknown level message');
+  });
 });
