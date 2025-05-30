@@ -8,7 +8,9 @@
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
     "moduleResolution": "node",
-    "lib": ["ES2020"]
+    "lib": ["ES2020"],
+    "declaration": true,
+    "declarationMap": true
   },
   "include": ["src/**/*"],
   "exclude": [
