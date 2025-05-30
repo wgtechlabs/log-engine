@@ -16,6 +16,7 @@ describe('LogLevel enum', () => {
     expect(LogLevel.WARN).toBe(2);
     expect(LogLevel.ERROR).toBe(3);
     expect(LogLevel.SILENT).toBe(4);
+    expect(LogLevel.OFF).toBe(5);
     expect(LogLevel.LOG).toBe(99);
   });
 
@@ -27,7 +28,8 @@ describe('LogLevel enum', () => {
     expect(LogLevel.INFO).toBeLessThan(LogLevel.WARN);
     expect(LogLevel.WARN).toBeLessThan(LogLevel.ERROR);
     expect(LogLevel.ERROR).toBeLessThan(LogLevel.SILENT);
-    expect(LogLevel.LOG).toBeGreaterThan(LogLevel.SILENT);
+    expect(LogLevel.SILENT).toBeLessThan(LogLevel.OFF);
+    expect(LogLevel.LOG).toBeGreaterThan(LogLevel.OFF);
   });
 
   it('should have LOG level as special always-on level', () => {
@@ -35,5 +37,6 @@ describe('LogLevel enum', () => {
     expect(LogLevel.LOG).toBe(99);
     expect(LogLevel.LOG).toBeGreaterThan(LogLevel.ERROR);
     expect(LogLevel.LOG).toBeGreaterThan(LogLevel.SILENT);
+    expect(LogLevel.LOG).toBeGreaterThan(LogLevel.OFF);
   });
 });

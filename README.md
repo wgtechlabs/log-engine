@@ -19,7 +19,7 @@ Log Engine transforms your development experience from chaotic debugging session
 - **Lightweight & Fast**: Minimal overhead with maximum performance - designed to enhance your application, not slow it down.
 - **No Learning Curve**: Dead simple API that you can master in seconds. No extensive documentation, complex configurations, or setup required - Log Engine works instantly.
 - **Colorized Console Output**: Beautiful ANSI color-coded log levels with intelligent terminal formatting - instantly identify message severity at a glance with color-coded output.
-- **Multiple Log Levels**: Support for DEBUG, INFO, WARN, ERROR, SILENT, and special LOG levels with smart filtering - just set your level and let it handle the rest.
+- **Multiple Log Levels**: Support for DEBUG, INFO, WARN, ERROR, SILENT, OFF, and special LOG levels with smart filtering - just set your level and let it handle the rest.
 - **Auto-Configuration**: Intelligent environment-based setup using NODE_ENV variables. No config files, initialization scripts, or manual setup - Log Engine works perfectly out of the box.
 - **Enhanced Formatting**: Structured log entries with dual timestamps (ISO + human-readable) and colored level indicators for maximum readability.
 - **TypeScript Ready**: Full TypeScript support with comprehensive type definitions for a seamless development experience.
@@ -134,8 +134,9 @@ Log Engine supports the following levels (in order of severity):
 - `LogLevel.INFO` (1) - General information
 - `LogLevel.WARN` (2) - Warning messages
 - `LogLevel.ERROR` (3) - Error messages
-- `LogLevel.SILENT` (4) - No output
-- `LogLevel.LOG` (99) - Critical messages that always show regardless of level
+- `LogLevel.SILENT` (4) - No output except LOG level messages
+- `LogLevel.OFF` (5) - Completely disable all output including LOG level messages
+- `LogLevel.LOG` (99) - Critical messages that always show (except when OFF is set)
 
 ### Auto-Configuration
 
@@ -150,7 +151,7 @@ Log Engine automatically configures itself based on the `NODE_ENV` environment v
 
 The `LOG` level is special and behaves differently from other levels:
 
-- **Always Visible**: LOG messages are always displayed regardless of the configured log level
+- **Always Visible**: LOG messages are always displayed regardless of the configured log level (except when OFF is set)
 - **Critical Information**: Perfect for essential system messages, application lifecycle events, and operational information that must never be filtered out
 - **Green Color**: Uses green coloring to distinguish it from other levels
 - **Use Cases**: Application startup/shutdown, server listening notifications, critical configuration changes, deployment information
@@ -166,6 +167,32 @@ LogEngine.info('Info message');      // Hidden
 LogEngine.warn('Warning message');   // Hidden  
 LogEngine.error('Error message');    // Hidden
 LogEngine.log('Server started on port 3000'); // ✅ Always visible!
+
+// But with OFF level, even LOG messages are hidden
+LogEngine.configure({ level: LogLevel.OFF });
+LogEngine.log('This LOG message is hidden'); // ❌ Hidden with OFF level
+```
+
+### Complete Silence with OFF Level
+
+The `OFF` level provides complete logging silence when you need to disable all output:
+
+- **Total Silence**: Disables ALL logging including the special LOG level messages
+- **Testing & CI/CD**: Perfect for automated testing environments where no console output is desired
+- **Performance**: Minimal overhead when logging is completely disabled
+- **Use Cases**: Unit tests, CI/CD pipelines, production environments requiring zero log output
+
+```typescript
+import { LogEngine, LogLevel } from '@wgtechlabs/log-engine';
+
+// Comparison: SILENT vs OFF
+LogEngine.configure({ level: LogLevel.SILENT });
+LogEngine.info('Info message');  // Hidden
+LogEngine.log('Critical message'); // ✅ Still visible with SILENT
+
+LogEngine.configure({ level: LogLevel.OFF });
+LogEngine.info('Info message');  // Hidden
+LogEngine.log('Critical message'); // ❌ Hidden with OFF - complete silence!
 ```
 
 ### Log Format

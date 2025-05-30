@@ -135,6 +135,21 @@ describe('LogEngine', () => {
       expect(mocks.mockConsoleWarn).not.toHaveBeenCalled();
       expect(mocks.mockConsoleError).not.toHaveBeenCalled();
     });
+
+    it('should not log any messages when level is OFF including LOG level', () => {
+      // Test that OFF level completely disables all logging including LOG
+      LogEngine.configure({ level: LogLevel.OFF });
+      LogEngine.debug('Debug message');
+      LogEngine.info('Info message');  
+      LogEngine.warn('Warning message');
+      LogEngine.error('Error message');
+      LogEngine.log('LOG level message');
+      
+      // No console methods should be called with OFF level (including LOG)
+      expect(mocks.mockConsoleLog).not.toHaveBeenCalled();
+      expect(mocks.mockConsoleWarn).not.toHaveBeenCalled();
+      expect(mocks.mockConsoleError).not.toHaveBeenCalled();
+    });
   });
 
   describe('Configuration', () => {

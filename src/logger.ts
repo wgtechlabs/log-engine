@@ -30,15 +30,22 @@ export class Logger {
     /**
      * Determines if a message should be logged based on current log level
      * Messages are shown only if their level >= configured minimum level
-     * LOG level is special - it always outputs regardless of configured level
+     * LOG level is special - it always outputs regardless of configured level (except when OFF is set)
+     * OFF level disables all logging including LOG level messages
      * @param level - The log level of the message to check
      * @returns true if message should be logged, false otherwise
      */
     private shouldLog(level: LogLevel): boolean {
-        // LOG level always outputs regardless of configuration
+        // OFF level disables all logging including LOG level
+        if (this.config.level === LogLevel.OFF) {
+            return false;
+        }
+        
+        // LOG level always outputs regardless of configuration (except when OFF is set)
         if (level === LogLevel.LOG) {
             return true;
         }
+        
         return level >= this.config.level;
     }
 

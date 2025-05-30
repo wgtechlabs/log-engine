@@ -98,11 +98,27 @@ describe('Logger class', () => {
       logger.configure({ level });
       logger.log(`LOG message ${index}`);
       
-      // LOG should always be visible regardless of configured level
+      // LOG should always be visible regardless of configured level (except OFF)
       expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
       expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
         expect.stringContaining(`LOG message ${index}`)
       );
     });
+  });
+
+  it('should not log any messages when level is OFF including LOG level', () => {
+    // Test that OFF level completely disables all logging including LOG
+    logger.configure({ level: LogLevel.OFF });
+    
+    logger.debug('Debug message');
+    logger.info('Info message');
+    logger.warn('Warning message');
+    logger.error('Error message');
+    logger.log('LOG level message');
+    
+    // No console methods should be called with OFF level (including LOG)
+    expect(mocks.mockConsoleLog).not.toHaveBeenCalled();
+    expect(mocks.mockConsoleWarn).not.toHaveBeenCalled();
+    expect(mocks.mockConsoleError).not.toHaveBeenCalled();
   });
 });

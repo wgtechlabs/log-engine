@@ -90,4 +90,15 @@ describe('LogFormatter', () => {
     expect(cleanFormatted).toContain('[UNKNOWN]');
     expect(cleanFormatted).toContain('Unknown level message');
   });
+
+  it('should format OFF level correctly with dim color', () => {
+    // Test OFF level formatting with specific color
+    const formatted = LogFormatter.format(LogLevel.OFF, 'OFF level message');
+    const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+    
+    expect(cleanFormatted).toContain('[OFF]');
+    expect(cleanFormatted).toContain('OFF level message');
+    // Verify dim color code is applied (ANSI code 2)
+    expect(formatted).toContain('\x1b[2m');
+  });
 });
