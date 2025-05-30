@@ -20,7 +20,8 @@ export class LogFormatter {
         magenta: '\x1b[35m',   // Magenta text (debug)
         cyan: '\x1b[36m',      // Cyan text (timestamps)
         white: '\x1b[37m',     // White text (default)
-        gray: '\x1b[90m'       // Gray text (timestamps)
+        gray: '\x1b[90m',      // Gray text (timestamps)
+        green: '\x1b[32m'      // Green text (log level)
     };
 
     /**
@@ -62,6 +63,7 @@ export class LogFormatter {
             case LogLevel.WARN: return 'WARN';
             case LogLevel.ERROR: return 'ERROR';
             case LogLevel.SILENT: return 'SILENT';
+            case LogLevel.LOG: return 'LOG';
             default: return 'UNKNOWN';
         }
     }
@@ -79,6 +81,7 @@ export class LogFormatter {
             case LogLevel.WARN: return this.colors.yellow;    // Yellow for warnings
             case LogLevel.ERROR: return this.colors.red;      // Red for errors
             case LogLevel.SILENT: return this.colors.dim;     // Dim for silent (shouldn't be used)
+            case LogLevel.LOG: return this.colors.green;      // Green for always-on log messages
             default: return this.colors.white;                // White for unknown levels
         }
     }

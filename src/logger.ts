@@ -1,6 +1,7 @@
 /**
  * Core Logger class that handles log message output with configurable levels
- * Supports DEBUG, INFO, WARN, ERROR levels with intelligent filtering
+ * Supports DEBUG, INFO, WARN, ERROR, and LOG levels with intelligent filtering
+ * LOG level always outputs regardless of configuration
  * Uses colorized console output with timestamps for better readability
  */
 
@@ -29,10 +30,15 @@ export class Logger {
     /**
      * Determines if a message should be logged based on current log level
      * Messages are shown only if their level >= configured minimum level
+     * LOG level is special - it always outputs regardless of configured level
      * @param level - The log level of the message to check
      * @returns true if message should be logged, false otherwise
      */
     private shouldLog(level: LogLevel): boolean {
+        // LOG level always outputs regardless of configuration
+        if (level === LogLevel.LOG) {
+            return true;
+        }
         return level >= this.config.level;
     }
 
@@ -81,6 +87,19 @@ export class Logger {
         if (this.shouldLog(LogLevel.ERROR)) {
             const formatted = LogFormatter.format(LogLevel.ERROR, message);
             console.error(formatted);
+        }
+    }
+
+    /**
+     * Log a critical message that always outputs (LOG level)
+     * Uses console.log for output with green coloring
+     * Always shown regardless of configured log level
+     * @param message - The critical log message to log
+     */
+    log(message: string): void {
+        if (this.shouldLog(LogLevel.LOG)) {
+            const formatted = LogFormatter.format(LogLevel.LOG, message);
+            console.log(formatted);
         }
     }
 }

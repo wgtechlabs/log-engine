@@ -61,4 +61,48 @@ describe('Logger class', () => {
     expect(mocks.mockConsoleWarn).toHaveBeenCalledTimes(1);
     expect(mocks.mockConsoleError).toHaveBeenCalledTimes(1);
   });
+
+  it('should always log LOG level messages regardless of configuration', () => {
+    // Test that LOG level always outputs regardless of configured level
+    logger.configure({ level: LogLevel.SILENT });
+    
+    logger.debug('Debug message');
+    logger.info('Info message');
+    logger.warn('Warning message');
+    logger.error('Error message');
+    logger.log('LOG level message');
+    
+    // Only LOG should be visible even with SILENT level
+    expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
+    expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
+      expect.stringContaining('LOG level message')
+    );
+    expect(mocks.mockConsoleWarn).not.toHaveBeenCalled();
+    expect(mocks.mockConsoleError).not.toHaveBeenCalled();
+  });
+
+  it('should log LOG level messages with different log configurations', () => {
+    // Test LOG level with various configurations
+    const testCases = [
+      LogLevel.DEBUG,
+      LogLevel.INFO,
+      LogLevel.WARN,
+      LogLevel.ERROR,
+      LogLevel.SILENT
+    ];
+
+    testCases.forEach((level, index) => {
+      // Reset mocks
+      mocks.mockConsoleLog.mockClear();
+      
+      logger.configure({ level });
+      logger.log(`LOG message ${index}`);
+      
+      // LOG should always be visible regardless of configured level
+      expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
+      expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
+        expect.stringContaining(`LOG message ${index}`)
+      );
+    });
+  });
 });

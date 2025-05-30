@@ -11,7 +11,7 @@ const logger = new LoggerClass();
 
 /**
  * Determines the appropriate default log level based on NODE_ENV
- * - production: WARN (reduce noise in production)
+ * - production: INFO (show important info, warn, and error messages)
  * - development: DEBUG (verbose logging for development)
  * - test: ERROR (minimal logging during tests)
  * - default: INFO (balanced logging for other environments)
@@ -21,7 +21,7 @@ const getDefaultLogLevel = (): LogLevel => {
     const nodeEnv = process.env.NODE_ENV;
     switch (nodeEnv) {
         case 'production':
-            return LogLevel.WARN;
+            return LogLevel.INFO;
         case 'development':
             return LogLevel.DEBUG;
         case 'test':
@@ -100,7 +100,21 @@ export const LogEngine = {
      * LogEngine.error('Authentication token expired');
      * ```
      */
-    error: (message: string) => logger.error(message)
+    error: (message: string) => logger.error(message),
+
+    /**
+     * Log a critical message that always outputs
+     * Essential messages that should always be visible regardless of log level
+     * Always shown no matter what log level is configured (even SILENT)
+     * @param message - The critical log message to log
+     * @example
+     * ```typescript
+     * LogEngine.log('Application starting up');
+     * LogEngine.log('Server listening on port 3000');
+     * LogEngine.log('Graceful shutdown initiated');
+     * ```
+     */
+    log: (message: string) => logger.log(message)
 };
 
 export { LogLevel, LoggerConfig } from './types';

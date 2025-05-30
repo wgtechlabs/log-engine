@@ -66,6 +66,17 @@ describe('LogEngine', () => {
         expect.stringContaining('Error message')
       );
     });
+
+    it('should log LOG level messages regardless of configuration', () => {
+      // Test that LOG level always outputs with console.log
+      LogEngine.configure({ level: LogLevel.ERROR });
+      LogEngine.log('LOG level message');
+      
+      expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
+      expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
+        expect.stringContaining('LOG level message')
+      );
+    });
   });
 
   describe('Log level filtering', () => {
@@ -94,15 +105,33 @@ describe('LogEngine', () => {
     });
 
     it('should not log any messages when level is SILENT', () => {
-      // Test that SILENT level completely disables all logging
+      // Test that SILENT level completely disables all logging except LOG
       LogEngine.configure({ level: LogLevel.SILENT });
       LogEngine.debug('Debug message');
       LogEngine.info('Info message');
       LogEngine.warn('Warning message');
       LogEngine.error('Error message');
       
-      // No console methods should be called with SILENT level
+      // No console methods should be called with SILENT level (except LOG)
       expect(mocks.mockConsoleLog).not.toHaveBeenCalled();
+      expect(mocks.mockConsoleWarn).not.toHaveBeenCalled();
+      expect(mocks.mockConsoleError).not.toHaveBeenCalled();
+    });
+
+    it('should always log LOG level messages even when level is SILENT', () => {
+      // Test that LOG level bypasses SILENT configuration
+      LogEngine.configure({ level: LogLevel.SILENT });
+      LogEngine.debug('Debug message');
+      LogEngine.info('Info message');  
+      LogEngine.warn('Warning message');
+      LogEngine.error('Error message');
+      LogEngine.log('LOG level message');
+      
+      // Only LOG should be visible
+      expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
+      expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
+        expect.stringContaining('LOG level message')
+      );
       expect(mocks.mockConsoleWarn).not.toHaveBeenCalled();
       expect(mocks.mockConsoleError).not.toHaveBeenCalled();
     });

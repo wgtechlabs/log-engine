@@ -20,19 +20,23 @@ describe('Environment-based configuration', () => {
     restoreConsoleMocks(mocks);
   });
 
-  it('should set WARN level for production environment', () => {
-    // Test production environment auto-configuration (reduce noise in production)
+  it('should set INFO level for production environment', () => {
+    // Test production environment auto-configuration (show important info and above)
     process.env.NODE_ENV = 'production';
     
     // Re-import to trigger fresh environment-based configuration
     jest.resetModules();
     const { LogEngine: ProdLogEngine } = require('../index');
     
+    ProdLogEngine.debug('Debug message');
     ProdLogEngine.info('Info message');
     ProdLogEngine.warn('Warning message');
     
-    // INFO should be filtered, only WARN and above should show
-    expect(mocks.mockConsoleLog).not.toHaveBeenCalled();
+    // DEBUG should be filtered, INFO and above should show
+    expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
+    expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
+      expect.stringContaining('Info message')
+    );
     expect(mocks.mockConsoleWarn).toHaveBeenCalledTimes(1);
   });
 

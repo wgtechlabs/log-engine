@@ -24,12 +24,14 @@ describe('LogFormatter', () => {
     const infoFormatted = LogFormatter.format(LogLevel.INFO, 'Info test');
     const warnFormatted = LogFormatter.format(LogLevel.WARN, 'Warn test');
     const errorFormatted = LogFormatter.format(LogLevel.ERROR, 'Error test');
+    const logFormatted = LogFormatter.format(LogLevel.LOG, 'LOG test');
     
     // Remove ANSI color codes and verify each level appears correctly
     expect(debugFormatted.replace(/\x1b\[[0-9;]*m/g, '')).toContain('[DEBUG]');
     expect(infoFormatted.replace(/\x1b\[[0-9;]*m/g, '')).toContain('[INFO]');
     expect(warnFormatted.replace(/\x1b\[[0-9;]*m/g, '')).toContain('[WARN]');
     expect(errorFormatted.replace(/\x1b\[[0-9;]*m/g, '')).toContain('[ERROR]');
+    expect(logFormatted.replace(/\x1b\[[0-9;]*m/g, '')).toContain('[LOG]');
   });
 
   it('should include the message in the formatted output', () => {
@@ -66,6 +68,17 @@ describe('LogFormatter', () => {
     
     expect(cleanFormatted).toContain('[SILENT]');
     expect(cleanFormatted).toContain('Silent message');
+  });
+
+  it('should format LOG level correctly with green color', () => {
+    // Test LOG level formatting with specific color
+    const formatted = LogFormatter.format(LogLevel.LOG, 'LOG level message');
+    const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+    
+    expect(cleanFormatted).toContain('[LOG]');
+    expect(cleanFormatted).toContain('LOG level message');
+    // Verify green color code is applied (ANSI code 32)
+    expect(formatted).toContain('\x1b[32m');
   });
 
   it('should handle unknown log levels with default case', () => {

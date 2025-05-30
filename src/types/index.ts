@@ -7,6 +7,7 @@
  * Log levels in order of priority (lowest to highest)
  * Higher numeric values represent higher priority levels
  * When a level is set, only messages at that level or higher are shown
+ * LOG level is special - it always outputs regardless of configured level
  */
 export enum LogLevel {
     /** Detailed diagnostic information, typically only of interest during development */
@@ -18,7 +19,9 @@ export enum LogLevel {
     /** Error events that might still allow the application to continue */
     ERROR = 3,
     /** Completely disable all logging output */
-    SILENT = 4
+    SILENT = 4,
+    /** Critical messages that always output regardless of configured level */
+    LOG = 99
 }
 
 /**

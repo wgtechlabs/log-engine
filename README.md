@@ -19,7 +19,7 @@ Log Engine transforms your development experience from chaotic debugging session
 - **Lightweight & Fast**: Minimal overhead with maximum performance - designed to enhance your application, not slow it down.
 - **No Learning Curve**: Dead simple API that you can master in seconds. No extensive documentation, complex configurations, or setup required - Log Engine works instantly.
 - **Colorized Console Output**: Beautiful ANSI color-coded log levels with intelligent terminal formatting - instantly identify message severity at a glance with color-coded output.
-- **Multiple Log Levels**: Support for DEBUG, INFO, WARN, ERROR, and SILENT levels with smart filtering - just set your level and let it handle the rest.
+- **Multiple Log Levels**: Support for DEBUG, INFO, WARN, ERROR, SILENT, and special LOG levels with smart filtering - just set your level and let it handle the rest.
 - **Auto-Configuration**: Intelligent environment-based setup using NODE_ENV variables. No config files, initialization scripts, or manual setup - Log Engine works perfectly out of the box.
 - **Enhanced Formatting**: Structured log entries with dual timestamps (ISO + human-readable) and colored level indicators for maximum readability.
 - **TypeScript Ready**: Full TypeScript support with comprehensive type definitions for a seamless development experience.
@@ -77,6 +77,7 @@ LogEngine.debug('This is a debug message');
 LogEngine.info('This is an info message');
 LogEngine.warn('This is a warning message');
 LogEngine.error('This is an error message');
+LogEngine.log('This is a critical message that always shows');
 ```
 
 ### Custom Configuration
@@ -100,6 +101,7 @@ LogEngine.debug('This will only show in development');
 LogEngine.info('General information');
 LogEngine.warn('Warning message');
 LogEngine.error('Error message');
+LogEngine.log('Critical message that always shows');
 ```
 
 ### Color-Coded Output 🎨
@@ -114,6 +116,7 @@ LogEngine.debug('🔍 Debugging user authentication flow');    // Purple/Magenta
 LogEngine.info('ℹ️ User successfully logged in');            // Blue  
 LogEngine.warn('⚠️ API rate limit at 80% capacity');         // Yellow
 LogEngine.error('❌ Database connection timeout');           // Red
+LogEngine.log('🚀 Application started successfully');        // Green
 ```
 
 **Why Colors Matter:**
@@ -132,15 +135,38 @@ Log Engine supports the following levels (in order of severity):
 - `LogLevel.WARN` (2) - Warning messages
 - `LogLevel.ERROR` (3) - Error messages
 - `LogLevel.SILENT` (4) - No output
+- `LogLevel.LOG` (99) - Critical messages that always show regardless of level
 
 ### Auto-Configuration
 
 Log Engine automatically configures itself based on the `NODE_ENV` environment variable:
 
-- `production` → `LogLevel.WARN`
+- `production` → `LogLevel.INFO`
 - `development` → `LogLevel.DEBUG`
 - `test` → `LogLevel.ERROR`
 - `default` → `LogLevel.INFO`
+
+### Special LOG Level
+
+The `LOG` level is special and behaves differently from other levels:
+
+- **Always Visible**: LOG messages are always displayed regardless of the configured log level
+- **Critical Information**: Perfect for essential system messages, application lifecycle events, and operational information that must never be filtered out
+- **Green Color**: Uses green coloring to distinguish it from other levels
+- **Use Cases**: Application startup/shutdown, server listening notifications, critical configuration changes, deployment information
+
+```typescript
+import { LogEngine, LogLevel } from '@wgtechlabs/log-engine';
+
+// Even with SILENT level, LOG messages still appear
+LogEngine.configure({ level: LogLevel.SILENT });
+
+LogEngine.debug('Debug message');    // Hidden
+LogEngine.info('Info message');      // Hidden
+LogEngine.warn('Warning message');   // Hidden  
+LogEngine.error('Error message');    // Hidden
+LogEngine.log('Server started on port 3000'); // ✅ Always visible!
+```
 
 ### Log Format
 
@@ -152,6 +178,7 @@ Log messages are beautifully formatted with colorized timestamps, levels, and sm
 [2025-05-29T16:57:46.123Z][4:57 PM][INFO]: Server started successfully  
 [2025-05-29T16:57:47.456Z][4:57 PM][WARN]: API rate limit approaching
 [2025-05-29T16:57:48.789Z][4:57 PM][ERROR]: Database connection failed
+[2025-05-29T16:57:49.012Z][4:57 PM][LOG]: Application startup complete
 ```
 
 **Color Scheme:**
@@ -160,6 +187,7 @@ Log messages are beautifully formatted with colorized timestamps, levels, and sm
 - 🔵 **INFO**: Blue - General informational messages  
 - 🟡 **WARN**: Yellow - Warning messages that need attention
 - 🔴 **ERROR**: Red - Error messages requiring immediate action
+- 🟢 **LOG**: Green - Critical messages that always display
 - ⚫ **Timestamps**: Gray (ISO) and Cyan (local time) for easy scanning
 
 ## 💬 Community Discussions
