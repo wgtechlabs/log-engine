@@ -107,8 +107,8 @@ export const LogEngine = {
 
     /**
      * Log a critical message that always outputs
-     * Essential messages that should always be visible regardless of log level
-     * Always shown no matter what log level is configured (even SILENT)
+     * Essential messages that should always be visible regardless of log mode
+     * Always shown no matter what log mode is configured (except OFF mode)
      * @param message - The critical log message to log
      * @example
      * ```typescript

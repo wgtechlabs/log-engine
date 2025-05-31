@@ -42,7 +42,7 @@ export class Logger {
                 [LogLevel.INFO]: LogMode.INFO,        // 1 -> 1
                 [LogLevel.WARN]: LogMode.WARN,        // 2 -> 2
                 [LogLevel.ERROR]: LogMode.ERROR,      // 3 -> 3
-                [LogLevel.LOG]: LogMode.INFO,         // 99 -> 1 (special case)
+                [LogLevel.LOG]: LogMode.SILENT,       // 99 -> 4 (preserves critical-only behavior)
                 4: LogMode.SILENT,                    // Legacy SILENT -> 4
                 5: LogMode.OFF                        // Legacy OFF -> 5
             };

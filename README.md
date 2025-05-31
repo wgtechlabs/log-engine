@@ -19,7 +19,7 @@ Log Engine transforms your development experience from chaotic debugging session
 - **Lightweight & Fast**: Minimal overhead with maximum performance - designed to enhance your application, not slow it down.
 - **No Learning Curve**: Dead simple API that you can master in seconds. No extensive documentation, complex configurations, or setup required - Log Engine works instantly.
 - **Colorized Console Output**: Beautiful ANSI color-coded log levels with intelligent terminal formatting - instantly identify message severity at a glance with color-coded output.
-- **Multiple Log Levels**: Support for DEBUG, INFO, WARN, ERROR, SILENT, OFF, and special LOG levels with smart filtering - just set your level and let it handle the rest.
+- **Multiple Log Modes**: Support for DEBUG, INFO, WARN, ERROR, SILENT, OFF, and special LOG levels with smart filtering - just set your mode and let it handle the rest.
 - **Auto-Configuration**: Intelligent environment-based setup using NODE_ENV variables. No config files, initialization scripts, or manual setup - Log Engine works perfectly out of the box.
 - **Enhanced Formatting**: Structured log entries with dual timestamps (ISO + human-readable) and colored level indicators for maximum readability.
 - **TypeScript Ready**: Full TypeScript support with comprehensive type definitions for a seamless development experience.
