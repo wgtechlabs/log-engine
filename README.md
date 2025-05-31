@@ -19,7 +19,7 @@ Log Engine transforms your development experience from chaotic debugging session
 - **Lightweight & Fast**: Minimal overhead with maximum performance - designed to enhance your application, not slow it down.
 - **No Learning Curve**: Dead simple API that you can master in seconds. No extensive documentation, complex configurations, or setup required - Log Engine works instantly.
 - **Colorized Console Output**: Beautiful ANSI color-coded log levels with intelligent terminal formatting - instantly identify message severity at a glance with color-coded output.
-- **Multiple Log Levels**: Support for DEBUG, INFO, WARN, ERROR, and SILENT levels with smart filtering - just set your level and let it handle the rest.
+- **Multiple Log Modes**: Support for DEBUG, INFO, WARN, ERROR, SILENT, OFF, and special LOG levels with smart filtering - just set your mode and let it handle the rest.
 - **Auto-Configuration**: Intelligent environment-based setup using NODE_ENV variables. No config files, initialization scripts, or manual setup - Log Engine works perfectly out of the box.
 - **Enhanced Formatting**: Structured log entries with dual timestamps (ISO + human-readable) and colored level indicators for maximum readability.
 - **TypeScript Ready**: Full TypeScript support with comprehensive type definitions for a seamless development experience.
@@ -70,37 +70,83 @@ yarn add @wgtechlabs/log-engine
 ### Quick Start
 
 ```typescript
-import { LogEngine, LogLevel } from '@wgtechlabs/log-engine';
+import { LogEngine, LogMode } from '@wgtechlabs/log-engine';
 
 // Basic usage with auto-configuration based on NODE_ENV
 LogEngine.debug('This is a debug message');
 LogEngine.info('This is an info message');
 LogEngine.warn('This is a warning message');
 LogEngine.error('This is an error message');
+LogEngine.log('This is a critical message that always shows');
 ```
 
-### Custom Configuration
+### Mode-Based Configuration (Recommended)
+
+Log Engine now uses a modern **LogMode** system that separates message severity from output control:
+
+```typescript
+import { LogEngine, LogMode } from '@wgtechlabs/log-engine';
+
+// Configure using LogMode (recommended approach)
+LogEngine.configure({ mode: LogMode.DEBUG });  // Most verbose
+LogEngine.configure({ mode: LogMode.INFO });   // Balanced
+LogEngine.configure({ mode: LogMode.WARN });   // Focused  
+LogEngine.configure({ mode: LogMode.ERROR });  // Minimal
+LogEngine.configure({ mode: LogMode.SILENT }); // Critical only
+LogEngine.configure({ mode: LogMode.OFF });    // Complete silence
+
+// Environment-based configuration example
+const env = process.env.NODE_ENV || 'development';
+
+if (env === 'production') {
+    LogEngine.configure({ mode: LogMode.INFO });
+} else if (env === 'staging') {
+    LogEngine.configure({ mode: LogMode.WARN });
+} else {
+    LogEngine.configure({ mode: LogMode.DEBUG });
+}
+
+// Now use Log Engine - only messages appropriate for the mode will be shown
+LogEngine.debug('This will only show in DEBUG mode');
+LogEngine.info('General information');
+LogEngine.warn('Warning message');
+LogEngine.error('Error message');
+LogEngine.log('Critical message that always shows');
+```
+
+### Legacy Level-Based Configuration (Backwards Compatible)
+
+For backwards compatibility, the old `LogLevel` API is still supported:
 
 ```typescript
 import { LogEngine, LogLevel } from '@wgtechlabs/log-engine';
 
-// Configure based on your custom environment variable
-const env = process.env.APP_ENV || 'development';
-
-if (env === 'production') {
-    LogEngine.configure({ level: LogLevel.ERROR });
-} else if (env === 'staging') {
-    LogEngine.configure({ level: LogLevel.WARN });
-} else {
-    LogEngine.configure({ level: LogLevel.DEBUG });
-}
-
-// Now use Log Engine - only messages at or above the configured level will be shown
-LogEngine.debug('This will only show in development');
-LogEngine.info('General information');
-LogEngine.warn('Warning message');
-LogEngine.error('Error message');
+// Legacy configuration (still works but LogMode is recommended)
+LogEngine.configure({ level: LogLevel.DEBUG });
+LogEngine.configure({ level: LogLevel.INFO });
+LogEngine.configure({ level: LogLevel.WARN });
+LogEngine.configure({ level: LogLevel.ERROR });
 ```
+
+### Migration Guide: LogLevel → LogMode
+
+**Version 1.2.0+** introduces the new LogMode system for better separation of concerns. Here's how to migrate:
+
+```typescript
+// OLD (v1.1.0 and earlier) - still works but deprecated
+import { LogEngine, LogLevel } from '@wgtechlabs/log-engine';
+LogEngine.configure({ level: LogLevel.DEBUG });
+
+// NEW (v1.2.0+) - recommended approach
+import { LogEngine, LogMode } from '@wgtechlabs/log-engine';
+LogEngine.configure({ mode: LogMode.DEBUG });
+```
+
+**Key Benefits of LogMode:**
+- **Clearer API**: Separates message severity (`LogLevel`) from output control (`LogMode`)
+- **Better Environment Defaults**: `development→DEBUG`, `staging→WARN`, `test→ERROR`
+- **Future-Proof**: New features will use the LogMode system
+- **100% Backwards Compatible**: Existing code continues to work unchanged
 
 ### Color-Coded Output 🎨
 
@@ -114,6 +160,7 @@ LogEngine.debug('🔍 Debugging user authentication flow');    // Purple/Magenta
 LogEngine.info('ℹ️ User successfully logged in');            // Blue  
 LogEngine.warn('⚠️ API rate limit at 80% capacity');         // Yellow
 LogEngine.error('❌ Database connection timeout');           // Red
+LogEngine.log('🚀 Application started successfully');        // Green
 ```
 
 **Why Colors Matter:**
@@ -123,24 +170,84 @@ LogEngine.error('❌ Database connection timeout');           // Red
 - **Production Monitoring**: Easily scan logs for critical issues in terminal environments
 - **Enhanced Readability**: Color-coded timestamps and level indicators reduce eye strain
 
-### Log Levels
+### Log Modes
 
-Log Engine supports the following levels (in order of severity):
+Log Engine uses a **LogMode** system that controls output verbosity and filtering:
+
+- `LogMode.DEBUG` (0) - Most verbose: shows DEBUG, INFO, WARN, ERROR, LOG messages
+- `LogMode.INFO` (1) - Balanced: shows INFO, WARN, ERROR, LOG messages  
+- `LogMode.WARN` (2) - Focused: shows WARN, ERROR, LOG messages
+- `LogMode.ERROR` (3) - Minimal: shows ERROR, LOG messages
+- `LogMode.SILENT` (4) - Critical only: shows LOG messages only
+- `LogMode.OFF` (5) - Complete silence: shows no messages at all
+
+### Message Severity Levels
+
+Individual log messages have severity levels that determine their importance:
 
 - `LogLevel.DEBUG` (0) - Detailed information for debugging
 - `LogLevel.INFO` (1) - General information
 - `LogLevel.WARN` (2) - Warning messages
 - `LogLevel.ERROR` (3) - Error messages
-- `LogLevel.SILENT` (4) - No output
+- `LogLevel.LOG` (99) - Critical messages that always show (except when OFF mode is set)
 
 ### Auto-Configuration
 
 Log Engine automatically configures itself based on the `NODE_ENV` environment variable:
 
-- `production` → `LogLevel.WARN`
-- `development` → `LogLevel.DEBUG`
-- `test` → `LogLevel.ERROR`
-- `default` → `LogLevel.INFO`
+- `development` → `LogMode.DEBUG` (most verbose)
+- `production` → `LogMode.INFO` (balanced)
+- `staging` → `LogMode.WARN` (focused)
+- `test` → `LogMode.ERROR` (minimal)
+- `default` → `LogMode.INFO` (balanced)
+
+### Special LOG Level
+
+The `LOG` level is special and behaves differently from other levels:
+
+- **Always Visible**: LOG messages are always displayed regardless of the configured log mode (except when OFF mode is set)
+- **Critical Information**: Perfect for essential system messages, application lifecycle events, and operational information that must never be filtered out
+- **Green Color**: Uses green coloring to distinguish it from other levels
+- **Use Cases**: Application startup/shutdown, server listening notifications, critical configuration changes, deployment information
+
+```typescript
+import { LogEngine, LogMode } from '@wgtechlabs/log-engine';
+
+// Even with SILENT mode, LOG messages still appear
+LogEngine.configure({ mode: LogMode.SILENT });
+
+LogEngine.debug('Debug message');    // Hidden
+LogEngine.info('Info message');      // Hidden
+LogEngine.warn('Warning message');   // Hidden  
+LogEngine.error('Error message');    // Hidden
+LogEngine.log('Server started on port 3000'); // ✅ Always visible!
+
+// But with OFF mode, even LOG messages are hidden
+LogEngine.configure({ mode: LogMode.OFF });
+LogEngine.log('This LOG message is hidden'); // ❌ Hidden with OFF mode
+```
+
+### Complete Silence with OFF Mode
+
+The `OFF` mode provides complete logging silence when you need to disable all output:
+
+- **Total Silence**: Disables ALL logging including the special LOG level messages
+- **Testing & CI/CD**: Perfect for automated testing environments where no console output is desired
+- **Performance**: Minimal overhead when logging is completely disabled
+- **Use Cases**: Unit tests, CI/CD pipelines, production environments requiring zero log output
+
+```typescript
+import { LogEngine, LogMode } from '@wgtechlabs/log-engine';
+
+// Comparison: SILENT vs OFF
+LogEngine.configure({ mode: LogMode.SILENT });
+LogEngine.info('Info message');  // Hidden
+LogEngine.log('Critical message'); // ✅ Still visible with SILENT
+
+LogEngine.configure({ mode: LogMode.OFF });
+LogEngine.info('Info message');  // Hidden
+LogEngine.log('Critical message'); // ❌ Hidden with OFF - complete silence!
+```
 
 ### Log Format
 
@@ -152,6 +259,7 @@ Log messages are beautifully formatted with colorized timestamps, levels, and sm
 [2025-05-29T16:57:46.123Z][4:57 PM][INFO]: Server started successfully  
 [2025-05-29T16:57:47.456Z][4:57 PM][WARN]: API rate limit approaching
 [2025-05-29T16:57:48.789Z][4:57 PM][ERROR]: Database connection failed
+[2025-05-29T16:57:49.012Z][4:57 PM][LOG]: Application startup complete
 ```
 
 **Color Scheme:**
@@ -160,6 +268,7 @@ Log messages are beautifully formatted with colorized timestamps, levels, and sm
 - 🔵 **INFO**: Blue - General informational messages  
 - 🟡 **WARN**: Yellow - Warning messages that need attention
 - 🔴 **ERROR**: Red - Error messages requiring immediate action
+- 🟢 **LOG**: Green - Critical messages that always display
 - ⚫ **Timestamps**: Gray (ISO) and Cyan (local time) for easy scanning
 
 ## 💬 Community Discussions

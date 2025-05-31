@@ -24,12 +24,14 @@ describe('LogFormatter', () => {
     const infoFormatted = LogFormatter.format(LogLevel.INFO, 'Info test');
     const warnFormatted = LogFormatter.format(LogLevel.WARN, 'Warn test');
     const errorFormatted = LogFormatter.format(LogLevel.ERROR, 'Error test');
+    const logFormatted = LogFormatter.format(LogLevel.LOG, 'LOG test');
     
     // Remove ANSI color codes and verify each level appears correctly
     expect(debugFormatted.replace(/\x1b\[[0-9;]*m/g, '')).toContain('[DEBUG]');
     expect(infoFormatted.replace(/\x1b\[[0-9;]*m/g, '')).toContain('[INFO]');
     expect(warnFormatted.replace(/\x1b\[[0-9;]*m/g, '')).toContain('[WARN]');
     expect(errorFormatted.replace(/\x1b\[[0-9;]*m/g, '')).toContain('[ERROR]');
+    expect(logFormatted.replace(/\x1b\[[0-9;]*m/g, '')).toContain('[LOG]');
   });
 
   it('should include the message in the formatted output', () => {
@@ -59,13 +61,15 @@ describe('LogFormatter', () => {
     expect(formatted).toContain(message);
   });
 
-  it('should format SILENT level correctly', () => {
-    // Test SILENT level formatting (covers missing branch)
-    const formatted = LogFormatter.format(LogLevel.SILENT, 'Silent message');
+  it('should format LOG level correctly with green color', () => {
+    // Test LOG level formatting with specific color
+    const formatted = LogFormatter.format(LogLevel.LOG, 'LOG level message');
     const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
     
-    expect(cleanFormatted).toContain('[SILENT]');
-    expect(cleanFormatted).toContain('Silent message');
+    expect(cleanFormatted).toContain('[LOG]');
+    expect(cleanFormatted).toContain('LOG level message');
+    // Verify green color code is applied (ANSI code 32)
+    expect(formatted).toContain('\x1b[32m');
   });
 
   it('should handle unknown log levels with default case', () => {
@@ -76,5 +80,46 @@ describe('LogFormatter', () => {
     
     expect(cleanFormatted).toContain('[UNKNOWN]');
     expect(cleanFormatted).toContain('Unknown level message');
+  });
+
+  describe('formatSystemMessage', () => {
+    it('should format system messages with [LOG ENGINE] prefix', () => {
+      const message = 'This is a system message';
+      const formatted = LogFormatter.formatSystemMessage(message);
+      
+      // Should contain the LOG ENGINE prefix
+      expect(formatted).toContain('[LOG ENGINE]');
+      
+      // Should contain the message content
+      expect(formatted).toContain(message);
+      
+      // Should contain timestamp components
+      expect(formatted).toMatch(/\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]/); // ISO timestamp
+      expect(formatted).toMatch(/\[\d{1,2}:\d{2} [AP]M\]/); // Local time
+    });
+
+    it('should format system messages with colors', () => {
+      const message = 'Colored system message';
+      const formatted = LogFormatter.formatSystemMessage(message);
+      
+      // Should contain ANSI color codes
+      expect(formatted).toContain('\x1b['); // ANSI escape sequence start
+      expect(formatted).toContain('\x1b[0m'); // Reset color code
+      
+      // Should contain yellow color for LOG ENGINE prefix
+      expect(formatted).toContain('\x1b[33m'); // Yellow color code
+    });
+
+    it('should maintain consistent format structure', () => {
+      const message = 'Test message';
+      const formatted = LogFormatter.formatSystemMessage(message);
+      
+      // Remove ANSI color codes for pattern matching
+      const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+      
+      // Should follow the format: [TIMESTAMP][TIME][LOG ENGINE]: message
+      const formatPattern = /\[.*?\]\[.*?\]\[LOG ENGINE\]: Test message/;
+      expect(cleanFormatted).toMatch(formatPattern);
+    });
   });
 });
