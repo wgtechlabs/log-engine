@@ -59,7 +59,8 @@ export interface LogEntry {
 export interface LoggerConfig {
     /** Log mode controlling output behavior (new API) */
     mode?: LogMode;
-    /** Legacy: Minimum log level to display (backwards compatibility) */
+    /** Legacy: Minimum log level to display (backwards compatibility)
+     * Note: If both mode and level are provided, mode takes precedence */
     level?: LogLevel;
     /** Optional environment identifier for context (e.g., 'production', 'staging') */
     environment?: string;

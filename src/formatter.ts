@@ -67,10 +67,10 @@ export class LogFormatter {
         });
         
         // Apply colors to each component for better readability
-        const coloredTimestamp = `${this.colors.gray}[${isoTimestamp}]${this.colors.reset}`;
-        const coloredTimeString = `${this.colors.cyan}[${timeString}]${this.colors.reset}`;
-        const coloredLogEngine = `${this.colors.yellow}[LOG ENGINE]${this.colors.reset}`;
-        const coloredMessage = `${this.colors.yellow}${message}${this.colors.reset}`;
+        const coloredTimestamp = `${LogFormatter.colors.gray}[${isoTimestamp}]${LogFormatter.colors.reset}`;
+        const coloredTimeString = `${LogFormatter.colors.cyan}[${timeString}]${LogFormatter.colors.reset}`;
+        const coloredLogEngine = `${LogFormatter.colors.yellow}[LOG ENGINE]${LogFormatter.colors.reset}`;
+        const coloredMessage = `${LogFormatter.colors.yellow}${message}${LogFormatter.colors.reset}`;
         
         return `${coloredTimestamp}${coloredTimeString}${coloredLogEngine}: ${coloredMessage}`;
     }
