@@ -1,6 +1,6 @@
 {
   "name": "@wgtechlabs/log-engine",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A lightweight and efficient logging utility designed specifically for bot applications running on Node.js.",
   "keywords": [
     "logging",

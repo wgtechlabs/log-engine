@@ -1,6 +1,6 @@
 /**
  * Tests for environment-based auto-configuration
- * Verifies that LogEngine automatically sets appropriate log levels based on NODE_ENV
+ * Verifies that LogEngine automatically sets appropriate log modes based on NODE_ENV
  */
 
 import { setupConsoleMocks, restoreConsoleMocks, ConsoleMocks } from './test-utils';
@@ -20,7 +20,7 @@ describe('Environment-based configuration', () => {
     restoreConsoleMocks(mocks);
   });
 
-  it('should set INFO level for production environment', () => {
+  it('should set INFO mode for production environment', () => {
     // Test production environment auto-configuration (show important info and above)
     process.env.NODE_ENV = 'production';
     
@@ -40,7 +40,7 @@ describe('Environment-based configuration', () => {
     expect(mocks.mockConsoleWarn).toHaveBeenCalledTimes(1);
   });
 
-  it('should set DEBUG level for development environment', () => {
+  it('should set DEBUG mode for development environment', () => {
     // Test development environment auto-configuration (verbose logging for debugging)
     process.env.NODE_ENV = 'development';
     
@@ -55,7 +55,23 @@ describe('Environment-based configuration', () => {
     );
   });
 
-  it('should set ERROR level for test environment', () => {
+  it('should set WARN mode for staging environment', () => {
+    // Test staging environment auto-configuration (focused logging)
+    process.env.NODE_ENV = 'staging';
+    
+    jest.resetModules();
+    const { LogEngine: StagingLogEngine } = require('../index');
+    
+    StagingLogEngine.debug('Debug message');
+    StagingLogEngine.info('Info message');
+    StagingLogEngine.warn('Warning message');
+    
+    // Only WARN and above should show in staging
+    expect(mocks.mockConsoleLog).not.toHaveBeenCalled();
+    expect(mocks.mockConsoleWarn).toHaveBeenCalledTimes(1);
+  });
+
+  it('should set ERROR mode for test environment', () => {
     // Test environment auto-configuration (minimal logging during tests)
     process.env.NODE_ENV = 'test';
     
@@ -70,7 +86,7 @@ describe('Environment-based configuration', () => {
     expect(mocks.mockConsoleError).toHaveBeenCalledTimes(1);
   });
 
-  it('should set INFO level for unknown environments', () => {
+  it('should set INFO mode for unknown environments', () => {
     // Test fallback behavior for unrecognized NODE_ENV values
     process.env.NODE_ENV = 'unknown';
     
@@ -80,14 +96,14 @@ describe('Environment-based configuration', () => {
     UnknownLogEngine.debug('Debug message');
     UnknownLogEngine.info('Info message');
     
-    // Should default to INFO level (DEBUG filtered, INFO shown)
+    // Should default to INFO mode (DEBUG filtered, INFO shown)
     expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
     expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
       expect.stringContaining('Info message')
     );
   });
 
-  it('should set INFO level when NODE_ENV is undefined', () => {
+  it('should set INFO mode when NODE_ENV is undefined', () => {
     // Test fallback behavior when NODE_ENV is not set at all
     delete process.env.NODE_ENV;
     
@@ -97,7 +113,7 @@ describe('Environment-based configuration', () => {
     DefaultLogEngine.debug('Debug message');
     DefaultLogEngine.info('Info message');
     
-    // Should default to INFO level when NODE_ENV is undefined
+    // Should default to INFO mode when NODE_ENV is undefined
     expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
     expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
       expect.stringContaining('Info message')

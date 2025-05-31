@@ -4,35 +4,38 @@
  */
 
 import { Logger as LoggerClass } from './logger';
-import { LogLevel, LoggerConfig } from './types';
+import { LogLevel, LogMode, LoggerConfig } from './types';
 
 // Create singleton logger instance
 const logger = new LoggerClass();
 
 /**
- * Determines the appropriate default log level based on NODE_ENV
- * - production: INFO (show important info, warn, and error messages)
- * - development: DEBUG (verbose logging for development)
- * - test: ERROR (minimal logging during tests)
+ * Determines the appropriate default log mode based on NODE_ENV
+ * - development: DEBUG (most verbose - shows all messages)
+ * - production: INFO (balanced - shows info, warn, error, log)
+ * - staging: WARN (focused - shows warn, error, log only)
+ * - test: ERROR (minimal - shows error and log only)
  * - default: INFO (balanced logging for other environments)
- * @returns The appropriate LogLevel for the current environment
+ * @returns The appropriate LogMode for the current environment
  */
-const getDefaultLogLevel = (): LogLevel => {
+const getDefaultLogMode = (): LogMode => {
     const nodeEnv = process.env.NODE_ENV;
     switch (nodeEnv) {
-        case 'production':
-            return LogLevel.INFO;
         case 'development':
-            return LogLevel.DEBUG;
+            return LogMode.DEBUG;
+        case 'production':
+            return LogMode.INFO;
+        case 'staging':
+            return LogMode.WARN;
         case 'test':
-            return LogLevel.ERROR;
+            return LogMode.ERROR;
         default:
-            return LogLevel.INFO;
+            return LogMode.INFO;
     }
 };
 
-// Initialize logger with environment-appropriate default level
-logger.configure({ level: getDefaultLogLevel() });
+// Initialize logger with environment-appropriate default mode
+logger.configure({ mode: getDefaultLogMode() });
 
 /**
  * Main LogEngine API - provides all logging functionality with a clean interface
@@ -117,4 +120,4 @@ export const LogEngine = {
     log: (message: string) => logger.log(message)
 };
 
-export { LogLevel, LoggerConfig } from './types';
+export { LogLevel, LogMode, LoggerConfig } from './types';

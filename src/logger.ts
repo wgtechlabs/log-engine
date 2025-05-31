@@ -5,39 +5,61 @@
  * Uses colorized console output with timestamps for better readability
  */
 
-import { LogLevel, LoggerConfig } from './types';
+import { LogLevel, LogMode, LoggerConfig } from './types';
 import { LogFormatter } from './formatter';
 
 /**
  * Logger class responsible for managing log output and configuration
- * Provides level-based filtering and formatted console output
+ * Provides mode-based filtering and formatted console output
  */
 export class Logger {
     // Internal configuration state with sensible defaults
     private config: LoggerConfig = {
-        level: LogLevel.INFO
+        mode: LogMode.INFO
     };
 
     /**
      * Updates logger configuration with new settings
      * Merges provided config with existing settings (partial update)
+     * Supports backwards compatibility by mapping level to mode
      * @param config - Partial configuration object to apply
      */
     configure(config: Partial<LoggerConfig>): void {
-        this.config = { ...this.config, ...config };
+        // Handle backwards compatibility - if level is provided but mode is not
+        if (config.level !== undefined && config.mode === undefined) {
+            // Map old LogLevel values to new LogMode values
+            const levelToModeMap: Record<number, LogMode> = {
+                [LogLevel.DEBUG]: LogMode.DEBUG,
+                [LogLevel.INFO]: LogMode.INFO,
+                [LogLevel.WARN]: LogMode.WARN,
+                [LogLevel.ERROR]: LogMode.ERROR,
+                // Legacy SILENT and OFF values - map to their LogMode equivalents
+                4: LogMode.SILENT, // Old LogLevel.SILENT
+                5: LogMode.OFF,    // Old LogLevel.OFF
+                [LogLevel.LOG]: LogMode.INFO // LOG level maps to INFO mode
+            };
+            
+            const mappedMode = levelToModeMap[config.level as number] || LogMode.INFO;
+            this.config = { ...this.config, mode: mappedMode };
+        } else {
+            // Normal configuration update
+            this.config = { ...this.config, ...config };
+        }
     }
 
     /**
-     * Determines if a message should be logged based on current log level
-     * Messages are shown only if their level >= configured minimum level
-     * LOG level is special - it always outputs regardless of configured level (except when OFF is set)
-     * OFF level disables all logging including LOG level messages
+     * Determines if a message should be logged based on current log mode
+     * Messages are shown only if their level is appropriate for the configured mode
+     * LOG level is special - it always outputs regardless of configured mode (except when OFF is set)
+     * OFF mode disables all logging including LOG level messages
      * @param level - The log level of the message to check
      * @returns true if message should be logged, false otherwise
      */
     private shouldLog(level: LogLevel): boolean {
-        // OFF level disables all logging including LOG level
-        if (this.config.level === LogLevel.OFF) {
+        const currentMode = this.config.mode !== undefined ? this.config.mode : LogMode.INFO;
+        
+        // OFF mode disables all logging including LOG level
+        if (currentMode === LogMode.OFF) {
             return false;
         }
         
@@ -46,7 +68,15 @@ export class Logger {
             return true;
         }
         
-        return level >= this.config.level;
+        // SILENT mode only shows LOG level messages
+        if (currentMode === LogMode.SILENT) {
+            return false;
+        }
+        
+        // For other modes, check if the message level meets the mode threshold
+        // Since LogLevel and LogMode have aligned values (DEBUG=0, INFO=1, WARN=2, ERROR=3),
+        // we can directly compare their numeric values
+        return level >= currentMode;
     }
 
     /**

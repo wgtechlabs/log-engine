@@ -4,7 +4,7 @@
  */
 
 import { Logger } from '../logger';
-import { LogLevel } from '../types';
+import { LogLevel, LogMode } from '../types';
 import { setupConsoleMocks, restoreConsoleMocks, ConsoleMocks } from './test-utils';
 
 describe('Logger class', () => {
@@ -37,7 +37,7 @@ describe('Logger class', () => {
 
   it('should allow configuration changes', () => {
     // Test that logger configuration updates work correctly
-    logger.configure({ level: LogLevel.DEBUG });
+    logger.configure({ mode: LogMode.DEBUG });
     logger.debug('Debug message');
     
     // DEBUG should now be visible after configuration change
@@ -46,9 +46,9 @@ describe('Logger class', () => {
     );
   });
 
-  it('should filter messages based on configured level', () => {
-    // Test log level filtering - only WARN and ERROR should show
-    logger.configure({ level: LogLevel.WARN });
+  it('should filter messages based on configured mode', () => {
+    // Test log mode filtering - only WARN and ERROR should show
+    logger.configure({ mode: LogMode.WARN });
     
     logger.debug('Debug message');
     logger.info('Info message');
@@ -62,9 +62,9 @@ describe('Logger class', () => {
     expect(mocks.mockConsoleError).toHaveBeenCalledTimes(1);
   });
 
-  it('should always log LOG level messages regardless of configuration', () => {
-    // Test that LOG level always outputs regardless of configured level
-    logger.configure({ level: LogLevel.SILENT });
+  it('should always log LOG level messages regardless of mode configuration', () => {
+    // Test that LOG level always outputs regardless of configured mode
+    logger.configure({ mode: LogMode.SILENT });
     
     logger.debug('Debug message');
     logger.info('Info message');
@@ -72,7 +72,7 @@ describe('Logger class', () => {
     logger.error('Error message');
     logger.log('LOG level message');
     
-    // Only LOG should be visible even with SILENT level
+    // Only LOG should be visible even with SILENT mode
     expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
     expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
       expect.stringContaining('LOG level message')
@@ -84,21 +84,21 @@ describe('Logger class', () => {
   it('should log LOG level messages with different log configurations', () => {
     // Test LOG level with various configurations
     const testCases = [
-      LogLevel.DEBUG,
-      LogLevel.INFO,
-      LogLevel.WARN,
-      LogLevel.ERROR,
-      LogLevel.SILENT
+      LogMode.DEBUG,
+      LogMode.INFO,
+      LogMode.WARN,
+      LogMode.ERROR,
+      LogMode.SILENT
     ];
 
-    testCases.forEach((level, index) => {
+    testCases.forEach((mode, index) => {
       // Reset mocks
       mocks.mockConsoleLog.mockClear();
       
-      logger.configure({ level });
+      logger.configure({ mode });
       logger.log(`LOG message ${index}`);
       
-      // LOG should always be visible regardless of configured level (except OFF)
+      // LOG should always be visible regardless of configured mode (except OFF)
       expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
       expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
         expect.stringContaining(`LOG message ${index}`)
@@ -106,9 +106,9 @@ describe('Logger class', () => {
     });
   });
 
-  it('should not log any messages when level is OFF including LOG level', () => {
-    // Test that OFF level completely disables all logging including LOG
-    logger.configure({ level: LogLevel.OFF });
+  it('should not log any messages when mode is OFF including LOG level', () => {
+    // Test that OFF mode completely disables all logging including LOG
+    logger.configure({ mode: LogMode.OFF });
     
     logger.debug('Debug message');
     logger.info('Info message');
@@ -116,7 +116,7 @@ describe('Logger class', () => {
     logger.error('Error message');
     logger.log('LOG level message');
     
-    // No console methods should be called with OFF level (including LOG)
+    // No console methods should be called with OFF mode (including LOG)
     expect(mocks.mockConsoleLog).not.toHaveBeenCalled();
     expect(mocks.mockConsoleWarn).not.toHaveBeenCalled();
     expect(mocks.mockConsoleError).not.toHaveBeenCalled();

@@ -4,10 +4,8 @@
  */
 
 /**
- * Log levels in order of priority (lowest to highest)
- * Higher numeric values represent higher priority levels
- * When a level is set, only messages at that level or higher are shown
- * LOG level is special - it always outputs regardless of configured level (except when OFF is set)
+ * Log levels representing message severity (lowest to highest)
+ * Used for filtering messages based on importance
  */
 export enum LogLevel {
     /** Detailed diagnostic information, typically only of interest during development */
@@ -18,12 +16,27 @@ export enum LogLevel {
     WARN = 2,
     /** Error events that might still allow the application to continue */
     ERROR = 3,
-    /** Disable all logging output except LOG level messages */
-    SILENT = 4,
-    /** Completely disable all logging output including LOG level messages */
-    OFF = 5,
-    /** Critical messages that always output regardless of configured level (except when OFF is set) */
+    /** Critical messages that always output regardless of configured mode (except when OFF is set) */
     LOG = 99
+}
+
+/**
+ * Log modes controlling output behavior and filtering
+ * Determines what messages are displayed based on verbosity requirements
+ */
+export enum LogMode {
+    /** Most verbose - shows DEBUG, INFO, WARN, ERROR, LOG messages */
+    DEBUG = 0,
+    /** Balanced - shows INFO, WARN, ERROR, LOG messages */
+    INFO = 1,
+    /** Focused - shows WARN, ERROR, LOG messages */
+    WARN = 2,
+    /** Minimal - shows ERROR, LOG messages */
+    ERROR = 3,
+    /** Critical only - shows LOG messages only */
+    SILENT = 4,
+    /** Complete silence - shows no messages at all */
+    OFF = 5
 }
 
 /**
@@ -41,11 +54,13 @@ export interface LogEntry {
 
 /**
  * Configuration options for the logger
- * All properties are optional to allow partial updates
+ * Supports both legacy level-based and new mode-based configuration
  */
 export interface LoggerConfig {
-    /** Minimum log level to display (filters out lower priority messages) */
-    level: LogLevel;
+    /** Log mode controlling output behavior (new API) */
+    mode?: LogMode;
+    /** Legacy: Minimum log level to display (backwards compatibility) */
+    level?: LogLevel;
     /** Optional environment identifier for context (e.g., 'production', 'staging') */
     environment?: string;
 }

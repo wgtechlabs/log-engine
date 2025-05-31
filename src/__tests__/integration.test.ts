@@ -3,7 +3,7 @@
  * Tests end-to-end functionality, configuration changes, and real-world usage patterns
  */
 
-import { LogEngine, LogLevel } from '../index';
+import { LogEngine, LogLevel, LogMode } from '../index';
 import { setupConsoleMocks, restoreConsoleMocks, ConsoleMocks } from './test-utils';
 
 describe('Integration tests', () => {
@@ -36,12 +36,12 @@ describe('Integration tests', () => {
 
   it('should handle rapid configuration changes', () => {
     // Test that configuration changes take effect immediately
-    LogEngine.configure({ level: LogLevel.DEBUG });
-    LogEngine.debug('Debug 1');          // Should show with DEBUG level
+    LogEngine.configure({ mode: LogMode.DEBUG });
+    LogEngine.debug('Debug 1');          // Should show with DEBUG mode
     
-    LogEngine.configure({ level: LogLevel.ERROR });
-    LogEngine.debug('Debug 2');          // Should be filtered with ERROR level
-    LogEngine.error('Error 1');          // Should show with ERROR level
+    LogEngine.configure({ mode: LogMode.ERROR });
+    LogEngine.debug('Debug 2');          // Should be filtered with ERROR mode
+    LogEngine.error('Error 1');          // Should show with ERROR mode
     
     // Verify only first debug and the error were logged
     expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
