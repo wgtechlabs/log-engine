@@ -21,25 +21,37 @@ export class Logger {
     /**
      * Updates logger configuration with new settings
      * Merges provided config with existing settings (partial update)
-     * Supports backwards compatibility by mapping level to mode
+     * Supports backwards compatibility by mapping level to mode with deprecation warnings
      * @param config - Partial configuration object to apply
      */
     configure(config: Partial<LoggerConfig>): void {
         // Handle backwards compatibility - if level is provided but mode is not
         if (config.level !== undefined && config.mode === undefined) {
-            // Map old LogLevel values to new LogMode values
+            // Only show deprecation warning in non-test environments
+            if (process.env.NODE_ENV !== 'test') {
+                console.warn(LogFormatter.formatSystemMessage('⚠️  DEPRECATION WARNING: The "level" configuration is deprecated and will be removed in v2.0.0. Please use "mode" instead.'));
+                console.warn(LogFormatter.formatSystemMessage('   Migration: LogEngine.configure({ level: LogLevel.DEBUG }) → LogEngine.configure({ mode: LogMode.DEBUG })'));
+                console.warn(LogFormatter.formatSystemMessage('   See: https://github.com/wgtechlabs/log-engine#migration-guide-loglevel--logmode'));
+            }
+            
+            // Map legacy level values to new LogMode values (including SILENT=4, OFF=5)
+            // This provides backwards compatibility for all legacy values
+            const levelValue = config.level as number;
             const levelToModeMap: Record<number, LogMode> = {
-                [LogLevel.DEBUG]: LogMode.DEBUG,
-                [LogLevel.INFO]: LogMode.INFO,
-                [LogLevel.WARN]: LogMode.WARN,
-                [LogLevel.ERROR]: LogMode.ERROR,
-                // Legacy SILENT and OFF values - map to their LogMode equivalents
-                4: LogMode.SILENT, // Old LogLevel.SILENT
-                5: LogMode.OFF,    // Old LogLevel.OFF
-                [LogLevel.LOG]: LogMode.INFO // LOG level maps to INFO mode
+                [LogLevel.DEBUG]: LogMode.DEBUG,      // 0 -> 0
+                [LogLevel.INFO]: LogMode.INFO,        // 1 -> 1
+                [LogLevel.WARN]: LogMode.WARN,        // 2 -> 2
+                [LogLevel.ERROR]: LogMode.ERROR,      // 3 -> 3
+                [LogLevel.LOG]: LogMode.INFO,         // 99 -> 1 (special case)
+                4: LogMode.SILENT,                    // Legacy SILENT -> 4
+                5: LogMode.OFF                        // Legacy OFF -> 5
             };
             
-            const mappedMode = levelToModeMap[config.level as number] || LogMode.INFO;
+            const mappedMode = levelToModeMap[levelValue];
+            if (mappedMode === undefined) {
+                throw new Error(`Invalid LogLevel value: ${config.level}. Valid values are: DEBUG(0), INFO(1), WARN(2), ERROR(3), LOG(99), or use LogMode instead.`);
+            }
+            
             this.config = { ...this.config, mode: mappedMode };
         } else {
             // Normal configuration update

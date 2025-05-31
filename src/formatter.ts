@@ -52,6 +52,30 @@ export class LogFormatter {
     }
 
     /**
+     * Formats a Log Engine system message with [LOG ENGINE] prefix instead of log levels
+     * Used for internal messages like deprecation warnings that should be distinguished from user logs
+     * @param message - The system message content to format
+     * @returns Formatted string with ANSI colors, timestamps, and LOG ENGINE prefix
+     */
+    static formatSystemMessage(message: string): string {
+        const now = new Date();
+        const isoTimestamp = now.toISOString();
+        const timeString = now.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        });
+        
+        // Apply colors to each component for better readability
+        const coloredTimestamp = `${this.colors.gray}[${isoTimestamp}]${this.colors.reset}`;
+        const coloredTimeString = `${this.colors.cyan}[${timeString}]${this.colors.reset}`;
+        const coloredLogEngine = `${this.colors.yellow}[LOG ENGINE]${this.colors.reset}`;
+        const coloredMessage = `${this.colors.yellow}${message}${this.colors.reset}`;
+        
+        return `${coloredTimestamp}${coloredTimeString}${coloredLogEngine}: ${coloredMessage}`;
+    }
+
+    /**
      * Converts LogLevel enum to human-readable string
      * @param level - The LogLevel to convert
      * @returns String representation of the log level

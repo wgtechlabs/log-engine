@@ -13,8 +13,8 @@ describe('LogEngine', () => {
     // Set up console mocks to capture log output
     mocks = setupConsoleMocks();
     
-    // Reset LogEngine to consistent default state for each test
-    LogEngine.configure({ level: LogLevel.INFO });
+    // Reset LogEngine to consistent default state for each test using new mode API
+    LogEngine.configure({ mode: LogMode.INFO });
   });
 
   afterEach(() => {
