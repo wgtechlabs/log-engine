@@ -147,7 +147,6 @@ LogEngine.configure({ mode: LogMode.DEBUG });
 - **Better Environment Defaults**: `development→DEBUG`, `staging→WARN`, `test→ERROR`
 - **Future-Proof**: New features will use the LogMode system
 - **100% Backwards Compatible**: Existing code continues to work unchanged
-```
 
 ### Color-Coded Output 🎨
 
