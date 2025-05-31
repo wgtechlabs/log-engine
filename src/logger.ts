@@ -60,6 +60,31 @@ export class Logger {
     }
 
     /**
+     * Maps LogLevel values to severity ranks for consistent comparison
+     * This prevents issues if enum numeric values change in the future
+     */
+    private static readonly SEVERITY_RANKS: Record<LogLevel, number> = {
+        [LogLevel.DEBUG]: 0,
+        [LogLevel.INFO]: 1,
+        [LogLevel.WARN]: 2,
+        [LogLevel.ERROR]: 3,
+        [LogLevel.LOG]: 99  // Special case - always outputs (except when OFF)
+    };
+
+    /**
+     * Maps LogMode values to minimum severity rank required for output
+     * This defines the filtering threshold for each mode
+     */
+    private static readonly MODE_THRESHOLDS: Record<LogMode, number> = {
+        [LogMode.DEBUG]: 0,   // Shows DEBUG and above
+        [LogMode.INFO]: 1,    // Shows INFO and above
+        [LogMode.WARN]: 2,    // Shows WARN and above
+        [LogMode.ERROR]: 3,   // Shows ERROR and above
+        [LogMode.SILENT]: 99, // Only shows LOG messages
+        [LogMode.OFF]: 100    // Shows nothing
+    };
+
+    /**
      * Determines if a message should be logged based on current log mode
      * Messages are shown only if their level is appropriate for the configured mode
      * LOG level is special - it always outputs regardless of configured mode (except when OFF is set)
@@ -70,25 +95,14 @@ export class Logger {
     private shouldLog(level: LogLevel): boolean {
         const currentMode = this.config.mode !== undefined ? this.config.mode : LogMode.INFO;
         
-        // OFF mode disables all logging including LOG level
-        if (currentMode === LogMode.OFF) {
-            return false;
-        }
+        // Get the severity rank for the message level
+        const messageSeverity = Logger.SEVERITY_RANKS[level];
         
-        // LOG level always outputs regardless of configuration (except when OFF is set)
-        if (level === LogLevel.LOG) {
-            return true;
-        }
+        // Get the minimum severity threshold for the current mode
+        const modeThreshold = Logger.MODE_THRESHOLDS[currentMode];
         
-        // SILENT mode only shows LOG level messages
-        if (currentMode === LogMode.SILENT) {
-            return false;
-        }
-        
-        // For other modes, check if the message level meets the mode threshold
-        // Since LogLevel and LogMode have aligned values (DEBUG=0, INFO=1, WARN=2, ERROR=3),
-        // we can directly compare their numeric values
-        return level >= currentMode;
+        // Allow the message if its severity meets or exceeds the mode threshold
+        return messageSeverity >= modeThreshold;
     }
 
     /**
