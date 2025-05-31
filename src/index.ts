@@ -4,7 +4,7 @@
  */
 
 import { Logger as LoggerClass } from './logger';
-import { LogLevel, LogMode, LoggerConfig } from './types';
+import { LogMode, LoggerConfig } from './types';
 
 // Create singleton logger instance
 const logger = new LoggerClass();
