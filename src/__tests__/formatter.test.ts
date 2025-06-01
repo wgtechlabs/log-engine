@@ -15,7 +15,7 @@ describe('LogFormatter', () => {
     const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
     
     // Verify format: [ISO_TIMESTAMP][LOCAL_TIME][LEVEL]: message
-    expect(cleanFormatted).toMatch(/^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]\[\d{1,2}:\d{2} [AP]M\]\[INFO\]: Test message$/);
+    expect(cleanFormatted).toMatch(/^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]\[\d{1,2}:\d{2}[AP]M\]\[INFO\]: Test message$/);
   });
 
   it('should format different log levels correctly', () => {
@@ -50,7 +50,7 @@ describe('LogFormatter', () => {
     const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
     
     // Should have timestamps and level but empty message at end
-    expect(cleanFormatted).toMatch(/^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]\[\d{1,2}:\d{2} [AP]M\]\[INFO\]: $/);
+    expect(cleanFormatted).toMatch(/^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]\[\d{1,2}:\d{2}[AP]M\]\[INFO\]: $/);
   });
 
   it('should handle special characters in messages', () => {
@@ -95,7 +95,7 @@ describe('LogFormatter', () => {
       
       // Should contain timestamp components
       expect(formatted).toMatch(/\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]/); // ISO timestamp
-      expect(formatted).toMatch(/\[\d{1,2}:\d{2} [AP]M\]/); // Local time
+      expect(formatted).toMatch(/\[\d{1,2}:\d{2}[AP]M\]/); // Local time
     });
 
     it('should format system messages with colors', () => {
