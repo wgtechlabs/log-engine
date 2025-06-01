@@ -255,11 +255,11 @@ Log messages are beautifully formatted with colorized timestamps, levels, and sm
 
 ```bash
 # Example colorized output (colors visible in terminal)
-[2025-05-29T16:57:45.678Z][4:57 PM][DEBUG]: Debugging application flow
-[2025-05-29T16:57:46.123Z][4:57 PM][INFO]: Server started successfully  
-[2025-05-29T16:57:47.456Z][4:57 PM][WARN]: API rate limit approaching
-[2025-05-29T16:57:48.789Z][4:57 PM][ERROR]: Database connection failed
-[2025-05-29T16:57:49.012Z][4:57 PM][LOG]: Application startup complete
+[2025-05-29T16:57:45.678Z][4:57PM][DEBUG]: Debugging application flow
+[2025-05-29T16:57:46.123Z][4:57PM][INFO]: Server started successfully  
+[2025-05-29T16:57:47.456Z][4:57PM][WARN]: API rate limit approaching
+[2025-05-29T16:57:48.789Z][4:57PM][ERROR]: Database connection failed
+[2025-05-29T16:57:49.012Z][4:57PM][LOG]: Application startup complete
 ```
 
 **Color Scheme:**
