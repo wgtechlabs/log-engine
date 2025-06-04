@@ -38,7 +38,7 @@ export class LogFormatter {
             hour: 'numeric',
             minute: '2-digit',
             hour12: true
-        }).replace(' ', '');
+        }).replace(/\s+/g, '');
 
         const levelName = this.getLevelName(level);
         const levelColor = this.getLevelColor(level);
@@ -64,7 +64,7 @@ export class LogFormatter {
             hour: 'numeric',
             minute: '2-digit',
             hour12: true
-        }).replace(' ', '');
+        }).replace(/\s+/g, '');
         
         // Apply colors to each component for better readability
         const coloredTimestamp = `${LogFormatter.colors.gray}[${isoTimestamp}]${LogFormatter.colors.reset}`;
