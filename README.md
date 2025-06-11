@@ -6,7 +6,7 @@
 
 WG's Log Engine is the **ultimate logging solution for Node.js developers** - a lightweight, battle-tested utility specifically engineered for Discord bots, Telegram bots, web servers, APIs, and server-side applications. Born from real-world development challenges and proven in production environments like the [Unthread Discord Bot](https://github.com/wgtechlabs/unthread-discord-bot/), Log Engine delivers enterprise-grade logging with zero complexity and beautiful color-coded console output.
 
-**Stop wrestling with logging configurations and start building amazing applications.** Whether you're creating the next viral Discord community bot, building high-performance APIs, developing microservices, or deploying production servers, Log Engine provides intelligent terminal-based logging with vibrant colors that scales with your application's growth - from your first "Hello World" to handling millions of requests across distributed systems.
+**Stop wrestling with logging configurations and start building amazing applications.** Whether you're creating the next viral Discord community bot, building high-performance APIs, developing microservices, or deploying production servers, Log Engine provides intelligent terminal-based logging with vibrant colors that scale with your application's growth - from your first "Hello World" to handling millions of requests across distributed systems.
 
 ## ❣️ Motivation
 
