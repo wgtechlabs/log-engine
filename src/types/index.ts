@@ -65,3 +65,26 @@ export interface LoggerConfig {
     /** Optional environment identifier for context (e.g., 'production', 'staging') */
     environment?: string;
 }
+
+/**
+ * Configuration options for automatic data redaction
+ * Controls how sensitive information is processed in log messages
+ */
+export interface RedactionConfig {
+    /** Whether redaction is enabled globally */
+    enabled: boolean;
+    /** List of field names that should be redacted (case-insensitive partial matching) */
+    sensitiveFields: string[];
+    /** List of field names that should be truncated if they exceed maxContentLength */
+    contentFields: string[];
+    /** Maximum length for content fields before truncation occurs */
+    maxContentLength: number;
+    /** Text to replace sensitive field values with */
+    redactionText: string;
+    /** Text to append when content is truncated */
+    truncationText: string;
+    /** Whether to recursively scan nested objects and arrays */
+    deepRedaction: boolean;
+    /** Optional custom regex patterns for advanced field detection */
+    customPatterns?: RegExp[];
+}

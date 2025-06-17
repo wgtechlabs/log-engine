@@ -4,9 +4,9 @@
 
 [![banner](https://raw.githubusercontent.com/wgtechlabs/log-engine/main/.github/assets/repo_banner.jpg)](https://github.com/wgtechlabs/log-engine)
 
-WG's Log Engine is the **ultimate logging solution for Node.js developers** - a lightweight, battle-tested utility specifically engineered for Discord bots, Telegram bots, web servers, APIs, and server-side applications. Born from real-world development challenges and proven in production environments like the [Unthread Discord Bot](https://github.com/wgtechlabs/unthread-discord-bot/), Log Engine delivers enterprise-grade logging with zero complexity and beautiful color-coded console output.
+WG's Log Engine is the **ultimate logging solution for Node.js developers** - a lightweight, battle-tested utility specifically engineered for Discord bots, Telegram bots, web servers, APIs, and server-side applications. Born from real-world development challenges and proven in production environments like the [Unthread Discord Bot](https://github.com/wgtechlabs/unthread-discord-bot/), Log Engine delivers enterprise-grade logging with zero complexity, beautiful color-coded console output, and **built-in automatic data redaction for security-first logging**.
 
-**Stop wrestling with logging configurations and start building amazing applications.** Whether you're creating the next viral Discord community bot, building high-performance APIs, developing microservices, or deploying production servers, Log Engine provides intelligent terminal-based logging with vibrant colors that scales with your application's growth - from your first "Hello World" to handling millions of requests across distributed systems.
+**The first logging library with built-in PII protection.** Stop wrestling with logging configurations and start building amazing applications safely. Whether you're creating the next viral Discord community bot, building high-performance APIs, developing microservices, or deploying production servers, Log Engine provides intelligent terminal-based logging with vibrant colors and automatic sensitive data protection that scales with your application's growth - from your first "Hello World" to handling millions of requests across distributed systems.
 
 ## ❣️ Motivation
 
@@ -16,6 +16,7 @@ Log Engine transforms your development experience from chaotic debugging session
 
 ## ✨ Key Features
 
+- **🔒 Automatic Data Redaction (NEW!)**: Built-in PII protection that automatically redacts sensitive information from logs - **the first logging library with security-first logging by default**.
 - **Lightweight & Fast**: Minimal overhead with maximum performance - designed to enhance your application, not slow it down.
 - **No Learning Curve**: Dead simple API that you can master in seconds. No extensive documentation, complex configurations, or setup required - Log Engine works instantly.
 - **Colorized Console Output**: Beautiful ANSI color-coded log levels with intelligent terminal formatting - instantly identify message severity at a glance with color-coded output.
@@ -78,6 +79,14 @@ LogEngine.info('This is an info message');
 LogEngine.warn('This is a warning message');
 LogEngine.error('This is an error message');
 LogEngine.log('This is a critical message that always shows');
+
+// NEW: Automatic data redaction (no configuration needed!)
+LogEngine.info('User login', {
+  username: 'john_doe',        // ✅ Visible
+  password: 'secret123',       // ❌ [REDACTED]
+  email: 'john@example.com',   // ❌ [REDACTED]
+  apiKey: 'sk-1234567890'      // ❌ [REDACTED]
+});
 ```
 
 ### Mode-Based Configuration (Recommended)
@@ -143,6 +152,7 @@ LogEngine.configure({ mode: LogMode.DEBUG });
 ```
 
 **Key Benefits of LogMode:**
+
 - **Clearer API**: Separates message severity (`LogLevel`) from output control (`LogMode`)
 - **Better Environment Defaults**: `development→DEBUG`, `staging→WARN`, `test→ERROR`
 - **Future-Proof**: New features will use the LogMode system
@@ -270,6 +280,138 @@ Log messages are beautifully formatted with colorized timestamps, levels, and sm
 - 🔴 **ERROR**: Red - Error messages requiring immediate action
 - 🟢 **LOG**: Green - Critical messages that always display
 - ⚫ **Timestamps**: Gray (ISO) and Cyan (local time) for easy scanning
+
+## � Automatic Data Redaction
+
+**LogEngine features built-in PII protection that automatically redacts sensitive information from your logs.** This security-first approach prevents accidental exposure of passwords, tokens, emails, and other sensitive data while maintaining full debugging capabilities.
+
+### Zero Configuration Security
+
+Just use LogEngine normally - **sensitive data is automatically protected**:
+
+```typescript
+import { LogEngine } from '@wgtechlabs/log-engine';
+
+// ✅ Automatic redaction - no setup needed!
+LogEngine.info('User authentication', {
+  username: 'john_doe',        // ✅ Visible
+  password: 'secret123',       // ❌ [REDACTED]
+  email: 'john@example.com',   // ❌ [REDACTED]
+  apiKey: 'sk-1234567890',     // ❌ [REDACTED]
+  timestamp: new Date()        // ✅ Visible
+});
+
+// Output: [INFO]: User authentication {"username":"john_doe","password":"[REDACTED]","email":"[REDACTED]","apiKey":"[REDACTED]","timestamp":"2025-06-17T..."}
+```
+
+### Protected Data Types
+
+**50+ sensitive patterns automatically detected:**
+
+- **Authentication**: `password`, `token`, `apiKey`, `secret`, `jwt`, `auth`, `sessionId`
+- **Personal Info**: `email`, `phone`, `ssn`, `firstName`, `lastName`, `address`
+- **Financial**: `creditCard`, `cvv`, `bankAccount`, `routingNumber`
+- **System**: `clientSecret`, `privateKey`, `webhookSecret`
+
+### Deep Object Scanning
+
+Automatically scans nested objects and arrays:
+
+```typescript
+LogEngine.warn('Payment processing', {
+  order: {
+    id: 'order-123',           // ✅ Visible
+    customer: {
+      username: 'customer1',      // ✅ Visible
+      email: 'user@example.com',  // ❌ [REDACTED]
+      creditCard: '4532-****'     // ❌ [REDACTED]
+    }
+  },
+  metadata: {
+    processor: 'stripe',
+    apiSecret: 'sk_live_...'     // ❌ [REDACTED]
+  }
+});
+```
+
+### Content Truncation
+
+Large content fields are automatically truncated to prevent log bloat:
+
+```typescript
+LogEngine.debug('Large payload', {
+  content: 'Very long content...'.repeat(100), // Truncated at 100 chars + "... [TRUNCATED]"
+  size: 'large',
+  processed: true
+});
+```
+
+### Development-Friendly Features
+
+**Raw Methods for Debugging:**
+
+```typescript
+// ⚠️ Use with caution - bypasses redaction
+LogEngine.debugRaw('Full debug data', {
+  password: 'secret123',    // ⚠️ Visible (not redacted)
+  apiKey: 'full-key'        // ⚠️ Visible (not redacted)
+});
+
+// Or use the helper method
+LogEngine.withoutRedaction().info('Debug mode', sensitiveData);
+```
+
+**Environment-Based Control:**
+
+```bash
+# Development - show everything
+NODE_ENV=development
+
+# Explicitly disable redaction
+LOG_REDACTION_DISABLED=true
+DEBUG_FULL_PAYLOADS=true
+
+# Custom configuration
+LOG_REDACTION_TEXT="***CONFIDENTIAL***"
+LOG_MAX_CONTENT_LENGTH=200
+LOG_SENSITIVE_FIELDS="customField,companySecret"
+```
+
+### Custom Configuration
+
+**Modify redaction behavior:**
+
+```typescript
+// Custom redaction settings
+LogEngine.configureRedaction({
+  redactionText: '***HIDDEN***',
+  maxContentLength: 200,
+  sensitiveFields: ['myCustomField', 'internalSecret']
+});
+
+// Get current configuration
+const config = LogEngine.getRedactionConfig();
+console.log(config);
+```
+
+### Environment Behavior
+
+| Environment | Redaction Status | Use Case |
+|-------------|------------------|----------|
+| **Production** | 🔒 **Active** | Full protection for live systems |
+| **Development** | 🛠️ **Disabled** | Full data visibility for debugging |
+| **Staging** | 🔒 **Active** | Test with production-like security |
+| **Test** | 🔒 **Active** | Consistent test environment |
+
+### Security Benefits
+
+✅ **Prevents Data Leaks** - Automatic protection against accidental exposure  
+✅ **Compliance Ready** - Helps meet GDPR, HIPAA, and other privacy requirements  
+✅ **Zero Configuration** - Secure by default, no setup required  
+✅ **Performance Optimized** - Minimal overhead with smart processing  
+✅ **Developer Friendly** - Full debugging capabilities when needed  
+
+**Perfect for:** Production applications, compliance requirements, team development, and any scenario where sensitive data might accidentally end up in logs.
 
 ## 💬 Community Discussions
 

@@ -26,12 +26,13 @@ export class LogFormatter {
 
     /**
      * Formats a log message with timestamp, level indicator, and appropriate coloring
-     * Creates a structured log entry: [ISO_TIMESTAMP][LOCAL_TIME][LEVEL]: message
+     * Creates a structured log entry: [ISO_TIMESTAMP][LOCAL_TIME][LEVEL]: message [data]
      * @param level - The log level to format for
      * @param message - The message content to format
+     * @param data - Optional data object to include in the log output
      * @returns Formatted string with ANSI colors and timestamps
      */
-    static format(level: LogLevel, message: string): string {
+    static format(level: LogLevel, message: string, data?: any): string {
         const now = new Date();
         const isoTimestamp = now.toISOString();
         const timeString = now.toLocaleTimeString('en-US', {
@@ -48,7 +49,18 @@ export class LogFormatter {
         const coloredTimeString = `${this.colors.cyan}[${timeString}]${this.colors.reset}`;
         const coloredLevel = `${levelColor}[${levelName}]${this.colors.reset}`;
         
-        return `${coloredTimestamp}${coloredTimeString}${coloredLevel}: ${message}`;
+        // Format the base message
+        let formattedMessage = `${coloredTimestamp}${coloredTimeString}${coloredLevel}: ${message}`;
+        
+        // Append data if provided
+        if (data !== undefined) {
+            const dataString = this.formatData(data);
+            if (dataString) {
+                formattedMessage += ` ${this.colors.dim}${dataString}${this.colors.reset}`;
+            }
+        }
+        
+        return formattedMessage;
     }
 
     /**
@@ -73,6 +85,37 @@ export class LogFormatter {
         const coloredMessage = `${LogFormatter.colors.yellow}${message}${LogFormatter.colors.reset}`;
         
         return `${coloredTimestamp}${coloredTimeString}${coloredLogEngine}: ${coloredMessage}`;
+    }
+
+    /**
+     * Formats data objects for log output
+     * Converts objects to readable JSON string format
+     * @param data - Data to format
+     * @returns Formatted string representation of the data
+     */
+    private static formatData(data: any): string {
+        if (data === null) {
+            return 'null';
+        }
+        
+        if (data === undefined) {
+            return '';
+        }
+        
+        if (typeof data === 'string') {
+            return data;
+        }
+        
+        if (typeof data === 'number' || typeof data === 'boolean') {
+            return String(data);
+        }
+        
+        try {
+            return JSON.stringify(data, null, 0);
+        } catch (error) {
+            // Fallback for objects that can't be stringified (e.g., circular references)
+            return '[Object]';
+        }
     }
 
     /**
