@@ -52,6 +52,50 @@ export class DataRedactor {
     }
 
     /**
+     * Add custom regex patterns for advanced field detection
+     * @param patterns - Array of regex patterns to add
+     */
+    static addCustomPatterns(patterns: RegExp[]): void {
+        const currentPatterns = this.config.customPatterns || [];
+        this.config = {
+            ...this.config,
+            customPatterns: [...currentPatterns, ...patterns]
+        };
+    }
+
+    /**
+     * Clear all custom regex patterns
+     */
+    static clearCustomPatterns(): void {
+        this.config = {
+            ...this.config,
+            customPatterns: []
+        };
+    }
+
+    /**
+     * Add custom sensitive field names to the existing list
+     * @param fields - Array of field names to add
+     */
+    static addSensitiveFields(fields: string[]): void {
+        this.config = {
+            ...this.config,
+            sensitiveFields: [...this.config.sensitiveFields, ...fields]
+        };
+    }
+
+    /**
+     * Test if a field name would be redacted with current configuration
+     * @param fieldName - Field name to test
+     * @returns true if field would be redacted, false otherwise
+     */
+    static testFieldRedaction(fieldName: string): boolean {
+        const testObj = { [fieldName]: 'test-value' };
+        const result = this.redactData(testObj);
+        return result[fieldName] !== 'test-value';
+    }
+
+    /**
      * Main entry point for data redaction
      * Processes any type of data and returns a redacted version
      * @param data - Data to be processed for redaction
@@ -145,12 +189,21 @@ export class DataRedactor {
     /**
      * Check if a field name indicates sensitive information
      * Uses case-insensitive matching with exact and partial matches
-     * Includes smart filtering to avoid false positives
+     * Includes smart filtering to avoid false positives and custom patterns
      * @param fieldName - Field name to check
      * @returns true if field should be redacted, false otherwise
      */
     private static isSensitiveField(fieldName: string): boolean {
         const lowerField = fieldName.toLowerCase();
+        
+        // Check custom regex patterns first (highest priority)
+        if (this.config.customPatterns && this.config.customPatterns.length > 0) {
+            for (const pattern of this.config.customPatterns) {
+                if (pattern.test(fieldName)) {
+                    return true;
+                }
+            }
+        }
         
         return this.config.sensitiveFields.some(sensitive => {
             const lowerSensitive = sensitive.toLowerCase();

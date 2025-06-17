@@ -6,7 +6,7 @@
 import { Logger } from './logger';
 import { LogMode } from './types';
 import type { LoggerConfig, RedactionConfig } from './types';
-import { DataRedactor } from './redaction';
+import { DataRedactor, defaultRedactionConfig } from './redaction';
 
 // Create a singleton logger instance
 const logger = new Logger();
@@ -132,33 +132,50 @@ export const LogEngine = {
     /**
      * Configure data redaction settings
      * @param config - Partial redaction configuration to apply
-     * @example
-     * ```typescript
-     * LogEngine.configureRedaction({
-     *   maxContentLength: 200,
-     *   redactionText: '***CONFIDENTIAL***'
-     * });
-     * ```
      */
     configureRedaction: (config: Partial<RedactionConfig>) => DataRedactor.updateConfig(config),
 
     /**
      * Refresh redaction configuration from environment variables
      * Useful for picking up runtime environment changes
-     * @example
-     * ```typescript
-     * // After changing environment variables at runtime
-     * process.env.LOG_REDACTION_TEXT = '***SECRET***';
-     * LogEngine.refreshRedactionConfig();
-     * ```
      */
     refreshRedactionConfig: () => DataRedactor.refreshConfig(),
+
+    /**
+     * Reset redaction configuration to defaults
+     */
+    resetRedactionConfig: () => DataRedactor.updateConfig(defaultRedactionConfig),
 
     /**
      * Get current redaction configuration
      * @returns Current redaction configuration
      */
     getRedactionConfig: () => DataRedactor.getConfig(),
+
+    // Advanced redaction methods (Phase 3)
+    /**
+     * Add custom regex patterns for advanced field detection
+     * @param patterns - Array of regex patterns to add
+     */
+    addCustomRedactionPatterns: (patterns: RegExp[]) => DataRedactor.addCustomPatterns(patterns),
+
+    /**
+     * Clear all custom redaction patterns
+     */
+    clearCustomRedactionPatterns: () => DataRedactor.clearCustomPatterns(),
+
+    /**
+     * Add custom sensitive field names to the existing list
+     * @param fields - Array of field names to add
+     */
+    addSensitiveFields: (fields: string[]) => DataRedactor.addSensitiveFields(fields),
+
+    /**
+     * Test if a field name would be redacted with current configuration
+     * @param fieldName - Field name to test
+     * @returns true if field would be redacted, false otherwise
+     */
+    testFieldRedaction: (fieldName: string) => DataRedactor.testFieldRedaction(fieldName),
 
     /**
      * Temporarily disable redaction for a specific logging call
