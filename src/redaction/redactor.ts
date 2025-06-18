@@ -228,8 +228,12 @@ export class DataRedactor {
                 return true;
             }
             
-            // Field contains sensitive term, but only for longer sensitive terms to avoid false positives
-            if (lowerSensitive.length >= 5 && lowerField.includes(lowerSensitive)) {
+            // Whitelist of short sensitive terms that should always trigger substring matching
+            const shortSensitiveWhitelist = ['pin', 'cvv', 'cvc', 'ssn', 'pwd', 'key', 'jwt', 'dob', 'pii', 'auth', 'csrf'];
+            
+            // Field contains sensitive term - either from whitelist or length >= 5 to avoid false positives
+            if ((shortSensitiveWhitelist.includes(lowerSensitive) || lowerSensitive.length >= 5) && 
+                lowerField.includes(lowerSensitive)) {
                 return true;
             }
             

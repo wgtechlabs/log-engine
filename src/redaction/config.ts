@@ -36,7 +36,7 @@ export const defaultRedactionConfig: RedactionConfig = {
         
         // Financial Information
         'creditCard', 'credit_card', 'cardNumber', 'card_number',
-        'cvv', 'cvc', 'expiryDate', 'expiry_date',
+        'cvv', 'cvc', 'pin', 'expiryDate', 'expiry_date',
         'bankAccount', 'bank_account', 'routingNumber',
         
         // Internal/System Information
