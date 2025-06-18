@@ -10,12 +10,19 @@ import { LogMode } from '../types';
  */
 export class EnvironmentDetector {
     /**
+     * Get the normalized NODE_ENV value
+     * @returns Normalized NODE_ENV (trimmed and lowercase)
+     */
+    private static getNormalizedNodeEnv(): string {
+        return (process.env.NODE_ENV || '').trim().toLowerCase();
+    }
+
+    /**
      * Determines the appropriate log mode based on NODE_ENV
      * @returns LogMode appropriate for current environment
      */
     static getEnvironmentMode(): LogMode {
-        // Normalize NODE_ENV by trimming whitespace and converting to lowercase
-        const nodeEnv = (process.env.NODE_ENV || '').trim().toLowerCase();
+        const nodeEnv = this.getNormalizedNodeEnv();
         
         switch (nodeEnv) {
             case 'development':
@@ -36,7 +43,7 @@ export class EnvironmentDetector {
      * @returns true if NODE_ENV is 'test'
      */
     static isTestEnvironment(): boolean {
-        return process.env.NODE_ENV === 'test';
+        return this.getNormalizedNodeEnv() === 'test';
     }
 
     /**
@@ -44,7 +51,7 @@ export class EnvironmentDetector {
      * @returns true if NODE_ENV is 'development'
      */
     static isDevelopmentEnvironment(): boolean {
-        return process.env.NODE_ENV === 'development';
+        return this.getNormalizedNodeEnv() === 'development';
     }
 
     /**
@@ -52,6 +59,6 @@ export class EnvironmentDetector {
      * @returns true if NODE_ENV is 'production'
      */
     static isProductionEnvironment(): boolean {
-        return process.env.NODE_ENV === 'production';
+        return this.getNormalizedNodeEnv() === 'production';
     }
 }
