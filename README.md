@@ -1,10 +1,4 @@
-# Log Engine 📜🚂 [![made by](https://img.shields.io/badge/made%20by-WG%20Tech%20Labs// Advanced automatic data redaction (no configuration needed!)
-LogEngine.info('User login', {
-  username: 'john_doe',        // ✅ Visible
-  password: 'secret123',       // ❌ [REDACTED]
-  email: 'john@example.com',   // ❌ [REDACTED]
-  apiKey: 'apikey123'          // ❌ [REDACTED]
-});.svg?logo=github&longCache=true&labelColor=181717&style=flat-square)](https://github.com/wgtechlabs)
+# Log Engine 📜🚂 [![made by](https://img.shields.io/badge/made%20by-WG%20Tech%20Labs-0060a0.svg?logo=github&longCache=true&labelColor=181717&style=flat-square)](https://github.com/wgtechlabs)
 
 [![github actions workflow status](https://img.shields.io/github/actions/workflow/status/wgtechlabs/log-engine/test.yml?branch=main&style=flat-square&logo=github&labelColor=181717)](https://github.com/wgtechlabs/log-engine/actions/workflows/test.yml) [![codecov](https://img.shields.io/codecov/c/github/wgtechlabs/log-engine?token=PWRJTBVKQ9&style=flat-square&logo=codecov&labelColor=181717)](https://codecov.io/gh/wgtechlabs/log-engine) [![npm downloads](https://img.shields.io/npm/d18m/%40wgtechlabs%2Flog-engine?style=flat-square&logo=npm&label=installs&labelColor=181717&color=%23CD0000)](https://www.npmjs.com/package/@wgtechlabs/log-engine) [![sponsors](https://img.shields.io/badge/sponsor-%E2%9D%A4-%23db61a2.svg?&logo=github&logoColor=white&labelColor=181717&style=flat-square)](https://github.com/sponsors/wgtechlabs) [![release](https://img.shields.io/github/release/wgtechlabs/log-engine.svg?logo=github&labelColor=181717&color=green&style=flat-square)](https://github.com/wgtechlabs/log-engine/releases) [![star](https://img.shields.io/github/stars/wgtechlabs/log-engine.svg?&logo=github&labelColor=181717&color=yellow&style=flat-square)](https://github.com/wgtechlabs/log-engine/stargazers) [![license](https://img.shields.io/github/license/wgtechlabs/log-engine.svg?&logo=github&labelColor=181717&style=flat-square)](https://github.com/wgtechlabs/log-engine/blob/main/license)
 

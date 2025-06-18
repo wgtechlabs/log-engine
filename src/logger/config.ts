@@ -40,7 +40,13 @@ export class LoggerConfigManager {
             this.handleLegacyLevelConfig(config);
         } else {
             // Normal configuration update
-            this.config = { ...this.config, ...config };
+            // If mode is present, remove legacy level property to avoid conflicts
+            if (config.mode !== undefined && config.level !== undefined) {
+                const { level, ...configWithoutLevel } = config;
+                this.config = { ...this.config, ...configWithoutLevel };
+            } else {
+                this.config = { ...this.config, ...config };
+            }
         }
     }
 

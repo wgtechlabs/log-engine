@@ -329,3 +329,82 @@ describe('Logger module exports', () => {
     expect(typeof logger.EnvironmentDetector).toBe('function');
   });
 });
+
+describe('LoggerConfigManager', () => {
+  let configManager: any;
+
+  beforeEach(() => {
+    const logger = require('../logger');
+    configManager = new logger.LoggerConfigManager();
+  });
+
+  it('should remove legacy level property when both level and mode are provided', () => {
+    // Test the specific fix: when both level and mode are provided,
+    // the legacy level property should be removed from the config
+    const configWithBothLevelAndMode = {
+      level: LogLevel.DEBUG,
+      mode: LogMode.INFO,
+      redaction: { enabled: true }
+    };
+
+    configManager.updateConfig(configWithBothLevelAndMode);
+    
+    // Get the current config
+    const currentConfig = configManager.getConfig();
+    
+    // Verify that the legacy level property is not present
+    expect(currentConfig).not.toHaveProperty('level');
+    
+    // Verify that mode is correctly set
+    expect(currentConfig.mode).toBe(LogMode.INFO);
+    
+    // Verify other properties are preserved
+    expect(currentConfig.redaction).toEqual({ enabled: true });
+  });
+
+  it('should preserve level property when only level is provided (legacy support)', () => {
+    // Test backwards compatibility: when only level is provided,
+    // it should be mapped to mode and level should be removed
+    const configWithOnlyLevel = {
+      level: LogLevel.WARN,
+      redaction: { enabled: false }
+    };
+
+    configManager.updateConfig(configWithOnlyLevel);
+    
+    // Get the current config
+    const currentConfig = configManager.getConfig();
+    
+    // Verify that the legacy level property is not present (it gets mapped to mode)
+    expect(currentConfig).not.toHaveProperty('level');
+    
+    // Verify that mode is correctly mapped from level
+    expect(currentConfig.mode).toBe(LogMode.WARN);
+    
+    // Verify other properties are preserved
+    expect(currentConfig.redaction).toEqual({ enabled: false });
+  });
+
+  it('should preserve all properties when only mode is provided', () => {
+    // Test normal operation: when only mode is provided,
+    // it should work normally without any level-related processing
+    const configWithOnlyMode = {
+      mode: LogMode.ERROR,
+      redaction: { enabled: true }
+    };
+
+    configManager.updateConfig(configWithOnlyMode);
+    
+    // Get the current config
+    const currentConfig = configManager.getConfig();
+    
+    // Verify that mode is correctly set
+    expect(currentConfig.mode).toBe(LogMode.ERROR);
+    
+    // Verify other properties are preserved
+    expect(currentConfig.redaction).toEqual({ enabled: true });
+    
+    // Verify no level property exists
+    expect(currentConfig).not.toHaveProperty('level');
+  });
+});
