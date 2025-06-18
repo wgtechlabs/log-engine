@@ -453,118 +453,49 @@ describe('Data Redaction', () => {
             });
 
             test('should trigger redactObject depth limit (line 182)', () => {
-                // To hit line 182, we need processValue to call redactObject with depth 100
-                // processValue at depth 99 will call redactObject with depth + 1 = 100
-                // We need exactly 99 levels of nesting to achieve this
-                
+                // Helper function to find redactObject depth limit marker in nested structure
+                function findRedactObjectLimit(obj: any, depth = 0): any {
+                    if (depth > 60) return null; // Prevent infinite loops
+                    
+                    if (obj && typeof obj === 'object') {
+                        // Check for redactObject depth limit signature (object with single property)
+                        if (obj['[Max Depth Exceeded]'] === '[Max Depth Exceeded]' && 
+                            Object.keys(obj).length === 1) {
+                            return obj;
+                        }
+                        
+                        // Recursively search in nested objects
+                        for (const value of Object.values(obj)) {
+                            const found = findRedactObjectLimit(value, depth + 1);
+                            if (found) return found;
+                        }
+                    }
+                    return null;
+                }
+
+                // Test scenario 1: Deep linear nesting (99 levels)
+                // This creates a structure that forces processValue to call redactObject at depth 100
                 let deepNested: any = { value: 'innermost' };
-                
-                // Create exactly 99 levels of nesting
                 for (let i = 0; i < 99; i++) {
                     deepNested = { [`nested${i}`]: deepNested };
                 }
 
-                const result = DataRedactor.redactData(deepNested);
-                
-                // Navigate through the structure to find where the redactObject depth limit is hit
-                let current = result;
-                let depth = 0;
-                
-                // Navigate through the nested structure
-                while (current && typeof current === 'object' && depth < 105) {
-                    // Check if we've hit the redactObject depth limit (returns an object)
-                    if (current['[Max Depth Exceeded]'] === '[Max Depth Exceeded]') {
-                        // This is the signature of the redactObject depth limit (line 182)
-                        expect(current).toEqual({ '[Max Depth Exceeded]': '[Max Depth Exceeded]' });
-                        return; // Test passed
-                    }
-                    
-                    // Check if we've hit the processValue depth limit (returns a string)
-                    if (current === '[Max Depth Exceeded]') {
-                        // This is the processValue depth limit, not what we're testing for
-                        break;
-                    }
-                    
-                    // Find the next nested property
-                    const nestedKey = Object.keys(current).find(key => 
-                        key.startsWith('nested') || key === 'value'
-                    );
-                    
-                    if (!nestedKey) break;
-                    current = current[nestedKey];
-                    depth++;
-                }
-                
-                // If we reach here, we should have encountered either depth limit
-                // The test is designed to hit the redactObject limit specifically
-                expect(current).toBeDefined();
-            });
+                const result1 = DataRedactor.redactData(deepNested);
+                const found1 = findRedactObjectLimit(result1);
+                expect(found1).toEqual({ '[Max Depth Exceeded]': '[Max Depth Exceeded]' });
 
-            test('should trigger redactObject depth limit (line 182)', () => {
-                // With MAX_REDACT_OBJECT_DEPTH = 99, redactObject will hit its limit
-                // when called with depth >= 99
-                // processValue calls redactObject with depth + 1
-                // So we need processValue to be called with depth = 98
-                
+                // Test scenario 2: Optimized nesting (49 levels)
+                // This creates a structure based on the alternating depth pattern
                 // processValue depths: 0, 2, 4, 6, ..., 96, 98
-                // To reach processValue(98), we need 98/2 = 49 levels of nesting
-                
+                // To reach redactObject depth limit at 99, we need processValue at depth 98
                 let deepObj: any = { inner: 'value' };
-                
-                // Create exactly 49 levels of nesting
                 for (let i = 0; i < 49; i++) {
                     deepObj = { [`level${i}`]: deepObj };
                 }
-                
-                // This should cause:
-                // Level 0: processValue(0) -> redactObject(1)
-                // Level 1: redactObject processes level48 -> processValue(2) -> redactObject(3)
-                // ...
-                // Level 48: processValue(96) -> redactObject(97)
-                // Level 49: redactObject processes level0 -> processValue(98) -> redactObject(99)
-                // redactObject(99) >= 99 -> returns { '[Max Depth Exceeded]': '[Max Depth Exceeded]' }
-                
-                const result = DataRedactor.redactData(deepObj);
-                
-                // Navigate to find the redactObject depth limit
-                let current = result;
-                
-                // Navigate through the structure to find the depth limit
-                for (let i = 48; i >= 0; i--) {
-                    if (current && current[`level${i}`]) {
-                        current = current[`level${i}`];
-                    } else {
-                        break;
-                    }
-                }
-                
-                // At this point, current should be the result of redactObject hitting its depth limit
-                if (current && 
-                    typeof current === 'object' && 
-                    current['[Max Depth Exceeded]'] === '[Max Depth Exceeded]') {
-                    expect(current).toEqual({ '[Max Depth Exceeded]': '[Max Depth Exceeded]' });
-                } else {
-                    // Alternative search - look for it anywhere in the result structure
-                    function findRedactObjectLimit(obj: any, depth = 0): any {
-                        if (depth > 60) return null; // Prevent infinite loops
-                        
-                        if (obj && typeof obj === 'object') {
-                            if (obj['[Max Depth Exceeded]'] === '[Max Depth Exceeded]' && 
-                                Object.keys(obj).length === 1) {
-                                return obj;
-                            }
-                            
-                            for (const value of Object.values(obj)) {
-                                const found = findRedactObjectLimit(value, depth + 1);
-                                if (found) return found;
-                            }
-                        }
-                        return null;
-                    }
-                    
-                    const found = findRedactObjectLimit(result);
-                    expect(found).toEqual({ '[Max Depth Exceeded]': '[Max Depth Exceeded]' });
-                }
+
+                const result2 = DataRedactor.redactData(deepObj);
+                const found2 = findRedactObjectLimit(result2);
+                expect(found2).toEqual({ '[Max Depth Exceeded]': '[Max Depth Exceeded]' });
             });
         });
     });
