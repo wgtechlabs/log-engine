@@ -5,6 +5,7 @@
 
 import { LogFormatter } from '../formatter';
 import { LogLevel } from '../types';
+import { styleData } from '../formatter/data-formatter';
 
 describe('LogFormatter', () => {
   it('should format messages with timestamp and level', () => {
@@ -177,6 +178,52 @@ describe('LogFormatter', () => {
       const { formatData } = require('../formatter/data-formatter');
       const result = formatData(undefined);
       expect(result).toBe('');
+    });
+  });
+
+  describe('styleData function', () => {
+    const mockColors = { data: '\x1b[36m', reset: '\x1b[0m' };
+
+    it('should return empty string for empty dataString', () => {
+      // Test to cover line 45 - empty string case
+      expect(styleData('', mockColors)).toBe('');
+    });
+
+    it('should return empty string for null/undefined dataString', () => {
+      // Test to cover line 45 - falsy values
+      expect(styleData(null as any, mockColors)).toBe('');
+      expect(styleData(undefined as any, mockColors)).toBe('');
+    });
+
+    it('should style non-empty data string correctly', () => {
+      // Test normal case
+      const result = styleData('test data', mockColors);
+      expect(result).toBe(` ${mockColors.data}test data${mockColors.reset}`);
+    });
+  });
+
+  describe('Module exports', () => {
+    it('should export all formatter functions and classes', () => {
+      const formatter = require('../formatter');
+      
+      // Test that all expected exports are available
+      expect(formatter.MessageFormatter).toBeDefined();
+      expect(formatter.LogFormatter).toBeDefined(); // Backward compatibility
+      expect(formatter.colors).toBeDefined();
+      expect(formatter.colorScheme).toBeDefined();
+      expect(formatter.getTimestampComponents).toBeDefined();
+      expect(formatter.formatTimestamp).toBeDefined();
+      expect(formatter.formatData).toBeDefined();
+      expect(formatter.styleData).toBeDefined();
+      
+      // Test that LogFormatter is alias for MessageFormatter
+      expect(formatter.LogFormatter).toBe(formatter.MessageFormatter);
+      
+      // Test that functions are callable
+      expect(typeof formatter.getTimestampComponents).toBe('function');
+      expect(typeof formatter.formatTimestamp).toBe('function');
+      expect(typeof formatter.formatData).toBe('function');
+      expect(typeof formatter.styleData).toBe('function');
     });
   });
 });

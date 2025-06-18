@@ -223,6 +223,37 @@ it('should log LOG level messages regardless of configuration', () => {
       expect(mocks.mockConsoleError).not.toHaveBeenCalled();
     });
   });
+
+  describe('Main module exports', () => {
+    it('should export LogEngine and all types', () => {
+      const main = require('../index');
+      
+      // Test that main exports are available
+      expect(main.LogEngine).toBeDefined();
+      expect(main.LogLevel).toBeDefined();
+      expect(main.LogMode).toBeDefined();
+      
+      // Test that LogEngine has expected methods
+      expect(typeof main.LogEngine.debug).toBe('function');
+      expect(typeof main.LogEngine.info).toBe('function');
+      expect(typeof main.LogEngine.warn).toBe('function');
+      expect(typeof main.LogEngine.error).toBe('function');
+      expect(typeof main.LogEngine.log).toBe('function');
+    });
+
+    it('should test withoutRedaction method', () => {
+      const main = require('../index');
+      const withoutRedaction = main.LogEngine.withoutRedaction();
+      
+      // Test that withoutRedaction returns an object with logging methods
+      expect(withoutRedaction).toBeDefined();
+      expect(typeof withoutRedaction.debug).toBe('function');
+      expect(typeof withoutRedaction.info).toBe('function');
+      expect(typeof withoutRedaction.warn).toBe('function');
+      expect(typeof withoutRedaction.error).toBe('function');
+      expect(typeof withoutRedaction.log).toBe('function');
+    });
+  });
 });
 
 

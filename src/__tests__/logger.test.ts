@@ -5,6 +5,7 @@
 
 import { Logger } from '../logger';
 import { LogLevel, LogMode } from '../types';
+import { LogFilter } from '../logger/filtering';
 import { setupConsoleMocks, restoreConsoleMocks, ConsoleMocks } from './test-utils';
 
 describe('Logger class', () => {
@@ -47,6 +48,18 @@ describe('Logger class', () => {
     expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
       expect.stringContaining('Debug message')
     );
+  });
+
+  it('should return current configuration', () => {
+    // Test the getConfig method
+    const config = logger.getConfig();
+    expect(config).toBeDefined();
+    expect(config.mode).toBeDefined();
+    
+    // Test configuration change is reflected in getConfig
+    logger.configure({ mode: LogMode.WARN });
+    const updatedConfig = logger.getConfig();
+    expect(updatedConfig.mode).toBe(LogMode.WARN);
   });
 
   it('should filter messages based on configured mode', () => {
@@ -229,5 +242,90 @@ describe('Logger class', () => {
         expect.stringContaining('Info message')
       );
     });
+  });
+
+  describe('LogFilter utility functions', () => {
+    it('should return correct severity ranks for all log levels', () => {
+      expect(LogFilter.getSeverityRank(LogLevel.DEBUG)).toBe(0);
+      expect(LogFilter.getSeverityRank(LogLevel.INFO)).toBe(1);
+      expect(LogFilter.getSeverityRank(LogLevel.WARN)).toBe(2);
+      expect(LogFilter.getSeverityRank(LogLevel.ERROR)).toBe(3);
+      expect(LogFilter.getSeverityRank(LogLevel.LOG)).toBe(99);
+    });
+
+    it('should return correct mode thresholds for all log modes', () => {
+      expect(LogFilter.getModeThreshold(LogMode.DEBUG)).toBe(0);
+      expect(LogFilter.getModeThreshold(LogMode.INFO)).toBe(1);
+      expect(LogFilter.getModeThreshold(LogMode.WARN)).toBe(2);
+      expect(LogFilter.getModeThreshold(LogMode.ERROR)).toBe(3);
+      expect(LogFilter.getModeThreshold(LogMode.SILENT)).toBe(99);
+      expect(LogFilter.getModeThreshold(LogMode.OFF)).toBe(100);
+    });
+
+    it('should correctly determine if message should be logged', () => {
+      // Test DEBUG mode - should allow all levels
+      expect(LogFilter.shouldLog(LogLevel.DEBUG, LogMode.DEBUG)).toBe(true);
+      expect(LogFilter.shouldLog(LogLevel.INFO, LogMode.DEBUG)).toBe(true);
+      expect(LogFilter.shouldLog(LogLevel.WARN, LogMode.DEBUG)).toBe(true);
+      expect(LogFilter.shouldLog(LogLevel.ERROR, LogMode.DEBUG)).toBe(true);
+      expect(LogFilter.shouldLog(LogLevel.LOG, LogMode.DEBUG)).toBe(true);
+
+      // Test INFO mode - should filter out DEBUG
+      expect(LogFilter.shouldLog(LogLevel.DEBUG, LogMode.INFO)).toBe(false);
+      expect(LogFilter.shouldLog(LogLevel.INFO, LogMode.INFO)).toBe(true);
+      expect(LogFilter.shouldLog(LogLevel.WARN, LogMode.INFO)).toBe(true);
+      expect(LogFilter.shouldLog(LogLevel.ERROR, LogMode.INFO)).toBe(true);
+      expect(LogFilter.shouldLog(LogLevel.LOG, LogMode.INFO)).toBe(true);
+
+      // Test WARN mode - should filter out DEBUG and INFO
+      expect(LogFilter.shouldLog(LogLevel.DEBUG, LogMode.WARN)).toBe(false);
+      expect(LogFilter.shouldLog(LogLevel.INFO, LogMode.WARN)).toBe(false);
+      expect(LogFilter.shouldLog(LogLevel.WARN, LogMode.WARN)).toBe(true);
+      expect(LogFilter.shouldLog(LogLevel.ERROR, LogMode.WARN)).toBe(true);
+      expect(LogFilter.shouldLog(LogLevel.LOG, LogMode.WARN)).toBe(true);
+
+      // Test ERROR mode - should only allow ERROR and LOG
+      expect(LogFilter.shouldLog(LogLevel.DEBUG, LogMode.ERROR)).toBe(false);
+      expect(LogFilter.shouldLog(LogLevel.INFO, LogMode.ERROR)).toBe(false);
+      expect(LogFilter.shouldLog(LogLevel.WARN, LogMode.ERROR)).toBe(false);
+      expect(LogFilter.shouldLog(LogLevel.ERROR, LogMode.ERROR)).toBe(true);
+      expect(LogFilter.shouldLog(LogLevel.LOG, LogMode.ERROR)).toBe(true);
+
+      // Test SILENT mode - should only allow LOG
+      expect(LogFilter.shouldLog(LogLevel.DEBUG, LogMode.SILENT)).toBe(false);
+      expect(LogFilter.shouldLog(LogLevel.INFO, LogMode.SILENT)).toBe(false);
+      expect(LogFilter.shouldLog(LogLevel.WARN, LogMode.SILENT)).toBe(false);
+      expect(LogFilter.shouldLog(LogLevel.ERROR, LogMode.SILENT)).toBe(false);
+      expect(LogFilter.shouldLog(LogLevel.LOG, LogMode.SILENT)).toBe(true);
+
+      // Test OFF mode - should block everything
+      expect(LogFilter.shouldLog(LogLevel.DEBUG, LogMode.OFF)).toBe(false);
+      expect(LogFilter.shouldLog(LogLevel.INFO, LogMode.OFF)).toBe(false);
+      expect(LogFilter.shouldLog(LogLevel.WARN, LogMode.OFF)).toBe(false);
+      expect(LogFilter.shouldLog(LogLevel.ERROR, LogMode.OFF)).toBe(false);
+      expect(LogFilter.shouldLog(LogLevel.LOG, LogMode.OFF)).toBe(false);
+    });
+  });
+});
+
+describe('Logger module exports', () => {
+  it('should export all logger classes', () => {
+    const logger = require('../logger');
+    
+    // Test that all expected exports are available
+    expect(logger.Logger).toBeDefined();
+    expect(logger.CoreLogger).toBeDefined(); // Backward compatibility
+    expect(logger.LoggerConfigManager).toBeDefined();
+    expect(logger.LogFilter).toBeDefined();
+    expect(logger.EnvironmentDetector).toBeDefined();
+    
+    // Test that CoreLogger is alias for Logger
+    expect(logger.CoreLogger).toBe(logger.Logger);
+    
+    // Test that classes are constructible/callable
+    expect(typeof logger.Logger).toBe('function');
+    expect(typeof logger.LoggerConfigManager).toBe('function');
+    expect(typeof logger.LogFilter).toBe('function');
+    expect(typeof logger.EnvironmentDetector).toBe('function');
   });
 });

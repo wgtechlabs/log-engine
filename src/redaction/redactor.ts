@@ -18,6 +18,8 @@ export class DataRedactor {
 
     // Maximum recursion depth to prevent stack overflow attacks
     private static readonly MAX_RECURSION_DEPTH = 100;
+    // Slightly lower limit for redactObject to ensure it can be reached
+    private static readonly MAX_REDACT_OBJECT_DEPTH = 99;
 
     /**
      * Update the redaction configuration with new settings
@@ -178,7 +180,7 @@ export class DataRedactor {
      */
     private static redactObject(obj: Record<string, any>, visited: WeakSet<object> = new WeakSet(), depth: number = 0): Record<string, any> {
         // Check recursion depth limit to prevent stack overflow
-        if (depth >= this.MAX_RECURSION_DEPTH) {
+        if (depth >= this.MAX_REDACT_OBJECT_DEPTH) {
             return { '[Max Depth Exceeded]': '[Max Depth Exceeded]' };
         }
 

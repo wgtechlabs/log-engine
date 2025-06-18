@@ -4,6 +4,8 @@
  */
 
 import { setupConsoleMocks, restoreConsoleMocks, ConsoleMocks } from './test-utils';
+import { EnvironmentDetector } from '../logger/environment';
+import { LogMode } from '../types';
 
 describe('Environment-based configuration', () => {
   const originalNodeEnv = process.env.NODE_ENV;
@@ -18,6 +20,58 @@ describe('Environment-based configuration', () => {
     // Restore original NODE_ENV and clean up mocks
     process.env.NODE_ENV = originalNodeEnv;
     restoreConsoleMocks(mocks);
+  });
+
+  describe('EnvironmentDetector direct tests', () => {
+    it('should detect test environment correctly', () => {
+      process.env.NODE_ENV = 'test';
+      expect(EnvironmentDetector.isTestEnvironment()).toBe(true);
+      expect(EnvironmentDetector.isDevelopmentEnvironment()).toBe(false);
+      expect(EnvironmentDetector.isProductionEnvironment()).toBe(false);
+    });
+
+    it('should detect development environment correctly', () => {
+      process.env.NODE_ENV = 'development';
+      expect(EnvironmentDetector.isDevelopmentEnvironment()).toBe(true);
+      expect(EnvironmentDetector.isTestEnvironment()).toBe(false);
+      expect(EnvironmentDetector.isProductionEnvironment()).toBe(false);
+    });
+
+    it('should detect production environment correctly', () => {
+      process.env.NODE_ENV = 'production';
+      expect(EnvironmentDetector.isProductionEnvironment()).toBe(true);
+      expect(EnvironmentDetector.isTestEnvironment()).toBe(false);
+      expect(EnvironmentDetector.isDevelopmentEnvironment()).toBe(false);
+    });
+
+    it('should return correct log mode for each environment', () => {
+      process.env.NODE_ENV = 'development';
+      expect(EnvironmentDetector.getEnvironmentMode()).toBe(LogMode.DEBUG);
+
+      process.env.NODE_ENV = 'production';
+      expect(EnvironmentDetector.getEnvironmentMode()).toBe(LogMode.INFO);
+
+      process.env.NODE_ENV = 'staging';
+      expect(EnvironmentDetector.getEnvironmentMode()).toBe(LogMode.WARN);
+
+      process.env.NODE_ENV = 'test';
+      expect(EnvironmentDetector.getEnvironmentMode()).toBe(LogMode.ERROR);
+
+      process.env.NODE_ENV = 'unknown';
+      expect(EnvironmentDetector.getEnvironmentMode()).toBe(LogMode.INFO);
+    });
+
+    it('should handle whitespace in NODE_ENV', () => {
+      process.env.NODE_ENV = '  production  ';
+      expect(EnvironmentDetector.isProductionEnvironment()).toBe(true);
+      expect(EnvironmentDetector.getEnvironmentMode()).toBe(LogMode.INFO);
+    });
+
+    it('should handle case insensitive NODE_ENV', () => {
+      process.env.NODE_ENV = 'PRODUCTION';
+      expect(EnvironmentDetector.isProductionEnvironment()).toBe(true);
+      expect(EnvironmentDetector.getEnvironmentMode()).toBe(LogMode.INFO);
+    });
   });
 
   it('should set INFO mode for production environment', () => {
