@@ -173,9 +173,9 @@ describe('LogFormatter', () => {
 
     it('should handle undefined values in formatData', () => {
       // Test to cover line 102 - undefined returns empty string
-      // We need to access the private method directly to test this specific case
-      const formatDataMethod = (LogFormatter as any).formatData;
-      const result = formatDataMethod(undefined);
+      // Import the formatData function from the new modular structure
+      const { formatData } = require('../formatter/data-formatter');
+      const result = formatData(undefined);
       expect(result).toBe('');
     });
   });

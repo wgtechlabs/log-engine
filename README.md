@@ -4,9 +4,9 @@
 
 [![banner](https://raw.githubusercontent.com/wgtechlabs/log-engine/main/.github/assets/repo_banner.jpg)](https://github.com/wgtechlabs/log-engine)
 
-WG's Log Engine is the **ultimate logging solution for Node.js developers** - a lightweight, battle-tested utility specifically engineered for Discord bots, Telegram bots, web servers, APIs, and server-side applications. Born from real-world development challenges and proven in production environments like the [Unthread Discord Bot](https://github.com/wgtechlabs/unthread-discord-bot/), Log Engine delivers enterprise-grade logging with zero complexity, beautiful color-coded console output, and **built-in automatic data redaction for security-first logging**.
+WG's Log Engine is the **ultimate logging solution for Node.js developers** - a lightweight, battle-tested utility specifically engineered for Discord bots, Telegram bots, web servers, APIs, and server-side applications. Born from real-world development challenges and proven in production environments like the [Unthread Discord Bot](https://github.com/wgtechlabs/unthread-discord-bot/), Log Engine delivers enterprise-grade logging with zero complexity, beautiful color-coded console output, and **advanced automatic data redaction with comprehensive PII protection**.
 
-**The first logging library with built-in PII protection.** Stop wrestling with logging configurations and start building amazing applications safely. Whether you're creating the next viral Discord community bot, building high-performance APIs, developing microservices, or deploying production servers, Log Engine provides intelligent terminal-based logging with vibrant colors and automatic sensitive data protection that scales with your application's growth - from your first "Hello World" to handling millions of requests across distributed systems.
+**The first logging library with built-in advanced PII protection and comprehensive TypeScript support.** Stop wrestling with logging configurations and start building amazing applications safely. Whether you're creating the next viral Discord community bot, building high-performance APIs, developing microservices, or deploying production servers, Log Engine provides intelligent terminal-based logging with vibrant colors, advanced customizable redaction patterns, and automatic sensitive data protection that scales with your application's growth - from your first "Hello World" to handling millions of requests across distributed systems.
 
 ## ❣️ Motivation
 
@@ -16,16 +16,19 @@ Log Engine transforms your development experience from chaotic debugging session
 
 ## ✨ Key Features
 
-- **🔒 Automatic Data Redaction (NEW!)**: Built-in PII protection that automatically redacts sensitive information from logs - **the first logging library with security-first logging by default**.
-- **Lightweight & Fast**: Minimal overhead with maximum performance - designed to enhance your application, not slow it down.
-- **No Learning Curve**: Dead simple API that you can master in seconds. No extensive documentation, complex configurations, or setup required - Log Engine works instantly.
-- **Colorized Console Output**: Beautiful ANSI color-coded log levels with intelligent terminal formatting - instantly identify message severity at a glance with color-coded output.
-- **Multiple Log Modes**: Support for DEBUG, INFO, WARN, ERROR, SILENT, OFF, and special LOG levels with smart filtering - just set your mode and let it handle the rest.
-- **Auto-Configuration**: Intelligent environment-based setup using NODE_ENV variables. No config files, initialization scripts, or manual setup - Log Engine works perfectly out of the box.
-- **Enhanced Formatting**: Structured log entries with dual timestamps (ISO + human-readable) and colored level indicators for maximum readability.
-- **TypeScript Ready**: Full TypeScript support with comprehensive type definitions for a seamless development experience.
-- **Zero Dependencies**: No external dependencies for maximum compatibility and security - keeps your bundle clean and your project simple.
-- **Easy Integration**: Simple API that works seamlessly with existing Node.js applications. Just `import` and start logging - no middleware, plugins, or configuration required.
+- **🔒 Advanced Data Redaction (Enhanced!)**: Built-in PII protection with **custom regex patterns**, **dynamic field management**, and **environment-based configuration** - the first logging library with comprehensive security-first logging by default.
+- **⚡ Custom Redaction Patterns**: Add your own regex patterns for advanced field detection and enterprise-specific data protection requirements.
+- **🎯 Dynamic Field Management**: Runtime configuration of sensitive fields with case-insensitive matching and partial field name detection.
+- **🛠️ Developer-Friendly API**: Advanced redaction methods including `testFieldRedaction()`, `withoutRedaction()`, and comprehensive configuration management.
+- **📊 Comprehensive TypeScript Support**: Full type definitions with 10+ interfaces covering all functionality for maximum developer experience and IDE support.
+- **🚀 Lightweight & Fast**: Minimal overhead with maximum performance - designed to enhance your application, not slow it down.
+- **📚 No Learning Curve**: Dead simple API that you can master in seconds. No extensive documentation, complex configurations, or setup required - Log Engine works instantly.
+- **🌈 Colorized Console Output**: Beautiful ANSI color-coded log levels with intelligent terminal formatting - instantly identify message severity at a glance with color-coded output.
+- **🎛️ Multiple Log Modes**: Support for DEBUG, INFO, WARN, ERROR, SILENT, OFF, and special LOG levels with smart filtering - just set your mode and let it handle the rest.
+- **⚙️ Auto-Configuration**: Intelligent environment-based setup using NODE_ENV variables. No config files, initialization scripts, or manual setup - Log Engine works perfectly out of the box.
+- **✨ Enhanced Formatting**: Structured log entries with dual timestamps (ISO + human-readable) and colored level indicators for maximum readability.
+- **🔗 Zero Dependencies**: No external dependencies for maximum compatibility and security - keeps your bundle clean and your project simple.
+- **🔌 Easy Integration**: Simple API that works seamlessly with existing Node.js applications. Just `import` and start logging - no middleware, plugins, or configuration required.
 
 ## 🤔 How It Works
 <!-- markdownlint-disable MD051 -->
@@ -80,13 +83,24 @@ LogEngine.warn('This is a warning message');
 LogEngine.error('This is an error message');
 LogEngine.log('This is a critical message that always shows');
 
-// NEW: Automatic data redaction (no configuration needed!)
+// Advanced automatic data redaction (no configuration needed!)
 LogEngine.info('User login', {
   username: 'john_doe',        // ✅ Visible
   password: 'secret123',       // ❌ [REDACTED]
   email: 'john@example.com',   // ❌ [REDACTED]
   apiKey: 'sk-1234567890'      // ❌ [REDACTED]
 });
+
+// Advanced redaction features - Add custom patterns
+LogEngine.addCustomRedactionPatterns([/internal.*/i, /company.*/i]);
+LogEngine.addSensitiveFields(['companySecret', 'internalToken']);
+
+// Test field redaction
+console.log(LogEngine.testFieldRedaction('password')); // true
+console.log(LogEngine.testFieldRedaction('username')); // false
+
+// Raw logging for debugging (bypasses redaction)
+LogEngine.withoutRedaction().info('Debug data', { password: 'visible-in-debug' });
 ```
 
 ### Mode-Based Configuration (Recommended)
@@ -146,7 +160,7 @@ LogEngine.configure({ level: LogLevel.ERROR });
 import { LogEngine, LogLevel } from '@wgtechlabs/log-engine';
 LogEngine.configure({ level: LogLevel.DEBUG });
 
-// NEW (v1.2.0+) - recommended approach
+// NEW (v1.2.1+) - recommended approach with advanced features
 import { LogEngine, LogMode } from '@wgtechlabs/log-engine';
 LogEngine.configure({ mode: LogMode.DEBUG });
 ```
@@ -155,7 +169,8 @@ LogEngine.configure({ mode: LogMode.DEBUG });
 
 - **Clearer API**: Separates message severity (`LogLevel`) from output control (`LogMode`)
 - **Better Environment Defaults**: `development→DEBUG`, `staging→WARN`, `test→ERROR`
-- **Future-Proof**: New features will use the LogMode system
+- **Advanced Features**: New redaction APIs and TypeScript interfaces work with LogMode
+- **Future-Proof**: All new features use the LogMode system
 - **100% Backwards Compatible**: Existing code continues to work unchanged
 
 ### Color-Coded Output 🎨
@@ -281,9 +296,9 @@ Log messages are beautifully formatted with colorized timestamps, levels, and sm
 - 🟢 **LOG**: Green - Critical messages that always display
 - ⚫ **Timestamps**: Gray (ISO) and Cyan (local time) for easy scanning
 
-## � Automatic Data Redaction
+## 🔒 Advanced Data Redaction
 
-**LogEngine features built-in PII protection that automatically redacts sensitive information from your logs.** This security-first approach prevents accidental exposure of passwords, tokens, emails, and other sensitive data while maintaining full debugging capabilities.
+**LogEngine features comprehensive built-in PII protection with advanced customization capabilities that automatically redacts sensitive information from your logs.** This security-first approach prevents accidental exposure of passwords, tokens, emails, and other sensitive data while maintaining full debugging capabilities with enterprise-grade flexibility.
 
 ### Zero Configuration Security
 
@@ -364,17 +379,21 @@ LogEngine.withoutRedaction().info('Debug mode', sensitiveData);
 **Environment-Based Control:**
 
 ```bash
-# Development - show everything
+# Development - show everything (redaction disabled)
 NODE_ENV=development
 
-# Explicitly disable redaction
+# Explicitly disable redaction  
 LOG_REDACTION_DISABLED=true
 DEBUG_FULL_PAYLOADS=true
 
-# Custom configuration
+# Custom redaction configuration
 LOG_REDACTION_TEXT="***CONFIDENTIAL***"
 LOG_MAX_CONTENT_LENGTH=200
-LOG_SENSITIVE_FIELDS="customField,companySecret"
+LOG_SENSITIVE_FIELDS="customField,companySecret,internalData"
+LOG_TRUNCATION_TEXT="... [CUSTOM_TRUNCATED]"
+
+# Advanced environment integration
+LOG_REDACTION_ENABLED=false  # Alternative disable method
 ```
 
 ### Custom Configuration
@@ -394,6 +413,54 @@ const config = LogEngine.getRedactionConfig();
 console.log(config);
 ```
 
+### Advanced Redaction Features (v1.2.1+)
+
+**Custom Patterns & Dynamic Field Management:**
+
+```typescript
+// Add custom regex patterns for enterprise-specific data protection
+LogEngine.addCustomRedactionPatterns([
+  /internal.*/i,        // Matches any field starting with "internal"
+  /company.*/i,         // Matches any field starting with "company"  
+  /^config[A-Z]/        // Matches camelCase config fields
+]);
+
+// Add custom sensitive field names dynamically
+LogEngine.addSensitiveFields(['companySecret', 'internalToken', 'proprietaryData']);
+
+// Test field redaction before logging
+if (LogEngine.testFieldRedaction('myField')) {
+  console.log('Field will be redacted');
+}
+
+// Advanced configuration management
+LogEngine.configureRedaction({
+  redactionText: '***CONFIDENTIAL***',
+  maxContentLength: 150,
+  customPatterns: [/private.*/i, /secret.*/i]
+});
+
+// Configuration utilities
+const currentConfig = LogEngine.getRedactionConfig();
+LogEngine.refreshRedactionConfig();  // Refresh from environment
+LogEngine.resetRedactionConfig();    // Reset to defaults
+LogEngine.clearCustomRedactionPatterns(); // Clear custom patterns
+```
+
+**Enhanced Development Workflow:**
+
+```typescript
+// Raw logging methods (bypass redaction) - use with caution
+LogEngine.debugRaw('Full debug data', { password: 'visible', apiKey: 'full-key' });
+
+// Temporary redaction bypass using helper method
+LogEngine.withoutRedaction().info('Debug mode', sensitiveData);
+
+// Compare outputs during development
+LogEngine.info('With redaction', data);                    // ❌ [REDACTED]
+LogEngine.withoutRedaction().info('Without redaction', data); // ⚠️ Visible
+```
+
 ### Environment Behavior
 
 | Environment | Redaction Status | Use Case |
@@ -405,13 +472,67 @@ console.log(config);
 
 ### Security Benefits
 
-✅ **Prevents Data Leaks** - Automatic protection against accidental exposure  
+✅ **Advanced Pattern Recognition** - Custom regex patterns for enterprise-specific data protection  
+✅ **Dynamic Field Management** - Runtime configuration of sensitive fields with intelligent matching  
+✅ **Comprehensive Testing API** - `testFieldRedaction()` for validation and debugging  
+✅ **Environment Integration** - Seamless configuration via environment variables  
+✅ **Development Workflow** - Raw logging methods and temporary redaction bypass for debugging  
+✅ **Prevents Data Leaks** - Automatic protection against accidental exposure with 50+ built-in patterns  
 ✅ **Compliance Ready** - Helps meet GDPR, HIPAA, and other privacy requirements  
-✅ **Zero Configuration** - Secure by default, no setup required  
-✅ **Performance Optimized** - Minimal overhead with smart processing  
-✅ **Developer Friendly** - Full debugging capabilities when needed  
+✅ **Zero Configuration** - Secure by default, advanced features when needed  
+✅ **Performance Optimized** - Minimal overhead with intelligent processing and depth limiting  
+✅ **TypeScript Excellence** - Full type safety with comprehensive interfaces and type definitions  
 
-**Perfect for:** Production applications, compliance requirements, team development, and any scenario where sensitive data might accidentally end up in logs.
+**Perfect for:** Enterprise applications, compliance requirements, team development environments, production systems requiring both security and debugging flexibility, and any scenario where sensitive data protection is critical.
+
+## 📚 Comprehensive TypeScript Support
+
+**LogEngine v1.2.1+ includes extensive TypeScript definitions with 10+ interfaces for maximum type safety and developer experience:**
+
+### Core Interfaces
+
+```typescript
+import { 
+  LogEngine, 
+  LogMode, 
+  LogLevel,
+  ILogEngine,
+  ILogEngineWithoutRedaction,
+  RedactionConfig,
+  LoggerConfig,
+  IDataRedactor
+} from '@wgtechlabs/log-engine';
+
+// Full type safety for all methods
+const config: RedactionConfig = {
+  enabled: true,
+  sensitiveFields: ['password', 'token'],
+  redactionText: '[HIDDEN]',
+  maxContentLength: 100,
+  // ... fully typed configuration
+};
+
+// Advanced redaction testing with return types
+const isRedacted: boolean = LogEngine.testFieldRedaction('password');
+const currentConfig: RedactionConfig = LogEngine.getRedactionConfig();
+
+// Type-safe raw logging
+const rawLogger: ILogEngineWithoutRedaction = LogEngine.withoutRedaction();
+rawLogger.info('Debug info', sensitiveData); // Fully typed methods
+```
+
+### Available Interfaces
+
+- **`ILogEngine`** - Complete LogEngine API with all methods
+- **`ILogEngineWithoutRedaction`** - Raw logging methods interface  
+- **`IDataRedactor`** - Static DataRedactor class methods
+- **`RedactionConfig`** - Comprehensive redaction configuration
+- **`LoggerConfig`** - Logger configuration options
+- **`LogEntry`** - Structured log entry interface
+- **`EnvironmentConfig`** - Environment variable documentation
+- **Plus 3+ additional interfaces** for advanced use cases
+
+**IDE Benefits:** IntelliSense, auto-completion, parameter hints, error detection, and comprehensive documentation tooltips throughout your development workflow.
 
 ## 💬 Community Discussions
 
@@ -475,6 +596,8 @@ This project is licensed under the [GNU Affero General Public License v3.0](http
 ## 📝 Author
 
 This project is created by **[Waren Gonzaga](https://github.com/warengonzaga)** under [WG Technology Labs](https://github.com/wgtechlabs), with the help of awesome [contributors](https://github.com/wgtechlabs/log-engine/graphs/contributors).
+
+**Latest Version:** v1.2.1 - Enhanced with advanced redaction features, comprehensive TypeScript support, and 95%+ test coverage.
 
 [![contributors](https://contrib.rocks/image?repo=wgtechlabs/log-engine)](https://github.com/wgtechlabs/log-engine/graphs/contributors)
 

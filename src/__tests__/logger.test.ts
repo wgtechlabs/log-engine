@@ -214,10 +214,10 @@ describe('Logger class', () => {
 
   describe('Edge cases and internal logic', () => {
     it('should handle undefined mode configuration', () => {
-      // Test to cover line 134 in logger.ts - undefined mode fallback
+      // Test to cover undefined mode fallback behavior
       const freshLogger = new Logger();
-      // Manually set the config mode to undefined to test fallback
-      (freshLogger as any).config = { mode: undefined };
+      // Configure with undefined mode to test fallback to INFO
+      freshLogger.configure({ mode: undefined as any });
       
       // Should fall back to INFO mode behavior
       freshLogger.debug('Debug message');

@@ -1,6 +1,23 @@
 /**
  * Main LogEngine module - provides a comprehensive logging solution
  * with mode-based filtering, colorized output, and automatic data redaction
+ * 
+ * Features a modular architecture with separate modules for:
+ * - Logger: Core logging functionality with environment-based configuration
+ * - Formatter: Message formatting with ANSI colors and timestamps 
+ * - Redaction: Automatic sensitive data protection with customizable patterns
+ * 
+ * @example
+ * ```typescript
+ * import { LogEngine, LogMode } from '@wgtechlabs/log-engine';
+ * 
+ * // Configure logging mode
+ * LogEngine.configure({ mode: LogMode.DEBUG });
+ * 
+ * // Log with automatic redaction
+ * LogEngine.info('User login', { username: 'john', password: 'secret123' });
+ * // Output: [2025-06-18T...][3:45PM][INFO]: User login { username: 'john', password: '[REDACTED]' }
+ * ```
  */
 
 import { Logger } from './logger';
