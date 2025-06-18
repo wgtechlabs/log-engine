@@ -22,7 +22,7 @@ export class EnvironmentDetector {
      * @returns LogMode appropriate for current environment
      */
     static getEnvironmentMode(): LogMode {
-        const nodeEnv = this.getNormalizedNodeEnv();
+        const nodeEnv = EnvironmentDetector.getNormalizedNodeEnv();
         
         switch (nodeEnv) {
             case 'development':
@@ -43,7 +43,7 @@ export class EnvironmentDetector {
      * @returns true if NODE_ENV is 'test'
      */
     static isTestEnvironment(): boolean {
-        return this.getNormalizedNodeEnv() === 'test';
+        return EnvironmentDetector.getNormalizedNodeEnv() === 'test';
     }
 
     /**
@@ -51,7 +51,7 @@ export class EnvironmentDetector {
      * @returns true if NODE_ENV is 'development'
      */
     static isDevelopmentEnvironment(): boolean {
-        return this.getNormalizedNodeEnv() === 'development';
+        return EnvironmentDetector.getNormalizedNodeEnv() === 'development';
     }
 
     /**
@@ -59,6 +59,6 @@ export class EnvironmentDetector {
      * @returns true if NODE_ENV is 'production'
      */
     static isProductionEnvironment(): boolean {
-        return this.getNormalizedNodeEnv() === 'production';
+        return EnvironmentDetector.getNormalizedNodeEnv() === 'production';
     }
 }
