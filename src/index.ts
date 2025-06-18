@@ -1,123 +1,220 @@
 /**
- * Main entry point for the Log Engine library
- * Provides a simple, configurable logging interface with environment-based auto-configuration
+ * Main LogEngine module - provides a comprehensive logging solution
+ * with mode-based filtering, colorized output, and automatic data redaction
+ * 
+ * Features a modular architecture with separate modules for:
+ * - Logger: Core logging functionality with environment-based configuration
+ * - Formatter: Message formatting with ANSI colors and timestamps 
+ * - Redaction: Automatic sensitive data protection with customizable patterns
+ * 
+ * @example
+ * ```typescript
+ * import { LogEngine, LogMode } from '@wgtechlabs/log-engine';
+ * 
+ * // Configure logging mode
+ * LogEngine.configure({ mode: LogMode.DEBUG });
+ * 
+ * // Log with automatic redaction
+ * LogEngine.info('User login', { username: 'john', password: 'secret123' });
+ * // Output: [2025-06-18T...][3:45PM][INFO]: User login { username: 'john', password: '[REDACTED]' }
+ * ```
  */
 
-import { Logger as LoggerClass } from './logger';
-import { LogMode, LoggerConfig } from './types';
+import { Logger } from './logger';
+import { LogMode } from './types';
+import type { LoggerConfig, RedactionConfig } from './types';
+import { DataRedactor, defaultRedactionConfig } from './redaction';
 
-// Create singleton logger instance
-const logger = new LoggerClass();
-
-/**
- * Determines the appropriate default log mode based on NODE_ENV
- * - development: DEBUG (most verbose - shows all messages)
- * - production: INFO (balanced - shows info, warn, error, log)
- * - staging: WARN (focused - shows warn, error, log only)
- * - test: ERROR (minimal - shows error and log only)
- * - default: INFO (balanced logging for other environments)
- * @returns The appropriate LogMode for the current environment
- */
-const getDefaultLogMode = (): LogMode => {
-    const nodeEnv = process.env.NODE_ENV;
-    switch (nodeEnv) {
-        case 'development':
-            return LogMode.DEBUG;
-        case 'production':
-            return LogMode.INFO;
-        case 'staging':
-            return LogMode.WARN;
-        case 'test':
-            return LogMode.ERROR;
-        default:
-            return LogMode.INFO;
-    }
-};
-
-// Initialize logger with environment-appropriate default mode
-logger.configure({ mode: getDefaultLogMode() });
+// Create a singleton logger instance
+const logger = new Logger();
 
 /**
- * Main LogEngine API - provides all logging functionality with a clean interface
- * Auto-configured based on NODE_ENV, but can be reconfigured at runtime
+ * LogEngine - The main interface for logging operations
+ * Provides a simple, intuitive API for all logging needs with security-first design
  */
 export const LogEngine = {
     /**
-     * Configure the logger with custom settings
-     * @param config - Partial configuration object containing level and/or environment
+     * Configure the logger with new settings
+     * @param config - Configuration object containing logger settings
      * @example
      * ```typescript
-     * LogEngine.configure({ level: LogLevel.DEBUG });
-     * LogEngine.configure({ level: LogLevel.WARN, environment: 'staging' });
+     * LogEngine.configure({ mode: LogMode.PRODUCTION });
      * ```
      */
     configure: (config: Partial<LoggerConfig>) => logger.configure(config),
 
+    // Standard logging methods with automatic redaction
     /**
-     * Log a debug message (lowest priority)
-     * Only shown when log level is DEBUG or lower
-     * Useful for detailed diagnostic information during development
+     * Log a debug message with automatic data redaction
+     * Only shown in DEVELOPMENT mode
      * @param message - The debug message to log
+     * @param data - Optional data object to log (sensitive data will be redacted)
      * @example
      * ```typescript
-     * LogEngine.debug('User authentication flow started');
-     * LogEngine.debug(`Processing ${items.length} items`);
+     * LogEngine.debug('Processing user data', { userId: 123, email: 'user@example.com' });
      * ```
      */
-    debug: (message: string) => logger.debug(message),
+    debug: (message: string, data?: any) => logger.debug(message, data),
 
     /**
-     * Log an informational message
-     * General information about application flow and state
-     * Shown when log level is INFO or lower
+     * Log an info message with automatic data redaction
+     * Shown in DEVELOPMENT and PRODUCTION modes
      * @param message - The info message to log
+     * @param data - Optional data object to log (sensitive data will be redacted)
      * @example
      * ```typescript
-     * LogEngine.info('Application started successfully');
-     * LogEngine.info('User logged in: john@example.com');
+     * LogEngine.info('User login successful', { username: 'john' });
      * ```
      */
-    info: (message: string) => logger.info(message),
+    info: (message: string, data?: any) => logger.info(message, data),
 
     /**
-     * Log a warning message
-     * Indicates potential issues that don't prevent operation
-     * Shown when log level is WARN or lower
+     * Log a warning message with automatic data redaction
+     * Shown in DEVELOPMENT and PRODUCTION modes
      * @param message - The warning message to log
+     * @param data - Optional data object to log (sensitive data will be redacted)
      * @example
      * ```typescript
-     * LogEngine.warn('API rate limit approaching');
-     * LogEngine.warn('Deprecated function called');
+     * LogEngine.warn('API rate limit approaching', { requestsRemaining: 10 });
      * ```
      */
-    warn: (message: string) => logger.warn(message),
+    warn: (message: string, data?: any) => logger.warn(message, data),
 
     /**
-     * Log an error message (highest priority)
-     * Indicates serious problems that need attention
-     * Always shown unless log level is SILENT
+     * Log an error message with automatic data redaction
+     * Shown in DEVELOPMENT and PRODUCTION modes
      * @param message - The error message to log
+     * @param data - Optional data object to log (sensitive data will be redacted)
      * @example
      * ```typescript
-     * LogEngine.error('Database connection failed');
-     * LogEngine.error('Authentication token expired');
+     * LogEngine.error('Database connection failed', { host: 'localhost', port: 5432 });
      * ```
      */
-    error: (message: string) => logger.error(message),
+    error: (message: string, data?: any) => logger.error(message, data),
 
     /**
-     * Log a critical message that always outputs
-     * Essential messages that should always be visible regardless of log mode
-     * Always shown no matter what log mode is configured (except OFF mode)
-     * @param message - The critical log message to log
+     * Log a critical message with automatic data redaction
+     * Always shown regardless of mode (except OFF)
+     * @param message - The critical log message to log 
+     * @param data - Optional data object to log (sensitive data will be redacted)
      * @example
      * ```typescript
-     * LogEngine.log('Application starting up');
-     * LogEngine.log('Server listening on port 3000');
-     * LogEngine.log('Graceful shutdown initiated');
+     * LogEngine.log('Application starting', { version: '1.0.0' });
      * ```
      */
-    log: (message: string) => logger.log(message)
+    log: (message: string, data?: any) => logger.log(message, data),
+
+    // Raw methods that bypass redaction (use with caution)
+    /**
+     * Log a debug message without redaction (use with caution)
+     * Bypasses automatic data redaction for debugging purposes
+     * @param message - The debug message to log
+     * @param data - Optional data object to log (no redaction applied)
+     */
+    debugRaw: (message: string, data?: any) => logger.debugRaw(message, data),
+
+    /**
+     * Log an info message without redaction (use with caution)
+     * Bypasses automatic data redaction for debugging purposes
+     * @param message - The info message to log
+     * @param data - Optional data object to log (no redaction applied)
+     */
+    infoRaw: (message: string, data?: any) => logger.infoRaw(message, data),
+
+    /**
+     * Log a warning message without redaction (use with caution)
+     * Bypasses automatic data redaction for debugging purposes
+     * @param message - The warning message to log
+     * @param data - Optional data object to log (no redaction applied)
+     */
+    warnRaw: (message: string, data?: any) => logger.warnRaw(message, data),
+
+    /**
+     * Log an error message without redaction (use with caution)
+     * Bypasses automatic data redaction for debugging purposes
+     * @param message - The error message to log
+     * @param data - Optional data object to log (no redaction applied)
+     */
+    errorRaw: (message: string, data?: any) => logger.errorRaw(message, data),
+
+    /**
+     * Log a critical message without redaction (use with caution)
+     * Bypasses automatic data redaction for debugging purposes
+     * @param message - The critical log message to log
+     * @param data - Optional data object to log (no redaction applied)
+     */
+    logRaw: (message: string, data?: any) => logger.logRaw(message, data),
+
+    // Redaction configuration methods
+    /**
+     * Configure data redaction settings
+     * @param config - Partial redaction configuration to apply
+     */
+    configureRedaction: (config: Partial<RedactionConfig>) => DataRedactor.updateConfig(config),
+
+    /**
+     * Refresh redaction configuration from environment variables
+     * Useful for picking up runtime environment changes
+     */
+    refreshRedactionConfig: () => DataRedactor.refreshConfig(),
+
+    /**
+     * Reset redaction configuration to defaults
+     */
+    resetRedactionConfig: () => DataRedactor.updateConfig(defaultRedactionConfig),
+
+    /**
+     * Get current redaction configuration
+     * @returns Current redaction configuration
+     */
+    getRedactionConfig: () => DataRedactor.getConfig(),
+
+    // Advanced redaction methods (Phase 3)
+    /**
+     * Add custom regex patterns for advanced field detection
+     * @param patterns - Array of regex patterns to add
+     */
+    addCustomRedactionPatterns: (patterns: RegExp[]) => DataRedactor.addCustomPatterns(patterns),
+
+    /**
+     * Clear all custom redaction patterns
+     */
+    clearCustomRedactionPatterns: () => DataRedactor.clearCustomPatterns(),
+
+    /**
+     * Add custom sensitive field names to the existing list
+     * @param fields - Array of field names to add
+     */
+    addSensitiveFields: (fields: string[]) => DataRedactor.addSensitiveFields(fields),
+
+    /**
+     * Test if a field name would be redacted with current configuration
+     * @param fieldName - Field name to test
+     * @returns true if field would be redacted, false otherwise
+     */
+    testFieldRedaction: (fieldName: string) => DataRedactor.testFieldRedaction(fieldName),
+
+    /**
+     * Temporarily disable redaction for a specific logging call
+     * @returns LogEngine instance with redaction bypassed
+     * @example
+     * ```typescript
+     * LogEngine.withoutRedaction().info('Debug data', sensitiveObject);
+     * ```
+     */
+    withoutRedaction: () => ({
+        debug: (message: string, data?: any) => logger.debugRaw(message, data),
+        info: (message: string, data?: any) => logger.infoRaw(message, data),
+        warn: (message: string, data?: any) => logger.warnRaw(message, data),
+        error: (message: string, data?: any) => logger.errorRaw(message, data),
+        log: (message: string, data?: any) => logger.logRaw(message, data)
+    })
 };
 
-export { LogLevel, LogMode, LoggerConfig } from './types';
+// Re-export types and utilities for external use
+export { LogMode, LogLevel } from './types';
+export type { LoggerConfig, RedactionConfig } from './types';
+export { DataRedactor, defaultRedactionConfig, RedactionController } from './redaction';
+
+// Default export for convenience
+export default LogEngine;

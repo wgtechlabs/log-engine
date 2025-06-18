@@ -5,6 +5,7 @@
 
 import { LogFormatter } from '../formatter';
 import { LogLevel } from '../types';
+import { styleData } from '../formatter/data-formatter';
 
 describe('LogFormatter', () => {
   it('should format messages with timestamp and level', () => {
@@ -94,8 +95,9 @@ describe('LogFormatter', () => {
       expect(formatted).toContain(message);
       
       // Should contain timestamp components
-      expect(formatted).toMatch(/\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]/); // ISO timestamp
-      expect(formatted).toMatch(/\[\d{1,2}:\d{2}[AP]M\]/); // Local time
+      const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+      expect(cleanFormatted).toMatch(/\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]/); // ISO timestamp
+      expect(cleanFormatted).toMatch(/\[\d{1,2}:\d{2}[AP]M\]/); // Local time
     });
 
     it('should format system messages with colors', () => {
@@ -120,6 +122,126 @@ describe('LogFormatter', () => {
       // Should follow the format: [TIMESTAMP][TIME][LOG ENGINE]: message
       const formatPattern = /\[.*?\]\[.*?\]\[LOG ENGINE\]: Test message/;
       expect(cleanFormatted).toMatch(formatPattern);
+    });
+  });
+
+  describe('formatData edge cases', () => {
+    it('should handle null values', () => {
+      // Test null handling (covers line 98)
+      const formatted = LogFormatter.format(LogLevel.INFO, 'Message', null);
+      expect(formatted).toContain('null');
+    });
+
+    it('should handle undefined values', () => {
+      // Test undefined handling (covers line 102)
+      const formatted = LogFormatter.format(LogLevel.INFO, 'Message', undefined);
+      expect(formatted).toContain('Message');
+      // The formatted message should not contain 'undefined'
+      // Remove ANSI color codes before pattern matching
+      const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+      expect(cleanFormatted).toMatch(/Message$/);
+    });
+
+    it('should handle number values', () => {
+      // Test number handling (covers line 106)
+      const formatted = LogFormatter.format(LogLevel.INFO, 'Message', 42);
+      expect(formatted).toContain('42');
+    });
+
+    it('should handle boolean values', () => {
+      // Test boolean handling (covers line 110)
+      const formatted = LogFormatter.format(LogLevel.INFO, 'Message', true);
+      expect(formatted).toContain('true');
+      
+      const formatted2 = LogFormatter.format(LogLevel.INFO, 'Message', false);
+      expect(formatted2).toContain('false');
+    });
+
+    it('should handle objects that cannot be stringified', () => {
+      // Test JSON.stringify error handling (covers line 117)
+      const circularObj: any = {};
+      circularObj.self = circularObj; // Create circular reference
+      
+      const formatted = LogFormatter.format(LogLevel.INFO, 'Message', circularObj);
+      expect(formatted).toContain('[Object]');
+    });
+
+    it('should handle string data types', () => {
+      // Test to cover line 106 - string handling
+      const formatted = LogFormatter.format(LogLevel.INFO, 'Message', 'test string');
+      expect(formatted).toContain('test string');
+    });
+
+    it('should handle undefined values in formatData', () => {
+      // Test to cover line 102 - undefined returns empty string
+      // Import the formatData function from the new modular structure
+      const { formatData } = require('../formatter/data-formatter');
+      const result = formatData(undefined);
+      expect(result).toBe('');
+    });
+
+    it('should handle Symbol values in formatData', () => {
+      // Test to verify Symbol handling - should return string representation
+      const { formatData } = require('../formatter/data-formatter');
+      const testSymbol = Symbol('test');
+      const result = formatData(testSymbol);
+      expect(typeof result).toBe('string');
+      expect(result).toBe('Symbol(test)');
+    });
+
+    it('should handle Symbol values without description in formatData', () => {
+      // Test to verify Symbol handling for symbols without description
+      const { formatData } = require('../formatter/data-formatter');
+      const testSymbol = Symbol();
+      const result = formatData(testSymbol);
+      expect(typeof result).toBe('string');
+      expect(result).toBe('Symbol()');
+    });
+  });
+
+  describe('styleData function', () => {
+    const mockColors = { data: '\x1b[36m', reset: '\x1b[0m' };
+
+    it('should return empty string for empty dataString', () => {
+      // Test to cover line 45 - empty string case
+      expect(styleData('', mockColors)).toBe('');
+    });
+
+    it('should return empty string for null/undefined dataString', () => {
+      // Test to cover line 45 - falsy values
+      expect(styleData(null as any, mockColors)).toBe('');
+      expect(styleData(undefined as any, mockColors)).toBe('');
+    });
+
+    it('should style non-empty data string correctly', () => {
+      // Test normal case
+      const result = styleData('test data', mockColors);
+      expect(result).toBe(` ${mockColors.data}test data${mockColors.reset}`);
+    });
+  });
+
+  describe('Module exports', () => {
+    it('should export all formatter functions and classes', () => {
+      const formatter = require('../formatter');
+      
+      // Test that all expected exports are available
+      expect(formatter.MessageFormatter).toBeDefined();
+      expect(formatter.LogFormatter).toBeDefined(); // Backward compatibility
+      expect(formatter.colors).toBeDefined();
+      expect(formatter.colorScheme).toBeDefined();
+      expect(formatter.getTimestampComponents).toBeDefined();
+      expect(formatter.formatTimestamp).toBeDefined();
+      expect(formatter.formatData).toBeDefined();
+      expect(formatter.styleData).toBeDefined();
+      
+      // Test that LogFormatter is alias for MessageFormatter
+      expect(formatter.LogFormatter).toBe(formatter.MessageFormatter);
+      
+      // Test that functions are callable
+      expect(typeof formatter.getTimestampComponents).toBe('function');
+      expect(typeof formatter.formatTimestamp).toBe('function');
+      expect(typeof formatter.formatData).toBe('function');
+      expect(typeof formatter.styleData).toBe('function');
     });
   });
 });
