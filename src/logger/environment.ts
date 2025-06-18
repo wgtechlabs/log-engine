@@ -14,7 +14,8 @@ export class EnvironmentDetector {
      * @returns LogMode appropriate for current environment
      */
     static getEnvironmentMode(): LogMode {
-        const nodeEnv = process.env.NODE_ENV;
+        // Normalize NODE_ENV by trimming whitespace and converting to lowercase
+        const nodeEnv = (process.env.NODE_ENV || '').trim().toLowerCase();
         
         switch (nodeEnv) {
             case 'development':
