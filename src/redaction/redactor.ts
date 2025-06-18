@@ -33,10 +33,15 @@ export class DataRedactor {
 
     /**
      * Get the current redaction configuration
-     * @returns Current redaction configuration
+     * @returns Deep copy of current redaction configuration
      */
     static getConfig(): RedactionConfig {
-        return { ...this.config };
+        return {
+            ...this.config,
+            sensitiveFields: [...this.config.sensitiveFields],
+            contentFields: [...this.config.contentFields],
+            customPatterns: this.config.customPatterns ? [...this.config.customPatterns] : undefined
+        };
     }
 
     /**
