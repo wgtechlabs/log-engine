@@ -49,20 +49,24 @@ export class LoggerConfigManager {
      * @param config - Configuration containing legacy level property
      */
     private handleLegacyLevelConfig(config: Partial<LoggerConfig>): void {
-        // Only show deprecation warning in non-test environments
-        if (!EnvironmentDetector.isTestEnvironment()) {
-            this.createDeprecationWarning();
-        }
-        
-        // Map legacy level values to new LogMode values
+        // Map legacy level values to new LogMode values and validate first
         const levelValue = config.level as number;
         const mappedMode = this.mapLevelToMode(levelValue);
         
+        // Fail fast if the level value is invalid
         if (mappedMode === undefined) {
             throw new Error(`Invalid LogLevel value: ${config.level}. Valid values are: DEBUG(0), INFO(1), WARN(2), ERROR(3), LOG(99), or use LogMode instead.`);
         }
         
-        this.config = { ...this.config, mode: mappedMode };
+        // Only show deprecation warning after confirming the level is valid and in non-test environments
+        if (!EnvironmentDetector.isTestEnvironment()) {
+            this.createDeprecationWarning();
+        }
+        
+        // Merge existing config with all keys from the passed config, and override mode with mapped value
+        // Remove the legacy 'level' property to avoid conflicts with the new 'mode' property
+        const { level, ...configWithoutLevel } = config;
+        this.config = { ...this.config, ...configWithoutLevel, mode: mappedMode };
     }
 
     /**
