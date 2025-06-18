@@ -179,6 +179,24 @@ describe('LogFormatter', () => {
       const result = formatData(undefined);
       expect(result).toBe('');
     });
+
+    it('should handle Symbol values in formatData', () => {
+      // Test to verify Symbol handling - should return string representation
+      const { formatData } = require('../formatter/data-formatter');
+      const testSymbol = Symbol('test');
+      const result = formatData(testSymbol);
+      expect(typeof result).toBe('string');
+      expect(result).toBe('Symbol(test)');
+    });
+
+    it('should handle Symbol values without description in formatData', () => {
+      // Test to verify Symbol handling for symbols without description
+      const { formatData } = require('../formatter/data-formatter');
+      const testSymbol = Symbol();
+      const result = formatData(testSymbol);
+      expect(typeof result).toBe('string');
+      expect(result).toBe('Symbol()');
+    });
   });
 
   describe('styleData function', () => {

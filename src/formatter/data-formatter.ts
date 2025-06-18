@@ -26,6 +26,10 @@ export function formatData(data: any): string {
         return String(data);
     }
     
+    if (typeof data === 'symbol') {
+        return data.toString();
+    }
+    
     try {
         return JSON.stringify(data, null, 0);
     } catch (error) {
