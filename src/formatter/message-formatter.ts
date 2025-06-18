@@ -27,7 +27,7 @@ export class MessageFormatter {
         
         const levelName = this.getLevelName(level);
         const levelColor = this.getLevelColor(level);
-        const coloredLevel = `${levelColor}[${levelName}]${colors.reset}`;
+        const coloredLevel = `${levelColor}[${levelName}]`;
         
         // Format the base message
         let formattedMessage = `${timestamp}${coloredLevel}: ${message}`;
@@ -39,7 +39,8 @@ export class MessageFormatter {
             formattedMessage += styledData;
         }
         
-        return formattedMessage;
+        // Always reset colors at the end of the entire log line
+        return formattedMessage + colors.reset;
     }
 
     /**
