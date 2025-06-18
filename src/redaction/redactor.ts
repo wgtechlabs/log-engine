@@ -147,7 +147,7 @@ export class DataRedactor {
             visited.add(value);
             
             const result = value.map(item => this.processValue(item, visited, depth + 1));
-            visited.delete(value);
+            // Keep value in visited set to detect circular references across branches
             return result;
         }
 
@@ -160,7 +160,7 @@ export class DataRedactor {
             visited.add(value);
             
             const result = this.redactObject(value, visited, depth + 1);
-            visited.delete(value);
+            // Keep value in visited set to detect circular references across branches
             return result;
         }
 
