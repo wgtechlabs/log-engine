@@ -27,7 +27,7 @@ export class MessageFormatter {
         
         const levelName = this.getLevelName(level);
         const levelColor = this.getLevelColor(level);
-        const coloredLevel = `${levelColor}[${levelName}]`;
+        const coloredLevel = `${levelColor}[${levelName}]${colors.reset}`;
         
         // Format the base message
         let formattedMessage = `${timestamp}${coloredLevel}: ${message}`;
