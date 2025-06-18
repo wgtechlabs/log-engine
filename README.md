@@ -597,7 +597,7 @@ This project is licensed under the [GNU Affero General Public License v3.0](http
 
 This project is created by **[Waren Gonzaga](https://github.com/warengonzaga)** under [WG Technology Labs](https://github.com/wgtechlabs), with the help of awesome [contributors](https://github.com/wgtechlabs/log-engine/graphs/contributors).
 
-**Latest Version:** v1.2.1 - Enhanced with advanced redaction features, comprehensive TypeScript support, and 95%+ test coverage.
+**Latest Version:** v1.3.0 - Enhanced with advanced redaction features, comprehensive TypeScript support, and 95%+ test coverage.
 
 [![contributors](https://contrib.rocks/image?repo=wgtechlabs/log-engine)](https://github.com/wgtechlabs/log-engine/graphs/contributors)
 
