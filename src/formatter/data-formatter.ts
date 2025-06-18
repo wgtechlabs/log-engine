@@ -4,10 +4,12 @@
  */
 
 /**
- * Formats data objects for log output
- * Converts objects to readable string format with proper handling of edge cases
- * @param data - Data to format (any type)
- * @returns Formatted string representation of the data
+ * Converts input data to a readable string suitable for log output.
+ *
+ * Returns 'null' for `null`, an empty string for `undefined`, the value itself for strings, and string representations for numbers and booleans. For other types, attempts JSON serialization; if serialization fails, returns '[Object]'.
+ *
+ * @param data - The value to format for logging
+ * @returns The formatted string representation of the input data
  */
 export function formatData(data: any): string {
     if (data === null) {
@@ -39,10 +41,11 @@ export function formatData(data: any): string {
 }
 
 /**
- * Apply data styling with colors
- * @param dataString - Formatted data string
- * @param colors - Color scheme for data styling
- * @returns Colored data string
+ * Applies color styling to a formatted data string using the provided color codes.
+ *
+ * @param dataString - The string to be styled; if falsy, an empty string is returned.
+ * @param colors - An object containing `data` (the color code prefix) and `reset` (the color code suffix).
+ * @returns The styled data string with color codes applied, or an empty string if `dataString` is falsy.
  */
 export function styleData(dataString: string, colors: { data: string; reset: string }): string {
     if (!dataString) {
