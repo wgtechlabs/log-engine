@@ -1,14 +1,21 @@
 {
   "name": "@wgtechlabs/log-engine",
   "version": "1.2.1",
-  "description": "A lightweight and efficient logging utility designed specifically for bot applications running on Node.js.",
+  "description": "A lightweight, security-first logging utility with automatic data redaction for Node.js applications - the first logging library with built-in PII protection.",
   "keywords": [
     "logging",
+    "security",
+    "redaction",
+    "pii-protection",
+    "data-redaction",
+    "typescript",
+    "nodejs",
     "bot",
     "discord",
     "telegram",
-    "nodejs",
-    "typescript"
+    "privacy",
+    "gdpr",
+    "compliance"
   ],
   "license": "AGPL-3.0",
   "author": "WG Tech Labs <opensource@wgtechlabs.com> (https://wgtechlabs.com)",

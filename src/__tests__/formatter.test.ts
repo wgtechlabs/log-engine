@@ -122,4 +122,58 @@ describe('LogFormatter', () => {
       expect(cleanFormatted).toMatch(formatPattern);
     });
   });
+
+  describe('formatData edge cases', () => {
+    it('should handle null values', () => {
+      // Test null handling (covers line 98)
+      const formatted = LogFormatter.format(LogLevel.INFO, 'Message', null);
+      expect(formatted).toContain('null');
+    });
+
+    it('should handle undefined values', () => {
+      // Test undefined handling (covers line 102)
+      const formatted = LogFormatter.format(LogLevel.INFO, 'Message', undefined);
+      expect(formatted).toContain('Message');
+      // The formatted message should not contain 'undefined'
+      expect(formatted).toMatch(/Message$/);
+    });
+
+    it('should handle number values', () => {
+      // Test number handling (covers line 106)
+      const formatted = LogFormatter.format(LogLevel.INFO, 'Message', 42);
+      expect(formatted).toContain('42');
+    });
+
+    it('should handle boolean values', () => {
+      // Test boolean handling (covers line 110)
+      const formatted = LogFormatter.format(LogLevel.INFO, 'Message', true);
+      expect(formatted).toContain('true');
+      
+      const formatted2 = LogFormatter.format(LogLevel.INFO, 'Message', false);
+      expect(formatted2).toContain('false');
+    });
+
+    it('should handle objects that cannot be stringified', () => {
+      // Test JSON.stringify error handling (covers line 117)
+      const circularObj: any = {};
+      circularObj.self = circularObj; // Create circular reference
+      
+      const formatted = LogFormatter.format(LogLevel.INFO, 'Message', circularObj);
+      expect(formatted).toContain('[Object]');
+    });
+
+    it('should handle string data types', () => {
+      // Test to cover line 106 - string handling
+      const formatted = LogFormatter.format(LogLevel.INFO, 'Message', 'test string');
+      expect(formatted).toContain('test string');
+    });
+
+    it('should handle undefined values in formatData', () => {
+      // Test to cover line 102 - undefined returns empty string
+      // We need to access the private method directly to test this specific case
+      const formatDataMethod = (LogFormatter as any).formatData;
+      const result = formatDataMethod(undefined);
+      expect(result).toBe('');
+    });
+  });
 });

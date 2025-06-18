@@ -1,4 +1,6 @@
 {
+  // TypeScript configuration for Log Engine
+  // Builds production-ready JavaScript with complete type definitions
   "compilerOptions": {
     "target": "ES2020",
     "module": "commonjs",

@@ -23,15 +23,18 @@ describe('Logger class', () => {
     restoreConsoleMocks(mocks);
   });
 
-  it('should have default log level of INFO', () => {
-    // Test that default behavior shows INFO but filters DEBUG
+  it('should have default log mode based on environment', () => {
+    // Test that default behavior uses environment-based configuration
+    // In test environment (NODE_ENV=test), the default mode is ERROR
     logger.info('Info message');
     logger.debug('Debug message');
+    logger.error('Error message');
     
-    // Only INFO should be logged with default settings
-    expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
-    expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
-      expect.stringContaining('Info message')
+    // In test environment, only ERROR and above should be logged by default
+    expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(0); // INFO filtered out
+    expect(mocks.mockConsoleError).toHaveBeenCalledTimes(1); // ERROR shown
+    expect(mocks.mockConsoleError).toHaveBeenCalledWith(
+      expect.stringContaining('Error message')
     );
   });
 
@@ -120,5 +123,111 @@ describe('Logger class', () => {
     expect(mocks.mockConsoleLog).not.toHaveBeenCalled();
     expect(mocks.mockConsoleWarn).not.toHaveBeenCalled();
     expect(mocks.mockConsoleError).not.toHaveBeenCalled();
+  });
+
+  describe('Backwards compatibility and deprecation warnings', () => {
+    let originalNodeEnv: string | undefined;
+    let mockConsoleWarn: jest.SpyInstance;
+
+    beforeEach(() => {
+      originalNodeEnv = process.env.NODE_ENV;
+      mockConsoleWarn = jest.spyOn(console, 'warn').mockImplementation();
+    });
+
+    afterEach(() => {
+      process.env.NODE_ENV = originalNodeEnv;
+      mockConsoleWarn.mockRestore();
+    });
+
+    it('should show deprecation warning for legacy level configuration in non-test environment', () => {
+      // Test deprecation warning (covers lines 64-66)
+      process.env.NODE_ENV = 'development';
+      
+      logger.configure({ level: LogLevel.DEBUG } as any);
+      
+      // Should show deprecation warning
+      expect(mockConsoleWarn).toHaveBeenCalledTimes(3);
+      expect(mockConsoleWarn).toHaveBeenCalledWith(
+        expect.stringContaining('DEPRECATION WARNING')
+      );
+      expect(mockConsoleWarn).toHaveBeenCalledWith(
+        expect.stringContaining('Migration:')
+      );
+      expect(mockConsoleWarn).toHaveBeenCalledWith(
+        expect.stringContaining('See:')
+      );
+    });
+
+    it('should not show deprecation warning in test environment', () => {
+      // Test that deprecation warning is suppressed in test environment
+      process.env.NODE_ENV = 'test';
+      
+      logger.configure({ level: LogLevel.DEBUG } as any);
+      
+      // Should not show deprecation warning in test environment
+      expect(mockConsoleWarn).not.toHaveBeenCalled();
+    });
+
+    it('should throw error for invalid legacy level values', () => {
+      // Test error handling for invalid level values (covers line 84)
+      expect(() => {
+        logger.configure({ level: 999 } as any);
+      }).toThrow('Invalid LogLevel value: 999');
+    });
+
+    it('should map legacy level values correctly', () => {
+      // Test that legacy level values map to correct LogMode values
+      logger.configure({ level: LogLevel.DEBUG } as any);
+      logger.debug('Debug message');
+      expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
+        expect.stringContaining('Debug message')
+      );
+
+      mocks.mockConsoleLog.mockClear();
+      logger.configure({ level: LogLevel.INFO } as any);
+      logger.debug('Debug message');
+      logger.info('Info message');
+      expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1); // Only info should show
+      expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
+        expect.stringContaining('Info message')
+      );
+    });
+
+    it('should handle legacy SILENT and OFF values', () => {
+      // Test mapping of legacy numeric values 4 (SILENT) and 5 (OFF)
+      logger.configure({ level: 4 } as any); // Legacy SILENT
+      logger.info('Info message');
+      logger.log('LOG message');
+      
+      expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1); // Only LOG should show
+      expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
+        expect.stringContaining('LOG message')
+      );
+
+      mocks.mockConsoleLog.mockClear();
+      logger.configure({ level: 5 } as any); // Legacy OFF
+      logger.log('LOG message');
+      
+      expect(mocks.mockConsoleLog).not.toHaveBeenCalled(); // Nothing should show
+    });
+  });
+
+  describe('Edge cases and internal logic', () => {
+    it('should handle undefined mode configuration', () => {
+      // Test to cover line 134 in logger.ts - undefined mode fallback
+      const freshLogger = new Logger();
+      // Manually set the config mode to undefined to test fallback
+      (freshLogger as any).config = { mode: undefined };
+      
+      // Should fall back to INFO mode behavior
+      freshLogger.debug('Debug message');
+      freshLogger.info('Info message');
+      
+      // With INFO mode fallback, DEBUG should be filtered, INFO should show
+      expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
+      expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
+        expect.stringContaining('Info message')
+      );
+    });
   });
 });

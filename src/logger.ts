@@ -21,6 +21,35 @@ export class Logger {
     };
 
     /**
+     * Logger constructor - sets up environment-based auto-configuration
+     */
+    constructor() {
+        // Set initial mode based on NODE_ENV for auto-configuration
+        this.config.mode = this.getEnvironmentMode();
+    }
+
+    /**
+     * Determines the appropriate log mode based on NODE_ENV
+     * @returns LogMode appropriate for current environment
+     */
+    private getEnvironmentMode(): LogMode {
+        const nodeEnv = process.env.NODE_ENV;
+        
+        switch (nodeEnv) {
+            case 'development':
+                return LogMode.DEBUG;    // Verbose logging for development
+            case 'production':
+                return LogMode.INFO;     // Important info and above for production
+            case 'staging':
+                return LogMode.WARN;     // Focused logging for staging
+            case 'test':
+                return LogMode.ERROR;    // Minimal logging during tests
+            default:
+                return LogMode.INFO;     // Default fallback for unknown environments
+        }
+    }
+
+    /**
      * Updates logger configuration with new settings
      * Merges provided config with existing settings (partial update)
      * Supports backwards compatibility by mapping level to mode with deprecation warnings

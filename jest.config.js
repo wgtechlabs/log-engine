@@ -1,3 +1,7 @@
+/**
+ * Jest configuration for Log Engine testing
+ * Provides comprehensive test coverage with TypeScript support
+ */
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
