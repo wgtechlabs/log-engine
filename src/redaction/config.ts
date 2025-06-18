@@ -84,7 +84,10 @@ export class RedactionController {
 
         // Apply environment variable overrides if they exist
         if (process.env.LOG_MAX_CONTENT_LENGTH) {
-            envConfig.maxContentLength = parseInt(process.env.LOG_MAX_CONTENT_LENGTH, 10);
+            const parsedLength = parseInt(process.env.LOG_MAX_CONTENT_LENGTH, 10);
+            if (!isNaN(parsedLength) && parsedLength > 0) {
+                envConfig.maxContentLength = parsedLength;
+            }
         }
 
         if (process.env.LOG_REDACTION_TEXT) {

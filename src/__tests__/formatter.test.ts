@@ -94,8 +94,9 @@ describe('LogFormatter', () => {
       expect(formatted).toContain(message);
       
       // Should contain timestamp components
-      expect(formatted).toMatch(/\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]/); // ISO timestamp
-      expect(formatted).toMatch(/\[\d{1,2}:\d{2}[AP]M\]/); // Local time
+      const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+      expect(cleanFormatted).toMatch(/\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]/); // ISO timestamp
+      expect(cleanFormatted).toMatch(/\[\d{1,2}:\d{2}[AP]M\]/); // Local time
     });
 
     it('should format system messages with colors', () => {
@@ -135,7 +136,9 @@ describe('LogFormatter', () => {
       const formatted = LogFormatter.format(LogLevel.INFO, 'Message', undefined);
       expect(formatted).toContain('Message');
       // The formatted message should not contain 'undefined'
-      expect(formatted).toMatch(/Message$/);
+      // Remove ANSI color codes before pattern matching
+      const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+      expect(cleanFormatted).toMatch(/Message$/);
     });
 
     it('should handle number values', () => {
