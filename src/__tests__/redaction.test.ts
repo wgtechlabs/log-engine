@@ -356,6 +356,115 @@ describe('Data Redaction', () => {
                 expect(DataRedactor.redactData(undefined)).toBe(undefined);
                 expect(DataRedactor.redactData([])).toEqual([]);
             });
+
+            test('should prevent stack overflow with deeply nested objects', () => {
+                // Create a test to verify depth limiting exists
+                // Since depth increments by 2 for each nesting level (processValue->redactObject->processValue),
+                // the 100 depth limit allows for about 50 levels of nesting
+                let deeplyNested: any = { value: 'innermost' };
+                for (let i = 0; i < 51; i++) { // Create 51 levels of nesting (should exceed limit)
+                    deeplyNested = { nested: deeplyNested };
+                }
+
+                // Should not throw a stack overflow error
+                const result = DataRedactor.redactData(deeplyNested);
+                
+                // The result should exist and be an object (not crash)
+                expect(result).toBeDefined();
+                expect(typeof result).toBe('object');
+                
+                // Navigate through the structure - we should be able to go about 49 levels deep
+                // before hitting the depth limit
+                let current = result;
+                for (let i = 0; i < 49; i++) { // Navigate 49 levels deep
+                    expect(current).toHaveProperty('nested');
+                    current = current.nested;
+                }
+                
+                // At this point, the next nested property should be the max depth exceeded string
+                expect(current.nested).toBe('[Max Depth Exceeded]');
+            });
+
+            test('should prevent stack overflow with deeply nested arrays', () => {
+                // Create a test to verify depth limiting exists for arrays
+                // Arrays only increment depth by 1 per level (unlike objects which increment by 2),
+                // so the 100 depth limit allows for about 99 levels of array nesting
+                let deeplyNested: any = ['innermost'];
+                for (let i = 0; i < 101; i++) { // Create 101 levels of nesting (should exceed limit)
+                    deeplyNested = [deeplyNested];
+                }
+
+                // Should not throw a stack overflow error
+                const result = DataRedactor.redactData(deeplyNested);
+                
+                // The result should exist and be an array (not crash)
+                expect(result).toBeDefined();
+                expect(Array.isArray(result)).toBe(true);
+                
+                // Navigate through the structure - we should be able to go 99 levels deep
+                let current = result;
+                for (let i = 0; i < 99; i++) { // Navigate 99 levels deep
+                    expect(Array.isArray(current)).toBe(true);
+                    expect(current.length).toBe(1);
+                    current = current[0];
+                }
+                
+                // At this point, the current should be an array containing the max depth exceeded string
+                expect(Array.isArray(current)).toBe(true);
+                expect(current[0]).toBe('[Max Depth Exceeded]');
+            });
+
+            test('should handle mixed nested structures at depth limit', () => {
+                // Create a mixed nested structure that approaches but doesn't exceed the limit
+                // Since depth increments by 2 for each level, use about 45 levels to stay under the 100 limit
+                let mixedNested: any = { value: 'test', password: 'secret' };
+                for (let i = 0; i < 45; i++) { // Stay well under the depth limit
+                    mixedNested = { 
+                        level: i, 
+                        nested: mixedNested,
+                        array: [{ data: 'test' }]
+                    };
+                }
+
+                // Should process normally without hitting depth limit
+                const result = DataRedactor.redactData(mixedNested);
+                
+                // Should be processed normally (not the depth exceeded placeholder)
+                expect(result).not.toBe('[Max Depth Exceeded]');
+                expect(result.level).toBe(44); // Last level added
+                expect(result.array).toBeInstanceOf(Array);
+            });
+
+            test('should handle structures within depth limit', () => {
+                // Create a structure with exactly 40 levels (well within the ~50 limit for objects)
+                let nestedData: any = { value: 'deepest', password: 'secret' };
+                for (let i = 0; i < 40; i++) {
+                    nestedData = { level: i, nested: nestedData };
+                }
+
+                const result = DataRedactor.redactData(nestedData);
+                
+                // Should process normally without hitting depth limit
+                expect(result).toBeDefined();
+                expect(typeof result).toBe('object');
+                expect(result.level).toBe(39); // Last level added
+                
+                // Navigate through the structure to verify it was processed normally
+                let current = result;
+                for (let i = 0; i < 30; i++) { // Go 30 levels deep
+                    expect(current).toHaveProperty('nested');
+                    expect(current.level).toBe(39 - i);
+                    current = current.nested;
+                }
+                
+                // The deepest object should have had its password redacted
+                let deepest = result;
+                for (let i = 0; i < 40; i++) {
+                    deepest = deepest.nested;
+                }
+                expect(deepest.password).toBe('[REDACTED]');
+                expect(deepest.value).toBe('deepest');
+            });
         });
     });
 

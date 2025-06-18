@@ -16,6 +16,9 @@ export class DataRedactor {
         ...RedactionController.getEnvironmentConfig()
     };
 
+    // Maximum recursion depth to prevent stack overflow attacks
+    private static readonly MAX_RECURSION_DEPTH = 100;
+
     /**
      * Update the redaction configuration with new settings
      * Merges provided config with existing settings and reloads environment variables
@@ -112,18 +115,24 @@ export class DataRedactor {
             return data;
         }
 
-        return this.processValue(data, new WeakSet());
+        return this.processValue(data, new WeakSet(), 0);
     }
 
     /**
      * Process a value of any type (primitive, object, array)
      * Recursively handles nested structures when deepRedaction is enabled
-     * Includes circular reference protection
+     * Includes circular reference protection and recursion depth limiting
      * @param value - Value to process
      * @param visited - Set to track visited objects (prevents circular references)
+     * @param depth - Current recursion depth (prevents stack overflow)
      * @returns Processed value with redaction applied
      */
-    private static processValue(value: any, visited: WeakSet<object> = new WeakSet()): any {
+    private static processValue(value: any, visited: WeakSet<object> = new WeakSet(), depth: number = 0): any {
+        // Check recursion depth limit to prevent stack overflow
+        if (depth >= this.MAX_RECURSION_DEPTH) {
+            return '[Max Depth Exceeded]';
+        }
+
         // Handle null and undefined
         if (value === null || value === undefined) {
             return value;
@@ -137,7 +146,7 @@ export class DataRedactor {
             }
             visited.add(value);
             
-            const result = value.map(item => this.processValue(item, visited));
+            const result = value.map(item => this.processValue(item, visited, depth + 1));
             visited.delete(value);
             return result;
         }
@@ -150,7 +159,7 @@ export class DataRedactor {
             }
             visited.add(value);
             
-            const result = this.redactObject(value, visited);
+            const result = this.redactObject(value, visited, depth + 1);
             visited.delete(value);
             return result;
         }
@@ -164,9 +173,15 @@ export class DataRedactor {
      * Handles field-level redaction and content truncation
      * @param obj - Object to process
      * @param visited - Set to track visited objects (prevents circular references)
+     * @param depth - Current recursion depth (prevents stack overflow)
      * @returns Object with sensitive fields redacted
      */
-    private static redactObject(obj: Record<string, any>, visited: WeakSet<object> = new WeakSet()): Record<string, any> {
+    private static redactObject(obj: Record<string, any>, visited: WeakSet<object> = new WeakSet(), depth: number = 0): Record<string, any> {
+        // Check recursion depth limit to prevent stack overflow
+        if (depth >= this.MAX_RECURSION_DEPTH) {
+            return { '[Max Depth Exceeded]': '[Max Depth Exceeded]' };
+        }
+
         const redacted: Record<string, any> = {};
 
         for (const [key, value] of Object.entries(obj)) {
@@ -180,7 +195,7 @@ export class DataRedactor {
             }
             // Recursively process nested objects/arrays if deep redaction is enabled
             else if (this.config.deepRedaction && (typeof value === 'object' && value !== null)) {
-                redacted[key] = this.processValue(value, visited);
+                redacted[key] = this.processValue(value, visited, depth + 1);
             }
             // Keep the value unchanged
             else {
