@@ -28,6 +28,7 @@ export const defaultRedactionConfig: RedactionConfig = {
         
         // Personal Information (PII)
         'email', 'emailAddress', 'email_address',
+        'username', 'userName', 'login', 'loginName', 'loginId',
         'phone', 'phoneNumber', 'phone_number', 'mobile',
         'ssn', 'socialSecurityNumber', 'social_security_number',
         'address', 'homeAddress', 'workAddress',
