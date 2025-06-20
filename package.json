@@ -1,6 +1,6 @@
 {
   "name": "@wgtechlabs/log-engine",
-  "version": "1.3.0",
+  "version": "2.0.0",
   "description": "A lightweight, security-first logging utility with automatic data redaction for Node.js applications - the first logging library with built-in PII protection.",
   "keywords": [
     "logging",
@@ -17,7 +17,7 @@
     "gdpr",
     "compliance"
   ],
-  "license": "AGPL-3.0",
+  "license": "MIT",
   "author": "WG Tech Labs <opensource@wgtechlabs.com> (https://wgtechlabs.com)",
   "contributors": [
     "Waren Gonzaga <opensource@warengonzaga.com> (https://warengonzaga.com)"
