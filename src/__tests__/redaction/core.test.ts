@@ -23,7 +23,7 @@ describe('Data Redaction - Core Functionality', () => {
 
             const result = DataRedactor.redactData(testData);
 
-            expect(result.username).toBe('john_doe'); // username is not sensitive
+            expect(result.username).toBe('[REDACTED]'); // username is sensitive PII
             expect(result.password).toBe('[REDACTED]');
             expect(result.email).toBe('[REDACTED]');
             expect(result.apiKey).toBe('[REDACTED]');
@@ -50,7 +50,7 @@ describe('Data Redaction - Core Functionality', () => {
 
             const result = DataRedactor.redactData(testData);
 
-            expect(result.user.profile.username).toBe('johndoe'); // username is not sensitive
+            expect(result.user.profile.username).toBe('[REDACTED]'); // username is sensitive PII
             expect(result.user.profile.email).toBe('[REDACTED]');
             expect(result.user.profile.password).toBe('[REDACTED]');
             expect(result.user.settings.theme).toBe('dark');
@@ -125,18 +125,18 @@ describe('Data Redaction - Core Functionality', () => {
 
         test('should not redact non-sensitive fields', () => {
             const testData = {
-                username: 'john_doe',
                 name: 'John Doe',
                 title: 'Engineer',
-                department: 'IT'
+                department: 'IT',
+                publicId: 'user123'
             };
 
             const result = DataRedactor.redactData(testData);
 
-            expect(result.username).toBe('john_doe');
             expect(result.name).toBe('John Doe');
             expect(result.title).toBe('Engineer');
             expect(result.department).toBe('IT');
+            expect(result.publicId).toBe('user123');
         });
 
         test('should be case insensitive', () => {

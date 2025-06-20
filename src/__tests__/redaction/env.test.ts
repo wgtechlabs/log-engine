@@ -7,18 +7,24 @@ import { DataRedactor, defaultRedactionConfig, RedactionController } from '../..
 
 describe('Data Redaction - Environment Control', () => {
     // Store original environment to restore after tests
-    const originalEnv = process.env;
+    const originalEnv = { ...process.env };
 
     beforeEach(() => {
         // Reset to default configuration before each test
         DataRedactor.updateConfig(defaultRedactionConfig);
-        // Reset environment
-        process.env = { ...originalEnv };
+        // Clear current environment and restore original
+        for (const key in process.env) {
+            delete process.env[key];
+        }
+        Object.assign(process.env, originalEnv);
     });
 
     afterAll(() => {
-        // Restore original environment
-        process.env = originalEnv;
+        // Restore original environment completely
+        for (const key in process.env) {
+            delete process.env[key];
+        }
+        Object.assign(process.env, originalEnv);
     });
 
     describe('Environment-based control', () => {

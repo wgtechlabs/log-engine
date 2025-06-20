@@ -40,7 +40,7 @@ export function restoreConsole(): void {
  * Setup environment for testing
  */
 export function setupTestEnvironment(): { originalEnv: NodeJS.ProcessEnv } {
-    const originalEnv = process.env;
+    const originalEnv = { ...process.env };
     return { originalEnv };
 }
 
@@ -48,5 +48,10 @@ export function setupTestEnvironment(): { originalEnv: NodeJS.ProcessEnv } {
  * Restore environment after testing
  */
 export function restoreEnvironment(originalEnv: NodeJS.ProcessEnv): void {
-    process.env = originalEnv;
+    // Clear current environment
+    for (const key in process.env) {
+        delete process.env[key];
+    }
+    // Restore original environment
+    Object.assign(process.env, originalEnv);
 }
