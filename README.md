@@ -591,7 +591,7 @@ I'm committed to providing a welcoming and inclusive environment for all contrib
 
 ## 📃 License
 
-This project is licensed under the [GNU Affero General Public License v3.0](https://opensource.org/licenses/AGPL-3.0). This license requires that all modifications to the code must be shared under the same license, especially when the software is used over a network. See the [LICENSE](LICENSE) file for the full license text.
+This project is licensed under the [MIT License](https://opensource.org/licenses/MIT). See the [LICENSE](LICENSE) file for the full license text.
 
 ## 📝 Author
 

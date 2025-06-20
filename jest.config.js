@@ -28,5 +28,9 @@ module.exports = {
       functions: 90,
       lines: 90
     }
-  }
+  },
+  // Enable parallel test execution for better performance
+  maxWorkers: '50%',
+  // Timeout for individual tests
+  testTimeout: 10000
 };
