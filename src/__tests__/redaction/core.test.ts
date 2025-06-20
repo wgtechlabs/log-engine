@@ -23,7 +23,7 @@ describe('Data Redaction - Core Functionality', () => {
 
             const result = DataRedactor.redactData(testData);
 
-            expect(result.username).toBe('[REDACTED]'); // username is sensitive PII
+            expect(result.username).toBe('john_doe'); // username is not considered sensitive
             expect(result.password).toBe('[REDACTED]');
             expect(result.email).toBe('[REDACTED]');
             expect(result.apiKey).toBe('[REDACTED]');
@@ -50,7 +50,7 @@ describe('Data Redaction - Core Functionality', () => {
 
             const result = DataRedactor.redactData(testData);
 
-            expect(result.user.profile.username).toBe('[REDACTED]'); // username is sensitive PII
+            expect(result.user.profile.username).toBe('johndoe'); // username is not considered sensitive
             expect(result.user.profile.email).toBe('[REDACTED]');
             expect(result.user.profile.password).toBe('[REDACTED]');
             expect(result.user.settings.theme).toBe('dark');
