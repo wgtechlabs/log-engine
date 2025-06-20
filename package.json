@@ -45,6 +45,11 @@
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
     "test:unit": "jest --testNamePattern=\"^((?!integration).)*$\"",
     "test:integration": "jest integration.test.ts",
+    "test:redaction": "jest --testPathPattern=\"redaction/\"",
+    "test:redaction:core": "jest --testPathPattern=\"redaction/core.test.ts\"",
+    "test:redaction:env": "jest --testPathPattern=\"redaction/env.test.ts\"",
+    "test:redaction:advanced": "jest --testPathPattern=\"redaction/advanced.test.ts\"",
+    "test:redaction:logengine": "jest --testPathPattern=\"redaction/logengine.test.ts\"",
     "clean": "rm -rf dist coverage",
     "coverage:open": "open coverage/lcov-report/index.html"
   },
