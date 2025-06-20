@@ -225,8 +225,8 @@ describe('Data Redaction - Advanced Features', () => {
             });
 
             const result = DataRedactor.redactData(testData);
-            // Should still work with fallback behavior
-            expect(typeof result.password).toBe('string');
+            // Should still work with fallback behavior - empty redactionText should result in empty string
+            expect(result.password).toBe('');
         });
 
         test('should handle empty sensitive fields array', () => {

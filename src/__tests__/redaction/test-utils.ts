@@ -48,10 +48,16 @@ export function setupTestEnvironment(): { originalEnv: NodeJS.ProcessEnv } {
  * Restore environment after testing
  */
 export function restoreEnvironment(originalEnv: NodeJS.ProcessEnv): void {
-    // Clear current environment
+    // Only remove environment variables that were added during the test
+    // (i.e., those not present in the originalEnv)
     for (const key in process.env) {
-        delete process.env[key];
+        if (!(key in originalEnv)) {
+            delete process.env[key];
+        }
     }
-    // Restore original environment
-    Object.assign(process.env, originalEnv);
+    
+    // Restore or update variables that existed originally
+    for (const key in originalEnv) {
+        process.env[key] = originalEnv[key];
+    }
 }
