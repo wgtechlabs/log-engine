@@ -1,3 +1,8 @@
+/**
+ * Global Jest setup for Log Engine testing
+ * Optimized for CI environments with better error handling
+ */
+
 // Global Jest setup to suppress console output during tests
 global.console = {
   ...console,
@@ -9,15 +14,21 @@ global.console = {
   info: console.info
 };
 
-// Increase timeout for async operations
-jest.setTimeout(30000);
+// Optimized timeout for faster feedback
+jest.setTimeout(10000);
 
-// Add global teardown to ensure clean test environment
+// Handle uncaught promise rejections in tests
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  // In test environment, we want to know about these
+  if (process.env.NODE_ENV === 'test') {
+    throw reason;
+  }
+});
+
+// Global cleanup optimized for CI
 afterAll(async () => {
-  // Give time for any pending operations to complete
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  // Clear any remaining timers
+  // Clear any remaining timers immediately
   jest.clearAllTimers();
   jest.clearAllMocks();
   
@@ -28,10 +39,7 @@ afterAll(async () => {
 });
 
 afterEach(async () => {
-  // Clean up after each test
+  // Fast cleanup after each test
   jest.restoreAllMocks();
   jest.clearAllMocks();
-  
-  // Small delay to ensure cleanup completes
-  await new Promise(resolve => setTimeout(resolve, 10));
 });

@@ -12,7 +12,21 @@ There are many ways to contribute to this open source project. Any contributions
 
 ### 🧬 Development
 
-If you can write code then create a pull request to this repo and I will review your code. Please consider submitting your pull request to the `dev` branch. I will auto reject if you submit your pull request to the `main` branch.
+If you can write code then create a pull request to this repo and I will review your code. 
+
+#### Branch Strategy
+
+**Development Workflow:**
+- **Work on `dev` branch** for feature development and bug fixes
+- **Fast CI feedback** (~3-5 minutes) for quick iteration
+- **Use `yarn test:ci:fast`** for local validation
+
+**Production Workflow:**  
+- **Create PR from `dev` to `main`** for production releases
+- **Comprehensive CI validation** (~8-10 minutes) with full coverage
+- **All Node.js versions tested** before merge
+
+> **Important**: Please submit pull requests to the `dev` branch. Pull requests to the `main` branch will be automatically rejected unless they are hotfixes or critical security updates.
 
 #### 🔧 Setup
 
@@ -43,13 +57,27 @@ To get started with development:
    yarn test
    ```
 
-> **Note**: This project uses yarn as the primary package manager. Please use yarn for all development tasks to ensure consistency across the development environment and CI/CD pipeline.
+> **Note**: This project uses Yarn for dependency management. Please use `yarn` for all development tasks to ensure consistency with our package manager configuration.
 
 Please refer to the [README](./README.md) for more detailed setup instructions.
 
 ### 🧪 Testing
 
-This section provides comprehensive information about testing the log-engine project and how to contribute tests.
+This section provides comprehensive information about testing the log-engine project and our two-tier testing strategy optimized for different development workflows.
+
+#### Two-Tier Testing Strategy
+
+We use a **fast feedback** approach for development and **comprehensive validation** for production readiness:
+
+**🚀 Development Testing (dev branch)**
+- **Fast feedback** in ~3-5 seconds
+- **Quick validation** without coverage generation
+- **Optimized for iteration** speed and developer productivity
+
+**🛡️ Production Testing (main branch)**  
+- **Full coverage** reporting and analysis
+- **Cross-platform validation** (Node.js 16.x, 18.x, 20.x)
+- **Comprehensive checks** before production deployment
 
 #### Quick Start
 
@@ -57,22 +85,52 @@ This section provides comprehensive information about testing the log-engine pro
 # Install dependencies
 yarn install
 
-# Run all tests
-yarn test
+# 🚀 Fast development testing (recommended for local dev)
+yarn test:ci:fast
 
-# Run tests with coverage
+# 🛡️ Full testing with coverage (before PR to main)
+yarn test:ci
+
+# 📊 Coverage only
 yarn test:coverage
 
-# Run tests in watch mode (for development)
+# 👀 Watch mode for development
 yarn test:watch
+
+# 🐛 Debug test issues
+yarn test:ci:debug
 ```
+
+#### Test Commands Reference
+
+| Command | Speed | Coverage | Use Case |
+|---------|-------|----------|----------|
+| `test:ci:fast` | ⚡⚡⚡⚡⚡ | ❌ | Quick validation, dev iteration |
+| `test:ci` | ⚡⚡⚡ | ✅ | Pre-PR testing, CI/CD |
+| `test:ci:debug` | ⚡⚡ | ✅ | Troubleshooting hanging tests |
+| `test:ci:safe` | ⚡⚡⚡ | ✅ | Unreliable environments |
+
+#### Development Workflow
+
+**For Feature Development:**
+1. Work on `dev` branch
+2. Use `yarn test:ci:fast` for quick validation  
+3. Push to `dev` → triggers fast CI tests (3-5 min)
+4. Iterate quickly with fast feedback
+
+**For Production Release:**
+1. Create PR from `dev` to `main`
+2. Use `yarn test:ci` for full validation
+3. PR triggers comprehensive tests (8-10 min)
+4. Full coverage and cross-platform validation
 
 #### Test Architecture
 
-- Tests are located in `src/__tests__/` and organized by component.
-- Utilities for mocking and setup are in `test-utils.ts`.
-- Each test file focuses on a single responsibility for maintainability and parallel execution.
-- Global test setup is configured in `jest.setup.js` (loaded via `jest.config.js`) to suppress error console output during tests while preserving test functionality.
+- **Location**: Tests are in `src/__tests__/` organized by component
+- **Utilities**: Async test utilities in `async-test-utils.ts` for reliable file/HTTP testing
+- **Isolation**: Each test uses unique directories to prevent conflicts
+- **Cleanup**: Automated cleanup with timeout protection
+- **CI Optimization**: Different configs for local vs CI environments
 
 #### Test Output Suppression
 
@@ -85,51 +143,66 @@ The project uses a clean testing approach that suppresses noisy console output:
 
 This approach ensures that test logs remain readable while preserving all error logging functionality in production code.
 
-#### Writing and Running Tests
-
-- Use the provided test file template and follow the Arrange-Act-Assert pattern.
-- Use descriptive test names (e.g., `should log debug messages when level is DEBUG`).
-- Mock console output using utilities from `test-utils.ts`.
-- Ensure each test is isolated using `beforeEach`/`afterEach`.
-- Check coverage with `yarn test:coverage` (targets: Statements ≥90%, Branches ≥85%, Functions ≥90%, Lines ≥90%).
-
-#### Common Testing Patterns
-
-- Test both positive and negative cases.
-- Verify console method call counts and message content.
-- Test configuration changes and environment variable effects.
-- See the codebase and below for more examples.
-
-#### Continuous Integration
-
-- Tests must pass before merging pull requests.
-- Coverage is checked in CI/CD workflows.
-- Use pre-commit hooks to ensure tests pass locally.
-
-#### Troubleshooting
-
-- If modules are not found, ensure TypeScript is compiled (`yarn build`).
-- If console mocks do not work, set them up before using LogEngine in tests.
-- Always restore environment variables after environment-based tests.
-
 #### Contributing Tests
 
-Before submitting:
+**Development Phase (dev branch):**
 
-1. Run the full test suite: `yarn test`
-2. Check coverage: `yarn test:coverage`
-3. Ensure new features have corresponding tests
-4. Follow the established testing patterns
-5. Update documentation if needed
+1. Write your tests alongside feature development
+2. Run `yarn test:ci:fast` for quick validation (~3-5 seconds)
+3. Ensure tests follow established patterns and are isolated
+4. Push to `dev` branch for fast CI validation
 
-Pull Request Checklist:
+**Pre-Production Phase (before main merge):**
 
-- [ ] All tests pass locally
-- [ ] New functionality is tested
-- [ ] Edge cases are covered
-- [ ] Test names are descriptive
-- [ ] Coverage requirements are met
-- [ ] No test pollution (tests affect each other)
+1. Run full test suite: `yarn test:ci`
+2. Verify coverage requirements are met
+3. Test across different scenarios and edge cases
+4. Ensure no test pollution or hanging issues
+
+**Pull Request Checklist:**
+
+- [ ] All tests pass with `yarn test:ci:fast`
+- [ ] Full test suite passes with `yarn test:ci`  
+- [ ] New functionality has corresponding tests
+- [ ] Edge cases and error scenarios are covered
+- [ ] Test names are descriptive and follow conventions
+- [ ] Coverage requirements are met (80%+ for CI)
+- [ ] No test pollution (tests are properly isolated)
+- [ ] Tests complete quickly (no arbitrary timeouts)
+
+#### Test Best Practices
+
+**✅ Do:**
+- Use `async/await` for asynchronous operations
+- Utilize `waitForFile()`, `waitForFileContent()` from `async-test-utils.ts`
+- Create unique test directories to prevent conflicts
+- Write descriptive test names
+- Test both success and failure scenarios
+
+**❌ Don't:**
+- Use arbitrary `setTimeout()` calls
+- Use `done` callbacks (prefer async/await)
+- Create tests that depend on other tests
+- Use fixed file paths that might conflict
+- Write tests that take longer than necessary
+
+#### Troubleshooting Tests
+
+**If tests are hanging:**
+```bash
+yarn test:ci:debug  # Shows open handles and verbose output
+```
+
+**If tests are flaky:**
+- Check for shared resources (files, directories)
+- Ensure proper cleanup in `afterEach`/`afterAll`
+- Use unique identifiers for test artifacts
+
+**If coverage is low:**
+```bash
+yarn test:coverage  # Generate detailed coverage report
+yarn coverage:open   # Open coverage report in browser
+```
 
 Thank you for contributing to the log-engine test suite! 🧪
 
@@ -150,3 +223,42 @@ For other bugs, please create an issue using the bug report template.
 ---
 
 💻 with ❤️ by [Waren Gonzaga](https://warengonzaga.com), [WG Technology Labs](https://wgtechlabs.com), and [Him](https://www.youtube.com/watch?v=HHrxS4diLew&t=44s) 🙏
+
+#### CI/CD Testing Strategy
+
+Our GitHub Actions workflow implements a **two-tier testing strategy** to optimize for both speed and thoroughness:
+
+##### Dev Branch (Fast Feedback) 
+- **Trigger**: Push to `dev` branch or PR to `dev`
+- **Runtime**: ~3-5 minutes total
+- **Node Versions**: 18.x, 20.x (reduced matrix)
+- **Command**: `yarn test:ci:fast`
+- **Features**: No coverage, fail-fast, optimized for speed
+- **Purpose**: Quick validation for development iteration
+
+##### Main Branch (Comprehensive)
+- **Trigger**: Push to `main` branch or PR to `main`  
+- **Runtime**: ~8-10 minutes total
+- **Node Versions**: 16.x, 18.x, 20.x (full matrix)
+- **Command**: `yarn test:ci`
+- **Features**: Full coverage, Codecov reporting, comprehensive validation
+- **Purpose**: Production-ready validation
+
+##### Branch Protection Rules
+
+**Dev Branch Requirements:**
+- `test-dev` job must pass
+- Quick feedback for iterative development
+- Allows for faster iteration cycles
+
+**Main Branch Requirements:**
+- `test-main` job must pass
+- Coverage thresholds must be met
+- All Node.js versions must pass
+- Codecov integration for coverage tracking
+
+This strategy ensures:
+- 🚀 **Fast development** cycles with immediate feedback
+- 🛡️ **Thorough validation** before production deployment  
+- 💰 **Cost efficiency** through optimized CI resource usage
+- 🔍 **Quality assurance** with comprehensive testing on critical branches
