@@ -38,7 +38,6 @@ module.exports = {
     }
   },
   // Optimize for CI environment
-  detectOpenHandles: false,
   clearMocks: true,
   restoreMocks: true,
   resetMocks: false,

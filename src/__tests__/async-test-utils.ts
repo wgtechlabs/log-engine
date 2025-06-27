@@ -147,6 +147,7 @@ export class MockHttpHandler {
     }> = [];
     
     private pendingPromises: Array<Promise<void>> = [];
+    private timeoutIds: Set<NodeJS.Timeout> = new Set();
 
     addRequest(url: string, options: any): void {
         let resolveRequest: () => void;
@@ -170,22 +171,48 @@ export class MockHttpHandler {
     async waitForRequests(count: number = 1, timeoutMs: number = DEFAULT_TIMEOUT): Promise<void> {
         const startTime = Date.now();
         
-        while (this.requests.length < count && Date.now() - startTime < timeoutMs) {
-            await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL));
-        }
+        // Set up a timeout that will be cleaned up
+        let timeoutId: NodeJS.Timeout | undefined;
+        const timeoutPromise = new Promise<never>((_, reject) => {
+            timeoutId = setTimeout(() => {
+                reject(new Error(`Expected ${count} requests but got ${this.requests.length} within ${timeoutMs}ms`));
+            }, timeoutMs);
+            this.timeoutIds.add(timeoutId);
+        });
         
-        if (this.requests.length < count) {
-            throw new Error(`Expected ${count} requests but got ${this.requests.length} within ${timeoutMs}ms`);
-        }
+        try {
+            while (this.requests.length < count && Date.now() - startTime < timeoutMs) {
+                await new Promise(resolve => {
+                    const id = setTimeout(resolve, POLL_INTERVAL);
+                    this.timeoutIds.add(id);
+                });
+            }
+            
+            if (this.requests.length < count) {
+                throw new Error(`Expected ${count} requests but got ${this.requests.length} within ${timeoutMs}ms`);
+            }
 
-        // Mark all requests as processed
-        this.requests.forEach(req => req.resolve());
-        
-        // Wait for all pending promises to resolve
-        await Promise.all(this.pendingPromises);
+            // Mark all requests as processed
+            this.requests.forEach(req => req.resolve());
+            
+            // Wait for all pending promises to resolve
+            await Promise.all(this.pendingPromises);
+        } finally {
+            // Clean up the timeout
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+                this.timeoutIds.delete(timeoutId);
+            }
+        }
     }
 
     clear(): void {
+        // Clean up any remaining timeouts
+        for (const timeoutId of this.timeoutIds) {
+            clearTimeout(timeoutId);
+        }
+        this.timeoutIds.clear();
+        
         this.requests = [];
         this.pendingPromises = [];
     }
@@ -194,20 +221,41 @@ export class MockHttpHandler {
 /**
  * Create a test timeout that fails fast instead of hanging
  */
-export function createTestTimeout(timeoutMs: number = DEFAULT_TIMEOUT): Promise<never> {
-    return new Promise((_, reject) => {
-        setTimeout(() => {
+export function createTestTimeout(timeoutMs: number = DEFAULT_TIMEOUT): { promise: Promise<never>, cancel: () => void } {
+    let timeoutId: NodeJS.Timeout;
+    const promise = new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(() => {
             reject(new Error(`Test timed out after ${timeoutMs}ms`));
         }, timeoutMs);
     });
+    
+    const cancel = () => {
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+        }
+    };
+    
+    return { promise, cancel };
 }
 
 /**
  * Race a promise against a timeout for fail-fast behavior
  */
 export async function withTimeout<T>(promise: Promise<T>, timeoutMs: number = DEFAULT_TIMEOUT): Promise<T> {
-    return Promise.race([
-        promise,
-        createTestTimeout(timeoutMs)
-    ]);
+    const timeout = createTestTimeout(timeoutMs);
+    
+    try {
+        const result = await Promise.race([
+            promise,
+            timeout.promise
+        ]);
+        
+        // Cancel the timeout since we got a result
+        timeout.cancel();
+        return result;
+    } catch (error) {
+        // Cancel the timeout in case of error
+        timeout.cancel();
+        throw error;
+    }
 }

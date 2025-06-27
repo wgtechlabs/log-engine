@@ -42,4 +42,7 @@ afterEach(async () => {
   // Fast cleanup after each test
   jest.restoreAllMocks();
   jest.clearAllMocks();
+  
+  // Clear any timers that might be hanging around
+  jest.clearAllTimers();
 });
