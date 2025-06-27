@@ -4,9 +4,9 @@
 
 [![banner](https://raw.githubusercontent.com/wgtechlabs/log-engine/main/.github/assets/repo_banner.jpg)](https://github.com/wgtechlabs/log-engine)
 
-WG's Log Engine is the **ultimate logging solution for Node.js developers** - a lightweight, battle-tested utility specifically engineered for Discord bots, Telegram bots, web servers, APIs, and server-side applications. Born from real-world development challenges and proven in production environments like the [Unthread Discord Bot](https://github.com/wgtechlabs/unthread-discord-bot/), Log Engine delivers enterprise-grade logging with zero complexity, beautiful color-coded console output, and **advanced automatic data redaction with comprehensive PII protection**.
+WG's Log Engine is the **ultimate logging solution for Node.js developers** - a lightweight, battle-tested utility specifically engineered for Discord bots, Telegram bots, web servers, APIs, and server-side applications. Born from real-world development challenges and proven in production environments like the [Unthread Discord Bot](https://github.com/wgtechlabs/unthread-discord-bot/), Log Engine delivers enterprise-grade logging with zero complexity, beautiful color-coded console output, **revolutionary configurable output routing**, and **advanced automatic data redaction with comprehensive PII protection**.
 
-**The first logging library with built-in advanced PII protection and comprehensive TypeScript support.** Stop wrestling with logging configurations and start building amazing applications safely. Whether you're creating the next viral Discord community bot, building high-performance APIs, developing microservices, or deploying production servers, Log Engine provides intelligent terminal-based logging with vibrant colors, advanced customizable redaction patterns, and automatic sensitive data protection that scales with your application's growth - from your first "Hello World" to handling millions of requests across distributed systems.
+**The first logging library with built-in advanced PII protection, configurable output handlers, and comprehensive TypeScript support.** Stop wrestling with logging configurations and start building amazing applications safely. Whether you're creating the next viral Discord community bot, building high-performance APIs, developing microservices, or deploying production servers, Log Engine provides intelligent logging with vibrant colors, flexible output routing to any destination, advanced customizable redaction patterns, and automatic sensitive data protection that scales with your application's growth - from your first "Hello World" to handling millions of requests across distributed systems.
 
 ## ❣️ Motivation
 
@@ -17,10 +17,11 @@ Log Engine transforms your development experience from chaotic debugging session
 ## ✨ Key Features
 
 - **🔒 Advanced Data Redaction (Enhanced!)**: Built-in PII protection with **custom regex patterns**, **dynamic field management**, and **environment-based configuration** - the first logging library with comprehensive security-first logging by default.
+- **🎯 Configurable Output Handlers (New!)**: Revolutionary output routing system supporting **custom destinations**, **multiple simultaneous outputs**, and **production-ready handlers** - redirect logs to files, HTTP endpoints, GUI applications, testing frameworks, or any custom destination with zero configuration complexity.
 - **⚡ Custom Redaction Patterns**: Add your own regex patterns for advanced field detection and enterprise-specific data protection requirements.
 - **🎯 Dynamic Field Management**: Runtime configuration of sensitive fields with case-insensitive matching and partial field name detection.
 - **🛠️ Developer-Friendly API**: Advanced redaction methods including `testFieldRedaction()`, `withoutRedaction()`, and comprehensive configuration management.
-- **📊 Comprehensive TypeScript Support**: Full type definitions with 10+ interfaces covering all functionality for maximum developer experience and IDE support.
+- **📊 Comprehensive TypeScript Support**: Full type definitions with 15+ interfaces covering all functionality for maximum developer experience and IDE support.
 - **🚀 Lightweight & Fast**: Minimal overhead with maximum performance - designed to enhance your application, not slow it down.
 - **📚 No Learning Curve**: Dead simple API that you can master in seconds. No extensive documentation, complex configurations, or setup required - Log Engine works instantly.
 - **🌈 Colorized Console Output**: Beautiful ANSI color-coded log levels with intelligent terminal formatting - instantly identify message severity at a glance with color-coded output.
@@ -29,6 +30,10 @@ Log Engine transforms your development experience from chaotic debugging session
 - **✨ Enhanced Formatting**: Structured log entries with dual timestamps (ISO + human-readable) and colored level indicators for maximum readability.
 - **🔗 Zero Dependencies**: No external dependencies for maximum compatibility and security - keeps your bundle clean and your project simple.
 - **🔌 Easy Integration**: Simple API that works seamlessly with existing Node.js applications. Just `import` and start logging - no middleware, plugins, or configuration required.
+
+## ⚠️ Breaking Changes Notice
+
+**v3.0.0 Breaking Change**: The legacy `level` configuration will be removed in v3.0.0. If you're using `LogEngine.configure({ level: LogLevel.DEBUG })`, please migrate to `LogEngine.configure({ mode: LogMode.DEBUG })`. See our [Migration Guide](#migration-guide-loglevel--logmode) for details.
 
 ## 🤔 How It Works
 <!-- markdownlint-disable MD051 -->
@@ -71,6 +76,8 @@ yarn add @wgtechlabs/log-engine
 
 ## 🕹️ Usage
 
+> **⚠️ Important**: If you're using the legacy `level` configuration, please migrate to `mode`. The `level` configuration is deprecated and will be removed in v3.0.0. See the [Migration Guide](#migration-guide-loglevel--logmode) below.
+
 ### Quick Start
 
 ```typescript
@@ -101,6 +108,24 @@ console.log(LogEngine.testFieldRedaction('username')); // false
 
 // Raw logging for debugging (bypasses redaction)
 LogEngine.withoutRedaction().info('Debug data', { password: 'visible-in-debug' });
+
+// NEW: Custom output destinations (v2.0+)
+LogEngine.configure({
+  outputHandler: (level, message, data) => {
+    // Send logs anywhere: GUI apps, files, APIs, databases
+    myCustomHandler(level, message, data);
+  },
+  suppressConsoleOutput: true  // Optional: disable console
+});
+
+// NEW: Multiple outputs simultaneously
+LogEngine.configure({
+  outputs: [
+    'console',                    // Built-in console
+    myFileHandler,               // Custom file handler
+    myMonitoringHandler          // Custom monitoring
+  ]
+});
 ```
 
 ### Mode-Based Configuration (Recommended)
@@ -137,33 +162,50 @@ LogEngine.error('Error message');
 LogEngine.log('Critical message that always shows');
 ```
 
-### Legacy Level-Based Configuration (Backwards Compatible)
+### Legacy Level-Based Configuration (⚠️ Deprecated)
 
-For backwards compatibility, the old `LogLevel` API is still supported:
+**⚠️ DEPRECATION WARNING**: The `level` configuration is deprecated and will be removed in **v3.0.0**. Please use `mode` instead.
+
+For backwards compatibility, the old `LogLevel` API is still supported but shows deprecation warnings:
 
 ```typescript
 import { LogEngine, LogLevel } from '@wgtechlabs/log-engine';
 
-// Legacy configuration (still works but LogMode is recommended)
-LogEngine.configure({ level: LogLevel.DEBUG });
-LogEngine.configure({ level: LogLevel.INFO });
-LogEngine.configure({ level: LogLevel.WARN });
-LogEngine.configure({ level: LogLevel.ERROR });
+// ⚠️ DEPRECATED: Legacy configuration (shows warning, will be removed in v3.0.0)
+LogEngine.configure({ level: LogLevel.DEBUG });   // Triggers deprecation warning
+LogEngine.configure({ level: LogLevel.INFO });    // Triggers deprecation warning
+LogEngine.configure({ level: LogLevel.WARN });    // Triggers deprecation warning
+LogEngine.configure({ level: LogLevel.ERROR });   // Triggers deprecation warning
+
+// ✅ RECOMMENDED: Use the modern LogMode API instead
+LogEngine.configure({ mode: LogMode.DEBUG });     // No warnings, future-proof
 ```
 
+**Why migrate to LogMode?**
+
+- No deprecation warnings
+- Future-proof API that won't be removed
+- Better separation of concerns
+- Access to all v2.0+ features including output handlers
+- Clearer, more intuitive configuration
+
 ### Migration Guide: LogLevel → LogMode
+
+**⚠️ IMPORTANT DEPRECATION NOTICE**: The `level` configuration is **deprecated as of v2.0.0** and will be **removed in v3.0.0**. Please migrate to the new `mode` configuration.
 
 **Version 1.2.0+** introduces the new LogMode system for better separation of concerns. Here's how to migrate:
 
 ```typescript
-// OLD (v1.1.0 and earlier) - still works but deprecated
+// ❌ OLD (v1.1.0 and earlier) - DEPRECATED, will be removed in v3.0.0
 import { LogEngine, LogLevel } from '@wgtechlabs/log-engine';
-LogEngine.configure({ level: LogLevel.DEBUG });
+LogEngine.configure({ level: LogLevel.DEBUG });  // Shows deprecation warning
 
-// NEW (v1.2.1+) - recommended approach with advanced features
+// ✅ NEW (v2.0.0+) - recommended approach with advanced features
 import { LogEngine, LogMode } from '@wgtechlabs/log-engine';
-LogEngine.configure({ mode: LogMode.DEBUG });
+LogEngine.configure({ mode: LogMode.DEBUG });   // Modern, future-proof API
 ```
+
+**Migration Benefits:**
 
 **Key Benefits of LogMode:**
 
@@ -171,7 +213,8 @@ LogEngine.configure({ mode: LogMode.DEBUG });
 - **Better Environment Defaults**: `development→DEBUG`, `staging→WARN`, `test→ERROR`
 - **Advanced Features**: New redaction APIs and TypeScript interfaces work with LogMode
 - **Future-Proof**: All new features use the LogMode system
-- **100% Backwards Compatible**: Existing code continues to work unchanged
+- **100% Backwards Compatible**: Existing code continues to work unchanged (with deprecation warnings)
+- **No Breaking Changes in v2.0**: Legacy `level` support maintained until v3.0.0
 
 ### Color-Coded Output 🎨
 
@@ -485,9 +528,179 @@ LogEngine.withoutRedaction().info('Without redaction', data); // ⚠️ Visible
 
 **Perfect for:** Enterprise applications, compliance requirements, team development environments, production systems requiring both security and debugging flexibility, and any scenario where sensitive data protection is critical.
 
+## 🎯 Configurable Output Handlers
+
+**LogEngine v2.0+ introduces revolutionary output routing capabilities that transform how and where your logs are delivered.** This powerful system enables custom log destinations, multiple simultaneous outputs, and production-ready handlers while maintaining the same simple API you know and love.
+
+### Zero-Configuration Custom Routing
+
+**Redirect logs anywhere with a single configuration:**
+
+```typescript
+import { LogEngine } from '@wgtechlabs/log-engine';
+
+// Redirect to GUI application
+LogEngine.configure({
+  outputHandler: (level, message, data) => {
+    updateReactUI({ level, message, timestamp: new Date() });
+  },
+  suppressConsoleOutput: true  // Optional: disable console output
+});
+
+// Testing framework integration
+const capturedLogs = [];
+LogEngine.configure({
+  outputHandler: (level, message, data) => {
+    capturedLogs.push({ level, message, data });
+  },
+  suppressConsoleOutput: true
+});
+
+// Now use LogEngine normally - output goes to your custom handler
+LogEngine.info('User logged in', { userId: 123 });
+```
+
+### Multiple Simultaneous Outputs
+
+**Log to multiple destinations at once with built-in handlers:**
+
+```typescript
+LogEngine.configure({
+  outputs: [
+    'console',           // Built-in console handler
+    'silent',           // Built-in silent handler (no output)
+    (level, message, data) => {
+      // Custom file handler
+      fs.appendFileSync('./app.log', `${new Date().toISOString()} [${level}] ${message}\n`);
+    },
+    (level, message, data) => {
+      // Custom network handler
+      if (level === 'error') {
+        sendToMonitoringService({ level, message, data });
+      }
+    }
+  ]
+});
+
+// Single log call outputs to all configured destinations
+LogEngine.error('Database connection failed', { retries: 3 });
+```
+
+### Production-Ready Advanced Handlers
+
+**Enterprise-grade file and HTTP outputs with advanced features:**
+
+```typescript
+LogEngine.configure({
+  enhancedOutputs: [
+    'console',
+    {
+      type: 'file',
+      config: {
+        filePath: './logs/app.log',
+        maxFileSize: 10485760,        // 10MB rotation
+        maxBackupFiles: 5,            // Keep 5 backup files
+        append: true,                 // Append mode
+        formatter: (level, message, data) => {
+          const timestamp = new Date().toISOString();
+          const dataStr = data ? ` | ${JSON.stringify(data)}` : '';
+          return `[${timestamp}] ${level.toUpperCase()}: ${message}${dataStr}\n`;
+        }
+      }
+    },
+    {
+      type: 'http',
+      config: {
+        url: 'https://api.datadog.com/v1/logs',
+        method: 'POST',
+        batchSize: 10,                // Batch requests for performance
+        timeout: 5000,                // 5-second timeout
+        headers: {
+          'Authorization': 'Bearer your-api-key',
+          'Content-Type': 'application/json'
+        },
+        formatter: (logs) => ({
+          service: 'my-app',
+          environment: process.env.NODE_ENV,
+          logs: logs.map(log => ({
+            timestamp: log.timestamp,
+            level: log.level,
+            message: log.message,
+            metadata: log.data
+          }))
+        })
+      }
+    }
+  ]
+});
+```
+
+### Configuration Priority System
+
+**Flexible configuration with intelligent priority handling:**
+
+```typescript
+// Priority: outputs > enhancedOutputs > outputHandler > default console
+
+// Single handler (Phase 1)
+LogEngine.configure({
+  outputHandler: myHandler,
+  suppressConsoleOutput: true
+});
+
+// Multiple basic outputs (Phase 2) - takes priority over outputHandler
+LogEngine.configure({
+  outputs: ['console', myFileHandler, myNetworkHandler]
+});
+
+// Advanced outputs (Phase 3) - used when outputs not specified
+LogEngine.configure({
+  enhancedOutputs: [
+    'console',
+    { type: 'file', config: { filePath: './app.log' } }
+  ]
+});
+```
+
+### Error Handling & Resilience
+
+**Robust error handling ensures logging never breaks your application:**
+
+```typescript
+LogEngine.configure({
+  outputs: [
+    'console',                    // Always works
+    (level, message) => {
+      throw new Error('Handler failed');  // This failure won't break other outputs
+    },
+    (level, message) => {
+      fs.writeFileSync('./logs/app.log', message);  // This still works
+    }
+  ]
+});
+
+// If any handler fails, others continue working + fallback to console
+LogEngine.error('Critical error');  // Logs to console + working file handler
+```
+
+### Output Handler Benefits
+
+✅ **GUI Integration** - Perfect for desktop applications, web dashboards, and real-time monitoring  
+✅ **Testing Support** - Capture and assert on log output in automated tests  
+✅ **Production Monitoring** - Send logs to Datadog, New Relic, CloudWatch, or custom endpoints  
+✅ **File Logging** - Persistent logs with automatic rotation and backup management  
+✅ **Silent Operation** - Disable console output for clean CLI tools and background services  
+✅ **Multi-Destination** - Log to console + file + network simultaneously with zero overhead  
+✅ **Error Isolation** - Failed outputs don't break other outputs or your application  
+✅ **Backward Compatible** - Existing code works unchanged, new features are opt-in only  
+✅ **TypeScript Ready** - Full type safety with comprehensive interfaces and IntelliSense  
+✅ **Zero Dependencies** - Built-in handlers use only Node.js standard library  
+
+**Use Cases:** Desktop applications, testing frameworks, production monitoring, CI/CD pipelines, microservices, IoT devices, and any scenario requiring flexible log routing with enterprise-grade reliability.
+
 ## 📚 Comprehensive TypeScript Support
 
-**LogEngine v1.2.1+ includes extensive TypeScript definitions with 10+ interfaces for maximum type safety and developer experience:**
+**LogEngine v2.0+ includes extensive TypeScript definitions with 15+ interfaces for maximum type safety and developer experience:**
 
 ### Core Interfaces
 
@@ -500,6 +713,9 @@ import {
   ILogEngineWithoutRedaction,
   RedactionConfig,
   LoggerConfig,
+  LogOutputHandler,
+  FileOutputConfig,
+  HttpOutputConfig,
   IDataRedactor
 } from '@wgtechlabs/log-engine';
 
@@ -512,6 +728,18 @@ const config: RedactionConfig = {
   // ... fully typed configuration
 };
 
+// Type-safe output handler configuration
+const outputHandler: LogOutputHandler = (level, message, data) => {
+  console.log(`[${level}] ${message}`, data);
+};
+
+const fileConfig: FileOutputConfig = {
+  filePath: './app.log',
+  maxFileSize: 1048576,
+  maxBackupFiles: 3,
+  formatter: (level, message, data) => `${level}: ${message}\n`
+};
+
 // Advanced redaction testing with return types
 const isRedacted: boolean = LogEngine.testFieldRedaction('password');
 const currentConfig: RedactionConfig = LogEngine.getRedactionConfig();
@@ -519,6 +747,10 @@ const currentConfig: RedactionConfig = LogEngine.getRedactionConfig();
 // Type-safe raw logging
 const rawLogger: ILogEngineWithoutRedaction = LogEngine.withoutRedaction();
 rawLogger.info('Debug info', sensitiveData); // Fully typed methods
+
+// ⚠️ Legacy (deprecated) - will be removed in v3.0.0
+import { LogLevel } from '@wgtechlabs/log-engine';
+LogEngine.configure({ level: LogLevel.DEBUG }); // Shows deprecation warning
 ```
 
 ### Available Interfaces
@@ -526,11 +758,17 @@ rawLogger.info('Debug info', sensitiveData); // Fully typed methods
 - **`ILogEngine`** - Complete LogEngine API with all methods
 - **`ILogEngineWithoutRedaction`** - Raw logging methods interface  
 - **`IDataRedactor`** - Static DataRedactor class methods
+- **`LogOutputHandler`** - Custom output handler function interface
+- **`FileOutputConfig`** - File output handler configuration
+- **`HttpOutputConfig`** - HTTP output handler configuration
 - **`RedactionConfig`** - Comprehensive redaction configuration
-- **`LoggerConfig`** - Logger configuration options
+- **`LoggerConfig`** - Logger configuration options (including output handlers)
 - **`LogEntry`** - Structured log entry interface
+- **`LogLevel`** - ⚠️ **Deprecated**: Legacy level enumeration (use `LogMode` instead)
+- **`LogMode`** - ✅ **Recommended**: Modern mode enumeration
 - **`EnvironmentConfig`** - Environment variable documentation
-- **Plus 3+ additional interfaces** for advanced use cases
+- **`EnvironmentConfig`** - Environment variable documentation
+- **Plus 5+ additional interfaces** for advanced output handling and configuration
 
 **IDE Benefits:** IntelliSense, auto-completion, parameter hints, error detection, and comprehensive documentation tooltips throughout your development workflow.
 

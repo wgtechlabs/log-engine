@@ -316,6 +316,97 @@ it('should log LOG level messages regardless of configuration', () => {
       );
     });
   });
+
+  describe('Multiple Outputs API (Phase 2)', () => {
+    it('should support multiple output targets', () => {
+      const capturedLogs1: Array<{ level: string; message: string }> = [];
+      const capturedLogs2: Array<{ level: string; message: string }> = [];
+      
+      LogEngine.configure({
+        mode: LogMode.DEBUG,
+        outputs: [
+          'console',
+          (level, message) => capturedLogs1.push({ level, message }),
+          (level, message) => capturedLogs2.push({ level, message })
+        ]
+      });
+
+      LogEngine.info('Multi-output test');
+      LogEngine.error('Multi-output error');
+
+      // Console should be called
+      expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
+      expect(mocks.mockConsoleError).toHaveBeenCalledTimes(1);
+
+      // Both custom handlers should capture logs
+      expect(capturedLogs1).toHaveLength(2);
+      expect(capturedLogs2).toHaveLength(2);
+      
+      expect(capturedLogs1[0]).toMatchObject({
+        level: 'info',
+        message: expect.stringContaining('Multi-output test')
+      });
+      expect(capturedLogs1[1]).toMatchObject({
+        level: 'error',
+        message: expect.stringContaining('Multi-output error')
+      });
+    });
+
+    it('should support built-in handlers', () => {
+      LogEngine.configure({
+        mode: LogMode.DEBUG,
+        outputs: ['console', 'silent']
+      });
+
+      LogEngine.info('Built-in test');
+
+      // Console should work, silent should do nothing
+      expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
+      expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
+        expect.stringContaining('Built-in test')
+      );
+    });
+
+    it('should prioritize outputs over single outputHandler', () => {
+      const singleHandler = jest.fn();
+      const multiHandler = jest.fn();
+
+      LogEngine.configure({
+        mode: LogMode.DEBUG,
+        outputHandler: singleHandler,
+        outputs: [multiHandler]
+      });
+
+      LogEngine.info('Priority test');
+
+      // Only outputs array should be used
+      expect(multiHandler).toHaveBeenCalledTimes(1);
+      expect(singleHandler).not.toHaveBeenCalled();
+    });
+
+    it('should maintain compatibility with console + file + network pattern', () => {
+      const fileLogs: string[] = [];
+      const networkCalls: number[] = [];
+
+      LogEngine.configure({
+        mode: LogMode.DEBUG,
+        outputs: [
+          'console',
+          (level, message) => fileLogs.push(`${level}: ${message}`),
+          (level) => networkCalls.push(Date.now())
+        ]
+      });
+
+      LogEngine.info('Pattern test');
+      LogEngine.warn('Pattern warning');
+
+      // All three outputs should work
+      expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
+      expect(mocks.mockConsoleWarn).toHaveBeenCalledTimes(1);
+      expect(fileLogs).toHaveLength(2);
+      expect(networkCalls).toHaveLength(2);
+    });
+  });
 });
 
 

@@ -102,7 +102,7 @@ export class LoggerConfigManager {
         // Import LogFormatter to format system messages properly
         const { LogFormatter } = require('../formatter');
         
-        console.warn(LogFormatter.formatSystemMessage('⚠️  DEPRECATION WARNING: The "level" configuration is deprecated and will be removed in v2.0.0. Please use "mode" instead.'));
+        console.warn(LogFormatter.formatSystemMessage('⚠️  DEPRECATION WARNING: The "level" configuration is deprecated and will be removed in v3.0.0. Please use "mode" instead.'));
         console.warn(LogFormatter.formatSystemMessage('   Migration: LogEngine.configure({ level: LogLevel.DEBUG }) → LogEngine.configure({ mode: LogMode.DEBUG })'));
         console.warn(LogFormatter.formatSystemMessage('   See: https://github.com/wgtechlabs/log-engine#migration-guide-loglevel--logmode'));
     }

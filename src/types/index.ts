@@ -59,6 +59,69 @@ export interface LogEntry {
 export type LogOutputHandler = (level: string, message: string, data?: unknown) => void;
 
 /**
+ * Built-in output handler types (Phase 3 enhanced)
+ */
+export type BuiltInOutputHandler = 'console' | 'silent' | 'file' | 'http';
+
+/**
+ * Configuration for file output handler
+ */
+export interface FileOutputConfig {
+    /** File path to write logs to */
+    filePath: string;
+    /** Whether to append to existing file (default: true) */
+    append?: boolean;
+    /** Maximum file size before rotation in bytes (optional) */
+    maxFileSize?: number;
+    /** Number of backup files to keep during rotation (default: 3) */
+    maxBackupFiles?: number;
+    /** Custom format function for file output */
+    formatter?: (level: string, message: string, data?: unknown) => string;
+}
+
+/**
+ * Configuration for HTTP output handler
+ */
+export interface HttpOutputConfig {
+    /** HTTP endpoint URL to send logs to */
+    url: string;
+    /** HTTP method (default: 'POST') */
+    method?: 'POST' | 'PUT' | 'PATCH';
+    /** Custom headers to include with requests */
+    headers?: Record<string, string>;
+    /** Batch size for sending multiple logs (default: 1) */
+    batchSize?: number;
+    /** Timeout for HTTP requests in ms (default: 5000) */
+    timeout?: number;
+    /** Custom format function for HTTP payload */
+    formatter?: (logs: Array<{ level: string; message: string; data?: unknown; timestamp: string }>) => any;
+}
+
+/**
+ * Configuration object for advanced built-in handlers
+ */
+export interface AdvancedOutputConfig {
+    file?: FileOutputConfig;
+    http?: HttpOutputConfig;
+}
+
+/**
+ * Enhanced output target - can be built-in handler, custom function, or configured handler object
+ */
+export type EnhancedOutputTarget = BuiltInOutputHandler | LogOutputHandler | {
+    type: 'file';
+    config: FileOutputConfig;
+} | {
+    type: 'http';
+    config: HttpOutputConfig;
+};
+
+/**
+ * Output target - can be a built-in handler string or custom function
+ */
+export type OutputTarget = BuiltInOutputHandler | LogOutputHandler;
+
+/**
  * Configuration options for the logger
  * Supports both legacy level-based and new mode-based configuration
  */
@@ -70,10 +133,16 @@ export interface LoggerConfig {
     level?: LogLevel;
     /** Optional environment identifier for context (e.g., 'production', 'staging') */
     environment?: string;
-    /** Custom output handler function to replace console output */
+    /** Custom output handler function to replace console output (Phase 1 - backward compatibility) */
     outputHandler?: LogOutputHandler;
+    /** Array of output targets for multiple simultaneous outputs (Phase 2) */
+    outputs?: OutputTarget[];
+    /** Enhanced outputs with advanced configuration support (Phase 3) */
+    enhancedOutputs?: EnhancedOutputTarget[];
     /** Whether to suppress default console output (useful with custom outputHandler) */
     suppressConsoleOutput?: boolean;
+    /** Advanced configuration for built-in handlers (Phase 3) */
+    advancedOutputConfig?: AdvancedOutputConfig;
 }
 
 /**

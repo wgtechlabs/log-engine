@@ -213,7 +213,18 @@ export const LogEngine = {
 
 // Re-export types and utilities for external use
 export { LogMode, LogLevel } from './types';
-export type { LoggerConfig, RedactionConfig, LogOutputHandler } from './types';
+export type { 
+    LoggerConfig, 
+    RedactionConfig, 
+    LogOutputHandler, 
+    BuiltInOutputHandler, 
+    OutputTarget,
+    // Phase 3 types
+    FileOutputConfig,
+    HttpOutputConfig,
+    AdvancedOutputConfig,
+    EnhancedOutputTarget
+} from './types';
 export { DataRedactor, defaultRedactionConfig, RedactionController } from './redaction';
 
 // Default export for convenience
