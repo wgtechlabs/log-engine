@@ -28,25 +28,39 @@ describe('Phase 3: Advanced Output Handlers', () => {
         }
     });
     
-    afterEach(() => {
+    afterEach(async () => {
+        // Reset configuration first
+        LogEngine.configure({ mode: LogMode.INFO });
+        
+        // Wait a bit to ensure any pending writes complete
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
         // Clean up test files
         if (fs.existsSync(testDir)) {
             const files = fs.readdirSync(testDir);
-            files.forEach(file => {
+            for (const file of files) {
                 try {
-                    fs.unlinkSync(path.join(testDir, file));
+                    const filePath = path.join(testDir, file);
+                    // Check if file is still being used
+                    if (fs.existsSync(filePath)) {
+                        fs.unlinkSync(filePath);
+                    }
                 } catch (error) {
-                    // Ignore cleanup errors
+                    // If file is locked, wait and try again
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                    try {
+                        fs.unlinkSync(path.join(testDir, file));
+                    } catch (retryError) {
+                        // Ignore cleanup errors on retry
+                    }
                 }
-            });
+            }
         }
-        
-        // Reset configuration
-        LogEngine.configure({ mode: LogMode.INFO });
     });
     
-    afterAll(() => {
-        // Remove test directory
+    afterAll(async () => {
+        // Final cleanup - remove test directory
+        await new Promise(resolve => setTimeout(resolve, 200));
         try {
             if (fs.existsSync(testDir)) {
                 fs.rmSync(testDir, { recursive: true, force: true });
