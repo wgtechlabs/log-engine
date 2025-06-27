@@ -6,11 +6,11 @@ const baseConfig = require('./jest.config.js');
 
 module.exports = {
   ...baseConfig,
-  // Faster timeout for CI - most tests should complete quickly
-  testTimeout: 10000,
+  // Much shorter timeout for CI - fail fast
+  testTimeout: 5000,
   // Single worker to avoid race conditions and resource conflicts
   maxWorkers: 1,
-  // Force exit to prevent hanging, but only after proper cleanup
+  // Force exit to prevent hanging
   forceExit: true,
   // Disable handle detection in CI to prevent false positives
   detectOpenHandles: false,
@@ -41,5 +41,12 @@ module.exports = {
   clearMocks: true,
   restoreMocks: true,
   resetMocks: false,
-  resetModules: false
+  resetModules: false,
+  // More aggressive CI settings
+  modulePathIgnorePatterns: ['<rootDir>/dist/'],
+  // Standard ignore patterns
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/dist/'
+  ]
 };
