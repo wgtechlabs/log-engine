@@ -102,11 +102,15 @@ export class Logger {
      * @param data - Optional data
      */
     private processEnhancedOutputs(enhancedOutputs: EnhancedOutputTarget[], level: string, rawMessage: string, formattedMessage: string, data?: any): void {
+        const config = this.configManager.getConfig();
+        const advancedOutputConfig = config.advancedOutputConfig;
+        
         for (const output of enhancedOutputs) {
             try {
                 if (typeof output === 'string') {
-                    // Built-in handler string
-                    const handler = this.getBuiltInHandler(output);
+                    // Built-in handler string - get config if available
+                    const outputConfig = advancedOutputConfig?.[output as keyof typeof advancedOutputConfig];
+                    const handler = this.getBuiltInHandler(output, outputConfig);
                     if (handler) {
                         const messageToUse = (output === 'file' || output === 'http') ? rawMessage : formattedMessage;
                         handler(level, messageToUse, data);
