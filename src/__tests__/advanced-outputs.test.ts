@@ -209,12 +209,12 @@ describe('Phase 3: Advanced Output Handlers', () => {
                 };
                 if (callback && typeof callback === 'function') {
                     const mockRes = {
-                        on: (event: string, handler: Function) => {
+                        on: (event: string, handler: (chunk?: string | Buffer) => void) => {
                             if (event === 'data') handler('{"success": true}');
                             if (event === 'end') handler();
                         }
                     };
-                    setTimeout(() => (callback as Function)(mockRes), 10);
+                    setTimeout(() => (callback as (res: any) => void)(mockRes), 10);
                 }
                 return mockReq;
             });
@@ -229,12 +229,12 @@ describe('Phase 3: Advanced Output Handlers', () => {
                 };
                 if (callback && typeof callback === 'function') {
                     const mockRes = {
-                        on: (event: string, handler: Function) => {
+                        on: (event: string, handler: (chunk?: string | Buffer) => void) => {
                             if (event === 'data') handler('{"success": true}');
                             if (event === 'end') handler();
                         }
                     };
-                    setTimeout(() => (callback as Function)(mockRes), 10);
+                    setTimeout(() => (callback as (res: any) => void)(mockRes), 10);
                 }
                 return mockReq;
             });
