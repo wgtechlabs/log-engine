@@ -61,6 +61,45 @@ export class Logger {
     }
 
     /**
+     * Writes log output using configured output handler or default console methods
+     * @param level - The log level as a string
+     * @param formattedMessage - The pre-formatted message to output
+     * @param data - Optional data object that was logged
+     * @param isError - Whether this is an error level message (for console.error)
+     * @param isWarn - Whether this is a warning level message (for console.warn)
+     */
+    private writeToOutput(level: string, formattedMessage: string, data?: any, isError = false, isWarn = false): void {
+        const config = this.configManager.getConfig();
+        
+        if (config.outputHandler) {
+            // Use custom output handler with error handling
+            try {
+                config.outputHandler(level, formattedMessage, data);
+            } catch (error) {
+                // Fallback to console if custom handler fails
+                console.error(`[LogEngine] Output handler failed: ${error}. Falling back to console.`);
+                if (isError) {
+                    console.error(formattedMessage);
+                } else if (isWarn) {
+                    console.warn(formattedMessage);
+                } else {
+                    console.log(formattedMessage);
+                }
+            }
+        } else if (!config.suppressConsoleOutput) {
+            // Default console behavior (backward compatibility)
+            if (isError) {
+                console.error(formattedMessage);
+            } else if (isWarn) {
+                console.warn(formattedMessage);
+            } else {
+                console.log(formattedMessage);
+            }
+        }
+        // If suppressConsoleOutput is true and no outputHandler, do nothing (silent)
+    }
+
+    /**
      * Log a debug message with DEBUG level formatting
      * Uses console.log for output with purple/magenta coloring
      * Automatically redacts sensitive data when provided
@@ -71,7 +110,7 @@ export class Logger {
         if (this.shouldLog(LogLevel.DEBUG)) {
             const processedData = DataRedactor.redactData(data);
             const formatted = LogFormatter.format(LogLevel.DEBUG, message, processedData);
-            console.log(formatted);
+            this.writeToOutput('debug', formatted, processedData);
         }
     }
 
@@ -86,7 +125,7 @@ export class Logger {
         if (this.shouldLog(LogLevel.INFO)) {
             const processedData = DataRedactor.redactData(data);
             const formatted = LogFormatter.format(LogLevel.INFO, message, processedData);
-            console.log(formatted);
+            this.writeToOutput('info', formatted, processedData);
         }
     }
 
@@ -101,7 +140,7 @@ export class Logger {
         if (this.shouldLog(LogLevel.WARN)) {
             const processedData = DataRedactor.redactData(data);
             const formatted = LogFormatter.format(LogLevel.WARN, message, processedData);
-            console.warn(formatted);
+            this.writeToOutput('warn', formatted, processedData, false, true);
         }
     }
 
@@ -116,7 +155,7 @@ export class Logger {
         if (this.shouldLog(LogLevel.ERROR)) {
             const processedData = DataRedactor.redactData(data);
             const formatted = LogFormatter.format(LogLevel.ERROR, message, processedData);
-            console.error(formatted);
+            this.writeToOutput('error', formatted, processedData, true, false);
         }
     }
 
@@ -132,7 +171,7 @@ export class Logger {
         if (this.shouldLog(LogLevel.LOG)) {
             const processedData = DataRedactor.redactData(data);
             const formatted = LogFormatter.format(LogLevel.LOG, message, processedData);
-            console.log(formatted);
+            this.writeToOutput('log', formatted, processedData);
         }
     }
 
@@ -145,7 +184,7 @@ export class Logger {
     debugRaw(message: string, data?: any): void {
         if (this.shouldLog(LogLevel.DEBUG)) {
             const formatted = LogFormatter.format(LogLevel.DEBUG, message, data);
-            console.log(formatted);
+            this.writeToOutput('debug', formatted, data);
         }
     }
 
@@ -157,7 +196,7 @@ export class Logger {
     infoRaw(message: string, data?: any): void {
         if (this.shouldLog(LogLevel.INFO)) {
             const formatted = LogFormatter.format(LogLevel.INFO, message, data);
-            console.log(formatted);
+            this.writeToOutput('info', formatted, data);
         }
     }
 
@@ -169,7 +208,7 @@ export class Logger {
     warnRaw(message: string, data?: any): void {
         if (this.shouldLog(LogLevel.WARN)) {
             const formatted = LogFormatter.format(LogLevel.WARN, message, data);
-            console.warn(formatted);
+            this.writeToOutput('warn', formatted, data, false, true);
         }
     }
 
@@ -181,7 +220,7 @@ export class Logger {
     errorRaw(message: string, data?: any): void {
         if (this.shouldLog(LogLevel.ERROR)) {
             const formatted = LogFormatter.format(LogLevel.ERROR, message, data);
-            console.error(formatted);
+            this.writeToOutput('error', formatted, data, true, false);
         }
     }
 
@@ -193,7 +232,7 @@ export class Logger {
     logRaw(message: string, data?: any): void {
         if (this.shouldLog(LogLevel.LOG)) {
             const formatted = LogFormatter.format(LogLevel.LOG, message, data);
-            console.log(formatted);
+            this.writeToOutput('log', formatted, data);
         }
     }
 }

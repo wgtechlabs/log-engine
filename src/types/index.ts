@@ -53,6 +53,12 @@ export interface LogEntry {
 }
 
 /**
+ * Output handler function type for custom log output
+ * Receives the log level, formatted message, and optional data
+ */
+export type LogOutputHandler = (level: string, message: string, data?: unknown) => void;
+
+/**
  * Configuration options for the logger
  * Supports both legacy level-based and new mode-based configuration
  */
@@ -64,6 +70,10 @@ export interface LoggerConfig {
     level?: LogLevel;
     /** Optional environment identifier for context (e.g., 'production', 'staging') */
     environment?: string;
+    /** Custom output handler function to replace console output */
+    outputHandler?: LogOutputHandler;
+    /** Whether to suppress default console output (useful with custom outputHandler) */
+    suppressConsoleOutput?: boolean;
 }
 
 /**

@@ -14,7 +14,12 @@ describe('LogEngine', () => {
     mocks = setupConsoleMocks();
     
     // Reset LogEngine to consistent default state for each test using new mode API
-    LogEngine.configure({ mode: LogMode.INFO });
+    // Clear any output handler and console suppression from previous tests
+    LogEngine.configure({ 
+      mode: LogMode.INFO,
+      outputHandler: undefined,
+      suppressConsoleOutput: undefined
+    });
   });
 
   afterEach(() => {
@@ -252,6 +257,63 @@ it('should log LOG level messages regardless of configuration', () => {
       expect(typeof withoutRedaction.warn).toBe('function');
       expect(typeof withoutRedaction.error).toBe('function');
       expect(typeof withoutRedaction.log).toBe('function');
+    });
+  });
+
+  describe('Output Handler API (Phase 1)', () => {
+    it('should support custom output handler configuration', () => {
+      const capturedLogs: Array<{ level: string; message: string }> = [];
+      
+      LogEngine.configure({
+        mode: LogMode.DEBUG,
+        outputHandler: (level, message) => {
+          capturedLogs.push({ level, message });
+        }
+      });
+
+      LogEngine.info('Test message');
+      LogEngine.error('Error message');
+
+      expect(capturedLogs).toHaveLength(2);
+      expect(capturedLogs[0]).toMatchObject({
+        level: 'info',
+        message: expect.stringContaining('Test message')
+      });
+      expect(capturedLogs[1]).toMatchObject({
+        level: 'error',
+        message: expect.stringContaining('Error message')
+      });
+
+      // Console should not be called
+      expect(mocks.mockConsoleLog).not.toHaveBeenCalled();
+      expect(mocks.mockConsoleError).not.toHaveBeenCalled();
+    });
+
+    it('should support console suppression', () => {
+      LogEngine.configure({
+        mode: LogMode.DEBUG,
+        suppressConsoleOutput: true
+      });
+
+      LogEngine.info('Suppressed message');
+      LogEngine.error('Suppressed error');
+
+      // Nothing should be logged to console
+      expect(mocks.mockConsoleLog).not.toHaveBeenCalled();
+      expect(mocks.mockConsoleError).not.toHaveBeenCalled();
+      expect(mocks.mockConsoleWarn).not.toHaveBeenCalled();
+    });
+
+    it('should maintain backward compatibility when no output options are used', () => {
+      LogEngine.configure({ mode: LogMode.DEBUG });
+
+      LogEngine.info('Regular message');
+
+      // Should work exactly as before
+      expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
+      expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
+        expect.stringContaining('Regular message')
+      );
     });
   });
 });
