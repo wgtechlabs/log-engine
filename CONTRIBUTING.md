@@ -198,11 +198,33 @@ yarn test:ci:debug  # Shows open handles and verbose output
 - Ensure proper cleanup in `afterEach`/`afterAll`
 - Use unique identifiers for test artifacts
 
-**If coverage is low:**
+#### Environment Variables for Testing
+
+##### EXCLUDE_PROBLEMATIC_TESTS
+
+Controls whether to exclude tests that may cause hanging in certain CI environments:
+
 ```bash
-yarn test:coverage  # Generate detailed coverage report
-yarn coverage:open   # Open coverage report in browser
+# Include all tests (default - for local development)
+yarn test:ci
+
+# Exclude problematic tests (for CI environments with strict timeouts)
+EXCLUDE_PROBLEMATIC_TESTS=true yarn test:ci
 ```
+
+**When to use:**
+
+- ✅ **CI environments** where file I/O operations may cause timeouts
+- ✅ **Unreliable network environments** with strict resource constraints  
+- ✅ **Docker containers** with limited filesystem access
+- ❌ **Local development** (should run all tests to catch regressions)
+
+**What gets excluded:**
+
+- `advanced-outputs.test.ts` - Contains file I/O operations that may hang in restricted environments
+- A CI-friendly alternative (`advanced-outputs-ci.test.ts`) provides coverage for core functionality
+
+> **Note**: The excluded tests are automatically replaced with simplified versions that test the same functionality without problematic file operations.
 
 Thank you for contributing to the log-engine test suite! 🧪
 

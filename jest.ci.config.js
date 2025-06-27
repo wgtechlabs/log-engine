@@ -47,8 +47,12 @@ module.exports = {
   testPathIgnorePatterns: [
     '/node_modules/',
     '/dist/',
-    // Skip tests that do heavy file I/O operations in CI
-    'advanced-outputs.test.ts'
+    // Conditionally exclude problematic tests based on environment variable
+    // Set EXCLUDE_PROBLEMATIC_TESTS=true to skip tests that cause CI hanging
+    ...(process.env.EXCLUDE_PROBLEMATIC_TESTS === 'true' 
+      ? ['advanced-outputs.test.ts'] 
+      : []
+    )
   ],
   // Use fake timers to avoid real timeout issues
   fakeTimers: {

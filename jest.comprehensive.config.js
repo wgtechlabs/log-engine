@@ -1,6 +1,10 @@
 /**
  * Jest configuration specifically for comprehensive CI tests with coverage
  * Used for main branch testing with full coverage collection
+ * 
+ * Environment Variables:
+ * - EXCLUDE_PROBLEMATIC_TESTS=true: Excludes tests that cause hanging in CI environments
+ *   (specifically advanced-outputs.test.ts with file I/O operations)
  */
 const baseConfig = require('./jest.config.js');
 
@@ -50,7 +54,11 @@ module.exports = {
   testPathIgnorePatterns: [
     '/node_modules/',
     '/dist/',
-    // Temporarily exclude problematic file until fixed
-    'advanced-outputs.test.ts'
+    // Conditionally exclude problematic tests based on environment variable
+    // Set EXCLUDE_PROBLEMATIC_TESTS=true to skip tests that cause CI hanging
+    ...(process.env.EXCLUDE_PROBLEMATIC_TESTS === 'true' 
+      ? ['advanced-outputs.test.ts'] 
+      : []
+    )
   ]
 };
