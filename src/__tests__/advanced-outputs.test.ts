@@ -160,44 +160,95 @@ describe('Phase 3: Advanced Output Handlers', () => {
     describe('HTTP Output Handler', () => {
         // Mock HTTP requests for testing
         let mockFetch: jest.SpyInstance;
+        let mockHttpsRequest: jest.SpyInstance;
+        let mockHttpRequest: jest.SpyInstance;
         let requestCalls: any[] = [];
+        let consoleErrorSpy: jest.SpyInstance;
+        let consoleLogSpy: jest.SpyInstance;
+        
+        beforeAll(() => {
+            // Globally suppress console output for the entire HTTP test suite
+            consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+            consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+        });
+
+        afterAll(() => {
+            if (consoleErrorSpy) {
+                consoleErrorSpy.mockRestore();
+            }
+            if (consoleLogSpy) {
+                consoleLogSpy.mockRestore();
+            }
+        });
         
         beforeEach(() => {
             requestCalls = [];
-            // Mock fetch if it exists
-            if (typeof global.fetch !== 'undefined') {
-                mockFetch = jest.spyOn(global, 'fetch').mockImplementation(async (url, options) => {
-                    requestCalls.push({ url, options });
-                    return new Response('{"success": true}', { status: 200 });
-                });
-            } else {
-                // Mock for Node.js environments without fetch
-                const https = require('https');
-                mockFetch = jest.spyOn(https, 'request').mockImplementation((options, callback) => {
-                    requestCalls.push({ options, callback });
-                    // Mock response
-                    const mockReq = {
-                        write: jest.fn(),
-                        end: jest.fn(),
-                        on: jest.fn()
-                    };
-                    if (callback && typeof callback === 'function') {
-                        const mockRes = {
-                            on: (event: string, handler: Function) => {
-                                if (event === 'data') handler('{"success": true}');
-                                if (event === 'end') handler();
-                            }
-                        };
-                        setTimeout(() => (callback as Function)(mockRes), 10);
-                    }
-                    return mockReq;
-                });
+            
+            // Mock fetch to never make real requests
+            if (typeof global.fetch === 'undefined') {
+                global.fetch = jest.fn();
             }
+            
+            mockFetch = jest.spyOn(global, 'fetch').mockImplementation(async (url, options) => {
+                requestCalls.push({ url, options });
+                // Always resolve successfully to prevent fallback to Node.js HTTP
+                return Promise.resolve(new Response('{"success": true}', { status: 200 }));
+            });
+
+            // Also mock the Node.js HTTP modules as fallback
+            const https = require('https');
+            const http = require('http');
+            
+            mockHttpsRequest = jest.spyOn(https, 'request').mockImplementation((options, callback) => {
+                requestCalls.push({ type: 'https', options, callback });
+                const mockReq = {
+                    write: jest.fn(),
+                    end: jest.fn(),
+                    on: jest.fn(),
+                    destroy: jest.fn()
+                };
+                if (callback && typeof callback === 'function') {
+                    const mockRes = {
+                        on: (event: string, handler: Function) => {
+                            if (event === 'data') handler('{"success": true}');
+                            if (event === 'end') handler();
+                        }
+                    };
+                    setTimeout(() => (callback as Function)(mockRes), 10);
+                }
+                return mockReq;
+            });
+
+            mockHttpRequest = jest.spyOn(http, 'request').mockImplementation((options, callback) => {
+                requestCalls.push({ type: 'http', options, callback });
+                const mockReq = {
+                    write: jest.fn(),
+                    end: jest.fn(),
+                    on: jest.fn(),
+                    destroy: jest.fn()
+                };
+                if (callback && typeof callback === 'function') {
+                    const mockRes = {
+                        on: (event: string, handler: Function) => {
+                            if (event === 'data') handler('{"success": true}');
+                            if (event === 'end') handler();
+                        }
+                    };
+                    setTimeout(() => (callback as Function)(mockRes), 10);
+                }
+                return mockReq;
+            });
         });
         
         afterEach(() => {
             if (mockFetch) {
                 mockFetch.mockRestore();
+            }
+            if (mockHttpsRequest) {
+                mockHttpsRequest.mockRestore();
+            }
+            if (mockHttpRequest) {
+                mockHttpRequest.mockRestore();
             }
         });
 
@@ -356,10 +407,22 @@ describe('Phase 3: Advanced Output Handlers', () => {
     });
 
     describe('Error Handling', () => {
+        let consoleErrorSpy: jest.SpyInstance;
+        let consoleLogSpy: jest.SpyInstance;
+
+        beforeEach(() => {
+            // Suppress console.error and console.log during error handling tests
+            // to avoid confusing test output while still testing the functionality
+            consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+            consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+        });
+
+        afterEach(() => {
+            consoleErrorSpy.mockRestore();
+            consoleLogSpy.mockRestore();
+        });
+
         test('should handle file write errors gracefully', () => {
-            const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-            const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
-            
             // Use a path that will definitely fail on both Unix and Windows
             const invalidPath = process.platform === 'win32' 
                 ? 'Z:\\definitely\\invalid\\path\\test.log'  // Non-existent drive on Windows
@@ -376,22 +439,19 @@ describe('Phase 3: Advanced Output Handlers', () => {
             
             LogEngine.info('This should fail to write to file');
             
-            // Should log error and fall back to console
-            expect(consoleSpy).toHaveBeenCalledWith(
+            // Verify that error handler was called (console.error should have been called)
+            expect(consoleErrorSpy).toHaveBeenCalledWith(
                 'File output handler failed:',
                 expect.any(Error)
             );
+            // Verify fallback logging was called
             expect(consoleLogSpy).toHaveBeenCalledWith(
                 expect.stringContaining('[INFO]'),
                 undefined
             );
-            
-            consoleSpy.mockRestore();
-            consoleLogSpy.mockRestore();
         });
 
         test('should continue processing other outputs when one fails', () => {
-            const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
             const successfulLogs: any[] = [];
             
             // Use a path that will definitely fail on both Unix and Windows
@@ -412,12 +472,12 @@ describe('Phase 3: Advanced Output Handlers', () => {
             
             LogEngine.error('Error handling test');
             
-            // First handler should fail, second should succeed, third should fail
-            expect(consoleSpy).toHaveBeenCalledTimes(2); // Two errors logged
+            // Verify that error handlers were called (console.error should have been called twice)
+            expect(consoleErrorSpy).toHaveBeenCalledTimes(2);
+            
+            // Verify that the successful handler still worked
             expect(successfulLogs).toHaveLength(1);
             expect(successfulLogs[0].level).toBe('error');
-            
-            consoleSpy.mockRestore();
         });
     });
 

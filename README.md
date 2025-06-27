@@ -62,17 +62,19 @@ Open source development is resource-intensive. These **sponsored ads help keep L
 
 ## 📦 Installation
 
-Install the package using npm:
+Install the package using yarn (recommended):
+
+```bash
+yarn add @wgtechlabs/log-engine
+```
+
+Or using npm:
 
 ```bash
 npm install @wgtechlabs/log-engine
 ```
 
-Or using yarn:
-
-```bash
-yarn add @wgtechlabs/log-engine
-```
+> **Note**: This project uses yarn as the primary package manager for development. If you're contributing to the project, please use yarn to ensure consistency with the development environment.
 
 ## 🕹️ Usage
 
@@ -95,7 +97,7 @@ LogEngine.info('User login', {
   username: 'john_doe',        // ✅ Visible
   password: 'secret123',       // ❌ [REDACTED]
   email: 'john@example.com',   // ❌ [REDACTED]
-  apiKey: 'apikey123'             // ❌ [REDACTED]
+  apiKey: 'apikey123'          // ❌ [REDACTED]
 });
 
 // Advanced redaction features - Add custom patterns
@@ -121,9 +123,9 @@ LogEngine.configure({
 // NEW: Multiple outputs simultaneously
 LogEngine.configure({
   outputs: [
-    'console',                    // Built-in console
-    myFileHandler,               // Custom file handler
-    myMonitoringHandler          // Custom monitoring
+    'console',             // Built-in console
+    myFileHandler,         // Custom file handler
+    myMonitoringHandler    // Custom monitoring
   ]
 });
 ```
@@ -807,6 +809,12 @@ Your contributions to improving this project are greatly appreciated! 🙏✨
 ## 🎯 Contributing
 
 Contributions are welcome, create a pull request to this repo and I will review your code. Please consider to submit your pull request to the `dev` branch. Thank you!
+
+**Development Environment:**
+
+- This project uses **yarn** as the primary package manager for consistency across development and CI/CD
+- Clean test output is maintained using `jest.setup.js` for suppressing console noise during testing
+- All error logging functionality remains intact in production code
 
 Read the project's [contributing guide](./CONTRIBUTING.md) for more info, including testing guidelines and requirements.
 

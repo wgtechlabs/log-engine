@@ -336,9 +336,6 @@ describe('Data Redaction - Advanced Features', () => {
             expect(result.users[0].password).toBe('[REDACTED]');
             expect(result.users[0].email).toBe('[REDACTED]');
             expect(result.users[999].password).toBe('[REDACTED]');
-            
-            // Log performance metrics for debugging
-            console.log(`Redaction performance: ${executionTime}ms for 1000 users (baseline: ${baselineTime}ms for 100 users)`);
         });
     });
 

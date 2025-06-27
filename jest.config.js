@@ -10,6 +10,7 @@ module.exports = {
   transform: {
     '^.+\\.(ts|tsx)$': 'ts-jest',
   },
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],
   collectCoverageFrom: [
     'src/**/*.ts',
@@ -32,5 +33,9 @@ module.exports = {
   // Enable parallel test execution for better performance
   maxWorkers: '50%',
   // Timeout for individual tests
-  testTimeout: 10000
+  testTimeout: 10000,
+  // Force exit to prevent hanging workers
+  forceExit: true,
+  // Detect open handles for debugging
+  detectOpenHandles: false
 };
