@@ -41,7 +41,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:coverage:watch": "jest --coverage --watch",
-    "test:ci": "jest --config=jest.ci.config.js --coverage --runInBand",
+    "test:ci": "jest --config=jest.comprehensive.config.js --coverage --runInBand",
     "test:ci:fast": "jest --config=jest.ci.config.js --runInBand --passWithNoTests --forceExit",
     "test:ci:dev": "jest --config=jest.ci.config.js --runInBand --passWithNoTests --maxWorkers=1",
     "test:ci:main": "jest --config=jest.ci.config.js --coverage --runInBand --ci",
