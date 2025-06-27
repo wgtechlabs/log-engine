@@ -266,7 +266,18 @@ export class HttpOutputHandler {
 }
 
 /**
- * Factory function to create built-in output handlers
+ * Returns a logging handler function based on the specified type and configuration.
+ *
+ * Supported types are:
+ * - `'console'`: Logs to the console using the appropriate method for the log level.
+ * - `'silent'`: Returns a no-op handler that discards all logs.
+ * - `'file'`: Writes logs to a file with optional rotation; requires `filePath` in config.
+ * - `'http'`: Sends logs to a remote HTTP endpoint; requires `url` in config.
+ *
+ * If required configuration is missing or initialization fails, logs an error and returns either a fallback handler or `null`.
+ *
+ * @param type - The type of output handler to create (`'console'`, `'silent'`, `'file'`, or `'http'`)
+ * @returns A log handler function or `null` if the handler cannot be created
  */
 export function createBuiltInHandler(type: string, config?: any): ((level: string, message: string, data?: unknown) => void) | null {
     switch (type) {
