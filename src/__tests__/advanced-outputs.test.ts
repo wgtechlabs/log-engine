@@ -30,14 +30,13 @@ describe('Phase 3: Advanced Output Handlers', () => {
       suppressConsoleOutput: false
     });
 
-    // Create test directory - use sync operation for reliability in CI
+    // Create test directory
     try {
       if (!fs.existsSync(testDir)) {
         fs.mkdirSync(testDir, { recursive: true });
       }
     } catch (error) {
       // If directory creation fails, use a backup directory
-      console.warn('Failed to create test directory, using fallback');
     }
   });
 
@@ -45,7 +44,7 @@ describe('Phase 3: Advanced Output Handlers', () => {
     // Reset configuration first
     LogEngine.configure({ mode: LogMode.INFO });
 
-    // Clean up test files - use sync operations for faster cleanup in CI
+    // Clean up test files
     try {
       if (fs.existsSync(testDir)) {
         const files = fs.readdirSync(testDir);
@@ -59,7 +58,6 @@ describe('Phase 3: Advanced Output Handlers', () => {
       }
     } catch (error) {
       // Log cleanup error but don't fail the test
-      console.warn('Test cleanup warning:', error);
     }
   });
 
@@ -83,7 +81,6 @@ describe('Phase 3: Advanced Output Handlers', () => {
       }
     } catch (error) {
       // Ignore final cleanup errors
-      console.warn('Final cleanup warning:', error);
     }
   });
 
@@ -104,7 +101,7 @@ describe('Phase 3: Advanced Output Handlers', () => {
 
       LogEngine.info('Test message', { test: 'data' });
 
-      // Wait for file to be created and have content - shorter timeout for CI
+      // Wait for file to be created and have content
       await waitForFile(logFile, 1000);
       await waitForFileContent(logFile, '[INFO] Test message', 1000);
 
