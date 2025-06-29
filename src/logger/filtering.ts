@@ -40,10 +40,10 @@ export class LogFilter {
      */
   static shouldLog(level: LogLevel, currentMode: LogMode): boolean {
     // Get the severity rank for the message level using safe lookup
-    const messageSeverity = this.getSeverityRank(level);
+    const messageSeverity = LogFilter.getSeverityRank(level);
 
     // Get the minimum severity threshold for the current mode using safe lookup
-    const modeThreshold = this.getModeThreshold(currentMode);
+    const modeThreshold = LogFilter.getModeThreshold(currentMode);
 
     // Allow the message if its severity meets or exceeds the mode threshold
     return messageSeverity >= modeThreshold;
@@ -55,14 +55,7 @@ export class LogFilter {
      * @returns Numeric severity rank
      */
   static getSeverityRank(level: LogLevel): number {
-    switch (level) {
-    case LogLevel.DEBUG: return this.SEVERITY_RANKS[LogLevel.DEBUG];
-    case LogLevel.INFO: return this.SEVERITY_RANKS[LogLevel.INFO];
-    case LogLevel.WARN: return this.SEVERITY_RANKS[LogLevel.WARN];
-    case LogLevel.ERROR: return this.SEVERITY_RANKS[LogLevel.ERROR];
-    case LogLevel.LOG: return this.SEVERITY_RANKS[LogLevel.LOG];
-    default: return 0;
-    }
+    return LogFilter.SEVERITY_RANKS[level] ?? 0;
   }
 
   /**
@@ -71,14 +64,6 @@ export class LogFilter {
      * @returns Numeric threshold value
      */
   static getModeThreshold(mode: LogMode): number {
-    switch (mode) {
-    case LogMode.DEBUG: return this.MODE_THRESHOLDS[LogMode.DEBUG];
-    case LogMode.INFO: return this.MODE_THRESHOLDS[LogMode.INFO];
-    case LogMode.WARN: return this.MODE_THRESHOLDS[LogMode.WARN];
-    case LogMode.ERROR: return this.MODE_THRESHOLDS[LogMode.ERROR];
-    case LogMode.SILENT: return this.MODE_THRESHOLDS[LogMode.SILENT];
-    case LogMode.OFF: return this.MODE_THRESHOLDS[LogMode.OFF];
-    default: return 0;
-    }
+    return LogFilter.MODE_THRESHOLDS[mode] ?? 0;
   }
 }
