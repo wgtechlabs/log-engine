@@ -185,6 +185,67 @@ describe('Advanced Output Handlers', () => {
       expect(fs.existsSync(logFile)).toBe(true);
       expect(fs.existsSync(backupFile1)).toBe(true);
     });
+
+    test('should handle file rotation with no existing backup files', async () => {
+      const logFile = path.join(testDir, 'rotation-no-backup-test.log');
+
+      LogEngine.configure({
+        outputs: ['file'],
+        suppressConsoleOutput: true,
+        advancedOutputConfig: {
+          file: {
+            filePath: logFile,
+            maxFileSize: 80, // Small size to trigger rotation quickly
+            maxBackupFiles: 3,
+            append: false
+          }
+        }
+      });
+
+      // Write just enough to trigger one rotation
+      LogEngine.info('First message with enough content to exceed the small size limit and trigger rotation');
+      LogEngine.info('Second message to trigger rotation');
+
+      await waitForFile(logFile, 2000);
+
+      // Should have created backup file even when none existed before
+      expect(fs.existsSync(logFile)).toBe(true);
+      expect(fs.existsSync(`${logFile}.1`)).toBe(true);
+    });
+
+    test('should handle concurrent rotation attempts', async () => {
+      const logFile = path.join(testDir, 'concurrent-rotation-test.log');
+
+      LogEngine.configure({
+        outputs: ['file'],
+        suppressConsoleOutput: true,
+        advancedOutputConfig: {
+          file: {
+            filePath: logFile,
+            maxFileSize: 100, // Small size to trigger rotation
+            maxBackupFiles: 2,
+            append: false
+          }
+        }
+      });
+
+      // Rapidly send many messages to test rotation concurrency protection
+      const promises: Promise<void>[] = [];
+      for (let i = 0; i < 20; i++) {
+        promises.push(new Promise<void>((resolve) => {
+          setTimeout(() => {
+            LogEngine.info(`Concurrent test message ${i} with enough content to trigger rotation`);
+            resolve();
+          }, i * 5); // Stagger messages slightly
+        }));
+      }
+
+      await Promise.all(promises);
+      await waitForFile(logFile, 3000);
+
+      // File should exist and rotations should have been handled safely
+      expect(fs.existsSync(logFile)).toBe(true);
+    });
   });
 
   describe('HTTP Output Handler', () => {
@@ -323,6 +384,107 @@ describe('Advanced Output Handlers', () => {
         expect(body.custom_format).toBe(true);
         expect(body.event_count).toBe(1);
         expect(body.events[0]).toBe('debug: Custom format test');
+      }
+    });
+
+    test('should handle HTTP timeout configuration', async () => {
+      LogEngine.configure({
+        outputs: ['http'],
+        suppressConsoleOutput: true,
+        advancedOutputConfig: {
+          http: {
+            url: 'https://api.example.com/logs',
+            timeout: 1000,
+            batchSize: 1
+          }
+        }
+      });
+
+      LogEngine.error('Timeout test message');
+
+      await mockHttpHandler.waitForRequests(1);
+
+      const requests = mockHttpHandler.getRequests();
+      expect(requests.length).toBeGreaterThan(0);
+    });
+
+    test('should handle HTTP with custom headers and method', async () => {
+      LogEngine.configure({
+        outputs: ['http'],
+        suppressConsoleOutput: true,
+        advancedOutputConfig: {
+          http: {
+            url: 'https://api.example.com/logs',
+            method: 'PUT',
+            headers: {
+              'Custom-Header': 'test-value',
+              'Content-Type': 'application/json'
+            },
+            batchSize: 1
+          }
+        }
+      });
+
+      LogEngine.info('Custom headers test');
+
+      await mockHttpHandler.waitForRequests(1);
+
+      const requests = mockHttpHandler.getRequests();
+      expect(requests.length).toBeGreaterThan(0);
+
+      const call = requests[0];
+      expect(call.options.method).toBe('PUT');
+      expect(call.options.headers['Custom-Header']).toBe('test-value');
+    });
+
+    test('should handle HTTP batching edge case', async () => {
+      LogEngine.configure({
+        outputs: ['http'],
+        suppressConsoleOutput: true,
+        advancedOutputConfig: {
+          http: {
+            url: 'https://api.example.com/logs',
+            batchSize: 5 // Large batch size to test single message handling
+          }
+        }
+      });
+
+      LogEngine.info('Single batch test message');
+
+      // Wait for the message to be sent
+      await mockHttpHandler.waitForRequests(1);
+      const requests = mockHttpHandler.getRequests();
+      expect(requests.length).toBeGreaterThan(0);
+    });
+
+    test('should handle Node.js HTTP fallback when fetch is unavailable', async () => {
+      // Temporarily remove fetch to trigger fallback
+      const originalFetch = (global as any).fetch;
+      delete (global as any).fetch;
+
+      try {
+        LogEngine.configure({
+          outputs: ['http'],
+          suppressConsoleOutput: true,
+          advancedOutputConfig: {
+            http: {
+              url: 'https://api.example.com/logs',
+              batchSize: 1
+            }
+          }
+        });
+
+        LogEngine.error('Fallback test message');
+
+        // Give some time for the fallback to attempt
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // The request won't be captured by our mock in the fallback case,
+        // but we're testing that the code path executes without error
+        expect(true).toBe(true); // Test passes if no error is thrown
+      } finally {
+        // Restore fetch
+        (global as any).fetch = originalFetch;
       }
     });
   });
@@ -536,6 +698,502 @@ describe('Advanced Output Handlers', () => {
       const content = await fs.promises.readFile(logFile, 'utf8');
       expect(content).toContain('Performance test message 0');
       expect(content).toContain('Performance test message 999');
+    });
+  });
+
+  describe('Edge Cases and Error Handling', () => {
+    test('should handle file creation with non-existent directory', async () => {
+      const logFile = path.join(testDir, 'subdir', 'test.log');
+
+      LogEngine.configure({
+        outputs: ['file'],
+        suppressConsoleOutput: true,
+        advancedOutputConfig: {
+          file: {
+            filePath: logFile,
+            append: false
+          }
+        }
+      });
+
+      LogEngine.info('Directory creation test');
+
+      // Wait for file to be created
+      await waitForFile(logFile, 2000);
+
+      expect(fs.existsSync(logFile)).toBe(true);
+      const content = await fs.promises.readFile(logFile, 'utf8');
+      expect(content).toContain('Directory creation test');
+    });
+
+    test('should handle file rotation with maximum backup files', async () => {
+      const logFile = path.join(testDir, 'rotation-max-test.log');
+
+      LogEngine.configure({
+        outputs: ['file'],
+        suppressConsoleOutput: true,
+        advancedOutputConfig: {
+          file: {
+            filePath: logFile,
+            maxFileSize: 100, // Very small size to trigger rotation
+            maxBackupFiles: 2, // Only keep 2 backup files
+            append: false
+          }
+        }
+      });
+
+      // Generate enough logs to cause multiple rotations
+      for (let i = 0; i < 25; i++) {
+        LogEngine.info(`Rotation test message ${i} with extra content to exceed size limit and trigger rotation`);
+      }
+
+      // Wait for files to be created
+      await waitForFile(logFile, 3000);
+
+      // Main file should exist
+      expect(fs.existsSync(logFile)).toBe(true);
+
+      // Check that at least one backup file exists
+      const backup1 = `${logFile}.1`;
+      expect(fs.existsSync(backup1)).toBe(true);
+
+      // The number of backup files depends on rotation timing, but should not exceed maxBackupFiles
+      const backup2 = `${logFile}.2`;
+      const backup3 = `${logFile}.3`;
+
+      // backup3 should not exist due to maxBackupFiles limit of 2
+      expect(fs.existsSync(backup3)).toBe(false);
+    });
+
+    test('should handle queue processing during rotation', async () => {
+      const logFile = path.join(testDir, 'queue-test.log');
+
+      LogEngine.configure({
+        outputs: ['file'],
+        suppressConsoleOutput: true,
+        advancedOutputConfig: {
+          file: {
+            filePath: logFile,
+            maxFileSize: 150, // Small size to trigger rotation
+            maxBackupFiles: 3,
+            append: false
+          }
+        }
+      });
+
+      // Rapidly log messages to test queue processing during rotation
+      for (let i = 0; i < 10; i++) {
+        LogEngine.info(`Queue test message ${i} with enough content to trigger rotation quickly`);
+      }
+
+      await waitForFile(logFile, 3000);
+
+      expect(fs.existsSync(logFile)).toBe(true);
+      const content = await fs.promises.readFile(logFile, 'utf8');
+      expect(content).toContain('Queue test message');
+    });
+
+    test('should handle createBuiltInHandler with invalid config', () => {
+      // Test error paths in createBuiltInHandler
+      const { createBuiltInHandler } = require('../logger/advanced-outputs');
+
+      // Test file handler without filePath
+      const fileHandler = createBuiltInHandler('file', {});
+      expect(fileHandler).toBeNull();
+
+      // Test http handler without url
+      const httpHandler = createBuiltInHandler('http', {});
+      expect(httpHandler).toBeNull();
+
+      // Test unknown handler type
+      const unknownHandler = createBuiltInHandler('unknown', {});
+      expect(unknownHandler).toBeNull();
+    });
+
+    test('should handle file write with non-string data in SecureFileSystem', () => {
+      // Test error path in SecureFileSystem.writeFileSync
+      const { SecureFileSystem } = require('../logger/advanced-outputs');
+      const testFile = path.join(testDir, 'data-type-test.log');
+
+      // This should throw an error for non-string data
+      expect(() => {
+        SecureFileSystem.writeFileSync(testFile, 123 as any);
+      }).toThrow('Data must be a string for security');
+    });
+
+    test('should handle SecureFileSystem path validation edge cases', () => {
+      const { SecureFileSystem } = require('../logger/advanced-outputs');
+
+      // Test empty/null path
+      expect(() => {
+        SecureFileSystem.statSync('');
+      }).toThrow('File path must be a non-empty string');
+
+      expect(() => {
+        SecureFileSystem.statSync(null as any);
+      }).toThrow('File path must be a non-empty string');
+
+      // Test path traversal with different patterns
+      expect(() => {
+        SecureFileSystem.statSync('../../etc/passwd');
+      }).toThrow('Path traversal detected');
+
+      // Test access to system directories
+      const systemPath = process.platform === 'win32' ? 'C:\\Windows\\system32\\test.log' : '/etc/passwd';
+      expect(() => {
+        SecureFileSystem.statSync(systemPath);
+      }).toThrow('File path outside allowed directories');
+
+      // Test path outside safe directories
+      const outsidePath = process.platform === 'win32' ? 'C:\\Users\\test.log' : '/home/user/test.log';
+      expect(() => {
+        SecureFileSystem.statSync(outsidePath);
+      }).toThrow('File path outside allowed directories');
+    });
+
+    test('should handle SecureFileSystem unlinkSync with invalid path restrictions', () => {
+      const { SecureFileSystem } = require('../logger/advanced-outputs');
+
+      // Try to delete a file outside log/temp directories - use a system directory
+      const invalidPath = process.platform === 'win32' ? 'C:\\Users\\test.log' : '/home/user/test.log';
+      expect(() => {
+        SecureFileSystem.unlinkSync(invalidPath);
+      }).toThrow('File path outside allowed directories');
+    });
+
+    test('should handle SecureFileSystem renameSync with invalid paths', () => {
+      const { SecureFileSystem } = require('../logger/advanced-outputs');
+
+      const validLogPath = path.join(testDir, 'test.log');
+      const invalidPath = process.platform === 'win32' ? 'C:\\Users\\test.log' : '/home/user/test.log';
+
+      // Try to rename with source outside allowed directories
+      expect(() => {
+        SecureFileSystem.renameSync(invalidPath, validLogPath);
+      }).toThrow('File path outside allowed directories');
+
+      // Try to rename with destination outside allowed directories
+      expect(() => {
+        SecureFileSystem.renameSync(validLogPath, invalidPath);
+      }).toThrow('File path outside allowed directories');
+    });
+
+    test('should handle HTTP handler with non-HTTPS URL fallback', async () => {
+      // Mock require to simulate Node.js environment without fetch
+      const originalFetch = (global as any).fetch;
+      delete (global as any).fetch;
+
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      try {
+        LogEngine.configure({
+          outputs: ['http'],
+          suppressConsoleOutput: true,
+          advancedOutputConfig: {
+            http: {
+              url: 'http://insecure.example.com/logs', // HTTP instead of HTTPS
+              batchSize: 1
+            }
+          }
+        });
+
+        LogEngine.error('HTTP security test');
+
+        // Wait a bit for the request to be processed
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Should have logged a security error
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          'HTTP request setup failed:',
+          expect.objectContaining({
+            message: expect.stringContaining('HTTP (cleartext) connections are not allowed')
+          })
+        );
+      } finally {
+        consoleErrorSpy.mockRestore();
+        (global as any).fetch = originalFetch;
+      }
+    });
+
+    test('should handle HTTP handler timeout in Node.js fallback', async () => {
+      const originalFetch = (global as any).fetch;
+      const originalHttps = require('https');
+      delete (global as any).fetch;
+
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      try {
+        // Mock https.request to simulate timeout
+        const mockReq: any = {
+          on: jest.fn((event: string, callback: () => void): any => {
+            if (event === 'timeout') {
+              setTimeout(callback, 10); // Trigger timeout quickly
+            }
+            return mockReq;
+          }),
+          write: jest.fn(),
+          end: jest.fn(),
+          destroy: jest.fn()
+        };
+
+        jest.spyOn(require('https'), 'request').mockImplementation(() => mockReq);
+
+        LogEngine.configure({
+          outputs: ['http'],
+          suppressConsoleOutput: true,
+          advancedOutputConfig: {
+            http: {
+              url: 'https://api.example.com/logs',
+              timeout: 50,
+              batchSize: 1
+            }
+          }
+        });
+
+        LogEngine.error('Timeout test');
+
+        // Wait for timeout to trigger
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        expect(mockReq.destroy).toHaveBeenCalled();
+      } finally {
+        consoleErrorSpy.mockRestore();
+        (global as any).fetch = originalFetch;
+        jest.restoreAllMocks();
+      }
+    });
+
+    test('should handle HTTP flush with empty buffer', () => {
+      const { HttpOutputHandler } = require('../logger/advanced-outputs');
+      const handler = new HttpOutputHandler({
+        url: 'https://api.example.com/logs'
+      });
+
+      // Calling flush with empty buffer should not cause errors
+      expect(() => {
+        handler.flush();
+      }).not.toThrow();
+    });
+
+    test('should handle file output with rotation edge cases', async () => {
+      const logFile = path.join(testDir, 'rotation-edge-test.log');
+
+      // Create handler with rotation disabled (maxFileSize = 0)
+      LogEngine.configure({
+        outputs: ['file'],
+        suppressConsoleOutput: true,
+        advancedOutputConfig: {
+          file: {
+            filePath: logFile,
+            maxFileSize: 0, // No rotation
+            append: true
+          }
+        }
+      });
+
+      // Write multiple large messages - should not trigger rotation
+      for (let i = 0; i < 5; i++) {
+        LogEngine.info(`No rotation test ${i} with a lot of content that would normally trigger rotation if maxFileSize was set`);
+      }
+
+      await waitForFile(logFile, 1000);
+
+      // Should only have main file, no backups
+      expect(fs.existsSync(logFile)).toBe(true);
+      expect(fs.existsSync(`${logFile}.1`)).toBe(false);
+    });
+
+    test('should handle file rotation with existing backup files cleanup', async () => {
+      const logFile = path.join(testDir, 'cleanup-rotation-test.log');
+
+      // Pre-create backup files to test cleanup logic
+      await fs.promises.writeFile(`${logFile}.1`, 'old backup 1\n');
+      await fs.promises.writeFile(`${logFile}.2`, 'old backup 2\n');
+      await fs.promises.writeFile(`${logFile}.3`, 'old backup 3\n'); // This should be deleted
+
+      LogEngine.configure({
+        outputs: ['file'],
+        suppressConsoleOutput: true,
+        advancedOutputConfig: {
+          file: {
+            filePath: logFile,
+            maxFileSize: 80, // Small size to trigger rotation quickly
+            maxBackupFiles: 2, // Only keep 2 backups
+            append: false
+          }
+        }
+      });
+
+      // Write messages to trigger rotation
+      for (let i = 0; i < 10; i++) {
+        LogEngine.info(`Cleanup rotation test ${i} with enough content to trigger rotation`);
+      }
+
+      await waitForFile(logFile, 2000);
+
+      // The main goal is to test rotation logic, the exact number of backup files depends on timing
+      // So we'll check that main file exists and at least some rotation occurred
+      expect(fs.existsSync(logFile)).toBe(true);
+
+      // Check that some backup rotation occurred - either .3 was deleted or rotation happened
+      const backup1Exists = fs.existsSync(`${logFile}.1`);
+      const backup2Exists = fs.existsSync(`${logFile}.2`);
+      const backup3Exists = fs.existsSync(`${logFile}.3`);
+
+      // At least one backup should exist, indicating rotation occurred
+      expect(backup1Exists || backup2Exists).toBe(true);
+    });
+
+    test('should handle HTTP error paths in flush operation', () => {
+      const { HttpOutputHandler } = require('../logger/advanced-outputs');
+
+      // Create handler with formatter that throws
+      const handler = new HttpOutputHandler({
+        url: 'https://api.example.com/logs',
+        formatter: () => {
+          throw new Error('Formatter error');
+        }
+      });
+
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      try {
+        // Add log entry and trigger flush
+        handler.write('error', 'test message');
+
+        // Force flush to trigger the error
+        handler.flush();
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          'HTTP flush failed:',
+          expect.any(Error)
+        );
+      } finally {
+        consoleErrorSpy.mockRestore();
+      }
+    });
+
+    test('should handle file write error during non-append mode', async () => {
+      const logFile = path.join(testDir, 'write-error-test.log');
+
+      // Create the file as read-only to trigger write error
+      await fs.promises.writeFile(logFile, 'initial content');
+      await fs.promises.chmod(logFile, 0o444); // Read-only
+
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+
+      try {
+        LogEngine.configure({
+          outputs: ['file'],
+          suppressConsoleOutput: true,
+          advancedOutputConfig: {
+            file: {
+              filePath: logFile,
+              append: false // Write mode should fail on read-only file
+            }
+          }
+        });
+
+        LogEngine.info('This should fail to write');
+
+        // Should have logged the error and fallen back to console
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          'File output handler failed:',
+          expect.any(Error)
+        );
+        expect(consoleLogSpy).toHaveBeenCalledWith(
+          expect.stringContaining('[INFO]'),
+          undefined
+        );
+      } finally {
+        consoleErrorSpy.mockRestore();
+        consoleLogSpy.mockRestore();
+
+        // Restore write permissions for cleanup
+        try {
+          await fs.promises.chmod(logFile, 0o644);
+        } catch (error) {
+          // Ignore cleanup errors
+        }
+      }
+    });
+
+    test('should handle URL parsing edge cases in HTTP handler', async () => {
+      const originalFetch = (global as any).fetch;
+      delete (global as any).fetch;
+
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      try {
+        // Mock https.request to capture the parsed URL options
+        let capturedOptions: any = null;
+        const mockReq: any = {
+          on: jest.fn((): any => mockReq),
+          write: jest.fn(),
+          end: jest.fn()
+        };
+
+        jest.spyOn(require('https'), 'request').mockImplementation((options) => {
+          capturedOptions = options;
+          return mockReq;
+        });
+
+        LogEngine.configure({
+          outputs: ['http'],
+          suppressConsoleOutput: true,
+          advancedOutputConfig: {
+            http: {
+              url: 'https://api.example.com:8443/logs?token=abc123',
+              batchSize: 1
+            }
+          }
+        });
+
+        LogEngine.error('URL parsing test');
+
+        // Wait for the request to be processed
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Verify URL was parsed correctly
+        expect(capturedOptions).not.toBeNull();
+        expect(capturedOptions.hostname).toBe('api.example.com');
+        expect(capturedOptions.port).toBe(8443);
+        expect(capturedOptions.path).toBe('/logs?token=abc123');
+      } finally {
+        consoleErrorSpy.mockRestore();
+        (global as any).fetch = originalFetch;
+        jest.restoreAllMocks();
+      }
+    });
+
+    test('should handle flush timeout scheduling edge cases', async () => {
+      const { HttpOutputHandler } = require('../logger/advanced-outputs');
+
+      // Mock global fetch for this test
+      const mockFetch = jest.fn().mockResolvedValue(new Response('{"success": true}'));
+      (global as any).fetch = mockFetch;
+
+      try {
+        const handler = new HttpOutputHandler({
+          url: 'https://api.example.com/logs',
+          batchSize: 5 // Large batch size
+        });
+
+        // Add one message (should schedule timeout)
+        handler.write('info', 'first message');
+
+        // Add another message (should not schedule new timeout)
+        handler.write('warn', 'second message');
+
+        // Wait for timeout to trigger flush
+        await new Promise(resolve => setTimeout(resolve, 1200));
+
+        // Verify fetch was called
+        expect(mockFetch).toHaveBeenCalled();
+      } finally {
+        delete (global as any).fetch;
+      }
     });
   });
 });

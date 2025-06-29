@@ -5,6 +5,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import * as os from 'os';
 import type { FileOutputConfig, HttpOutputConfig } from '../types';
 
 // Type definitions for HTTP operations
@@ -48,11 +49,12 @@ interface HttpRequestOptions {
 class SecureFileSystem {
   /**
    * Predefined safe base directories for different operation types
+   * Restricted to specific subdirectories to prevent unauthorized access
    */
   private static readonly SAFE_BASE_DIRS = {
-    LOG_FILES: [path.resolve('./logs'), path.resolve('.')],
-    TEMP_FILES: [path.resolve('./temp'), path.resolve('./logs')],
-    CONFIG_FILES: [path.resolve('.')]
+    LOG_FILES: [path.resolve('./logs'), path.resolve('./var/log'), path.resolve('./data/logs')],
+    TEMP_FILES: [path.resolve('./temp'), path.resolve('./logs'), path.resolve('./tmp'), os.tmpdir()],
+    CONFIG_FILES: [path.resolve('./config'), path.resolve('./etc'), path.resolve('./logs')]
   };
 
   /**
@@ -68,8 +70,8 @@ class SecureFileSystem {
     const resolvedPath = path.resolve(filePath);
     const normalizedPath = path.normalize(resolvedPath);
 
-    // Check for path traversal attempts in original path
-    if (filePath.includes('..') && !filePath.startsWith('./') && !filePath.startsWith('../logs')) {
+    // Check for path traversal attempts in original path - reject ANY use of '..'
+    if (filePath.includes('..')) {
       throw new Error(`Path traversal detected: ${filePath}`);
     }
 
@@ -614,3 +616,6 @@ export function createBuiltInHandler(type: string, config?: Record<string, unkno
     return null;
   }
 }
+
+// Export for testing
+export { SecureFileSystem };
