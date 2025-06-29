@@ -1,0 +1,40 @@
+name: Security & Linting
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  security-lint:
+    name: Security & Code Quality Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: TypeScript compilation check
+        run: npx tsc --noEmit
+        
+      - name: Run ESLint with security rules
+        run: npm run lint
+        
+      - name: Run security-focused ESLint
+        run: npx eslint . --config eslint.security.config.js --format=stylish
+        
+      - name: Audit dependencies for vulnerabilities
+        run: npm audit --audit-level=high
+        
+      - name: Check for known security issues
+        run: npm audit --audit-level=moderate --json | jq '.vulnerabilities | length'
