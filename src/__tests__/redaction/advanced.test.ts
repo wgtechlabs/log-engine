@@ -362,8 +362,8 @@ describe('Data Redaction - Advanced Features', () => {
           console.log(`Scaling factor: ${(executionTime / baselineTime).toFixed(2)}x`);
         }
       } else {
-        // In CI environments, just log that performance testing was skipped
-        console.log('Performance assertions skipped in CI/constrained environment');
+        // In CI environments, performance testing is skipped
+        // No console output to keep test results clean
       }
     });
   });

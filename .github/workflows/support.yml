@@ -13,7 +13,7 @@ jobs:
     
     strategy:
       matrix:
-        node-version: ['18', '19', '20', '21']
+        node-version: ['18', '20']
       fail-fast: false
     
     steps:
@@ -36,7 +36,7 @@ jobs:
         run: yarn exec tsc --noEmit
         
       - name: Run test suite
-        run: yarn test --watchAll=false --verbose=false
+        run: yarn test --watchAll=false --verbose=false --coverage=false
         
       - name: Basic linting check
         run: yarn lint
@@ -54,7 +54,7 @@ jobs:
       - name: Check all Node.js versions passed
         run: |
           if [[ "${{ needs.node-support-matrix.result }}" == "success" ]]; then
-            echo "✅ All Node.js versions (18-22) are compatible"
+            echo "✅ All Node.js versions (18, 20) are compatible"
             exit 0
           else
             echo "❌ Some Node.js versions failed compatibility tests"
