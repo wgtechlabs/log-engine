@@ -39,28 +39,11 @@ export class LogFilter {
      * @returns true if message should be logged, false otherwise
      */
   static shouldLog(level: LogLevel, currentMode: LogMode): boolean {
-    // Get the severity rank for the message level - use safe property access with switch
-    let messageSeverity = 0;
-    switch (level) {
-    case LogLevel.DEBUG: messageSeverity = this.SEVERITY_RANKS[LogLevel.DEBUG]; break;
-    case LogLevel.INFO: messageSeverity = this.SEVERITY_RANKS[LogLevel.INFO]; break;
-    case LogLevel.WARN: messageSeverity = this.SEVERITY_RANKS[LogLevel.WARN]; break;
-    case LogLevel.ERROR: messageSeverity = this.SEVERITY_RANKS[LogLevel.ERROR]; break;
-    case LogLevel.LOG: messageSeverity = this.SEVERITY_RANKS[LogLevel.LOG]; break;
-    default: messageSeverity = 0;
-    }
+    // Get the severity rank for the message level using safe lookup with fallback
+    const messageSeverity = this.SEVERITY_RANKS[level] ?? 0;
 
-    // Get the minimum severity threshold for the current mode - use safe property access with switch
-    let modeThreshold = 0;
-    switch (currentMode) {
-    case LogMode.DEBUG: modeThreshold = this.MODE_THRESHOLDS[LogMode.DEBUG]; break;
-    case LogMode.INFO: modeThreshold = this.MODE_THRESHOLDS[LogMode.INFO]; break;
-    case LogMode.WARN: modeThreshold = this.MODE_THRESHOLDS[LogMode.WARN]; break;
-    case LogMode.ERROR: modeThreshold = this.MODE_THRESHOLDS[LogMode.ERROR]; break;
-    case LogMode.SILENT: modeThreshold = this.MODE_THRESHOLDS[LogMode.SILENT]; break;
-    case LogMode.OFF: modeThreshold = this.MODE_THRESHOLDS[LogMode.OFF]; break;
-    default: modeThreshold = 0;
-    }
+    // Get the minimum severity threshold for the current mode using safe lookup with fallback
+    const modeThreshold = this.MODE_THRESHOLDS[currentMode] ?? 0;
 
     // Allow the message if its severity meets or exceeds the mode threshold
     return messageSeverity >= modeThreshold;
