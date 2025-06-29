@@ -30,7 +30,7 @@ describe('Logger class', () => {
     logger.info('Info message');
     logger.debug('Debug message');
     logger.error('Error message');
-    
+
     // In test environment, only ERROR and above should be logged by default
     expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(0); // INFO filtered out
     expect(mocks.mockConsoleError).toHaveBeenCalledTimes(1); // ERROR shown
@@ -43,7 +43,7 @@ describe('Logger class', () => {
     // Test that logger configuration updates work correctly
     logger.configure({ mode: LogMode.DEBUG });
     logger.debug('Debug message');
-    
+
     // DEBUG should now be visible after configuration change
     expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
       expect.stringContaining('Debug message')
@@ -55,7 +55,7 @@ describe('Logger class', () => {
     const config = logger.getConfig();
     expect(config).toBeDefined();
     expect(config.mode).toBeDefined();
-    
+
     // Test configuration change is reflected in getConfig
     logger.configure({ mode: LogMode.WARN });
     const updatedConfig = logger.getConfig();
@@ -65,12 +65,12 @@ describe('Logger class', () => {
   it('should filter messages based on configured mode', () => {
     // Test log mode filtering - only WARN and ERROR should show
     logger.configure({ mode: LogMode.WARN });
-    
+
     logger.debug('Debug message');
     logger.info('Info message');
     logger.warn('Warning message');
     logger.error('Error message');
-    
+
     // DEBUG and INFO should be filtered out
     expect(mocks.mockConsoleLog).not.toHaveBeenCalled();
     // Only WARN and ERROR should be logged
@@ -81,13 +81,13 @@ describe('Logger class', () => {
   it('should always log LOG level messages regardless of mode configuration', () => {
     // Test that LOG level always outputs regardless of configured mode
     logger.configure({ mode: LogMode.SILENT });
-    
+
     logger.debug('Debug message');
     logger.info('Info message');
     logger.warn('Warning message');
     logger.error('Error message');
     logger.log('LOG level message');
-    
+
     // Only LOG should be visible even with SILENT mode
     expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
     expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
@@ -110,10 +110,10 @@ describe('Logger class', () => {
     testCases.forEach((mode, index) => {
       // Reset mocks
       mocks.mockConsoleLog.mockClear();
-      
+
       logger.configure({ mode });
       logger.log(`LOG message ${index}`);
-      
+
       // LOG should always be visible regardless of configured mode (except OFF)
       expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
       expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
@@ -125,13 +125,13 @@ describe('Logger class', () => {
   it('should not log any messages when mode is OFF including LOG level', () => {
     // Test that OFF mode completely disables all logging including LOG
     logger.configure({ mode: LogMode.OFF });
-    
+
     logger.debug('Debug message');
     logger.info('Info message');
     logger.warn('Warning message');
     logger.error('Error message');
     logger.log('LOG level message');
-    
+
     // No console methods should be called with OFF mode (including LOG)
     expect(mocks.mockConsoleLog).not.toHaveBeenCalled();
     expect(mocks.mockConsoleWarn).not.toHaveBeenCalled();
@@ -159,9 +159,9 @@ describe('Logger class', () => {
     it('should show deprecation warning for legacy level configuration in non-test environment', () => {
       // Test deprecation warning (covers lines 64-66)
       process.env.NODE_ENV = 'development';
-      
+
       logger.configure({ level: LogLevel.DEBUG } as any);
-      
+
       // Should show deprecation warning
       expect(mockConsoleWarn).toHaveBeenCalledTimes(3);
       expect(mockConsoleWarn).toHaveBeenCalledWith(
@@ -178,9 +178,9 @@ describe('Logger class', () => {
     it('should not show deprecation warning in test environment', () => {
       // Test that deprecation warning is suppressed in test environment
       process.env.NODE_ENV = 'test';
-      
+
       logger.configure({ level: LogLevel.DEBUG } as any);
-      
+
       // Should not show deprecation warning in test environment
       expect(mockConsoleWarn).not.toHaveBeenCalled();
     });
@@ -215,7 +215,7 @@ describe('Logger class', () => {
       logger.configure({ level: 4 } as any); // Legacy SILENT
       logger.info('Info message');
       logger.log('LOG message');
-      
+
       expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1); // Only LOG should show
       expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
         expect.stringContaining('LOG message')
@@ -224,7 +224,7 @@ describe('Logger class', () => {
       mocks.mockConsoleLog.mockClear();
       logger.configure({ level: 5 } as any); // Legacy OFF
       logger.log('LOG message');
-      
+
       expect(mocks.mockConsoleLog).not.toHaveBeenCalled(); // Nothing should show
     });
   });
@@ -235,11 +235,11 @@ describe('Logger class', () => {
       const freshLogger = new Logger();
       // Configure with undefined mode to test fallback to INFO
       freshLogger.configure({ mode: undefined as any });
-      
+
       // Should fall back to INFO mode behavior
       freshLogger.debug('Debug message');
       freshLogger.info('Info message');
-      
+
       // With INFO mode fallback, DEBUG should be filtered, INFO should show
       expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
       expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
@@ -315,17 +315,17 @@ describe('Logger class', () => {
 describe('Logger module exports', () => {
   it('should export all logger classes', () => {
     const logger = require('../logger');
-    
+
     // Test that all expected exports are available
     expect(logger.Logger).toBeDefined();
     expect(logger.CoreLogger).toBeDefined(); // Backward compatibility
     expect(logger.LoggerConfigManager).toBeDefined();
     expect(logger.LogFilter).toBeDefined();
     expect(logger.EnvironmentDetector).toBeDefined();
-    
+
     // Test that CoreLogger is alias for Logger
     expect(logger.CoreLogger).toBe(logger.Logger);
-    
+
     // Test that classes are constructible/callable
     expect(typeof logger.Logger).toBe('function');
     expect(typeof logger.LoggerConfigManager).toBe('function');
@@ -352,16 +352,16 @@ describe('LoggerConfigManager', () => {
     };
 
     configManager.updateConfig(configWithBothLevelAndMode);
-    
+
     // Get the current config
     const currentConfig = configManager.getConfig();
-    
+
     // Verify that the legacy level property is not present
     expect(currentConfig).not.toHaveProperty('level');
-    
+
     // Verify that mode is correctly set
     expect(currentConfig.mode).toBe(LogMode.INFO);
-    
+
     // Verify other properties are preserved
     expect(currentConfig.redaction).toEqual({ enabled: true });
   });
@@ -375,16 +375,16 @@ describe('LoggerConfigManager', () => {
     };
 
     configManager.updateConfig(configWithOnlyLevel);
-    
+
     // Get the current config
     const currentConfig = configManager.getConfig();
-    
+
     // Verify that the legacy level property is not present (it gets mapped to mode)
     expect(currentConfig).not.toHaveProperty('level');
-    
+
     // Verify that mode is correctly mapped from level
     expect(currentConfig.mode).toBe(LogMode.WARN);
-    
+
     // Verify other properties are preserved
     expect(currentConfig.redaction).toEqual({ enabled: false });
   });
@@ -398,17 +398,61 @@ describe('LoggerConfigManager', () => {
     };
 
     configManager.updateConfig(configWithOnlyMode);
-    
+
     // Get the current config
     const currentConfig = configManager.getConfig();
-    
+
     // Verify that mode is correctly set
     expect(currentConfig.mode).toBe(LogMode.ERROR);
-    
+
     // Verify other properties are preserved
     expect(currentConfig.redaction).toEqual({ enabled: true });
-    
+
     // Verify no level property exists
     expect(currentConfig).not.toHaveProperty('level');
+  });
+
+  it('should map legacy SILENT level (4) to LogMode.SILENT', () => {
+    // Test that legacy SILENT level (4) maps correctly to LogMode.SILENT
+    const configWithLegacySilent = {
+      level: 4, // Legacy SILENT value
+      redaction: { enabled: true }
+    };
+
+    configManager.updateConfig(configWithLegacySilent);
+
+    // Get the current config
+    const currentConfig = configManager.getConfig();
+
+    // Verify that the legacy level property is not present (it gets mapped to mode)
+    expect(currentConfig).not.toHaveProperty('level');
+
+    // Verify that mode is correctly mapped from legacy SILENT (4) to LogMode.SILENT
+    expect(currentConfig.mode).toBe(LogMode.SILENT);
+
+    // Verify other properties are preserved
+    expect(currentConfig.redaction).toEqual({ enabled: true });
+  });
+
+  it('should map legacy OFF level (5) to LogMode.OFF', () => {
+    // Test that legacy OFF level (5) maps correctly to LogMode.OFF
+    const configWithLegacyOff = {
+      level: 5, // Legacy OFF value
+      redaction: { enabled: false }
+    };
+
+    configManager.updateConfig(configWithLegacyOff);
+
+    // Get the current config
+    const currentConfig = configManager.getConfig();
+
+    // Verify that the legacy level property is not present (it gets mapped to mode)
+    expect(currentConfig).not.toHaveProperty('level');
+
+    // Verify that mode is correctly mapped from legacy OFF (5) to LogMode.OFF
+    expect(currentConfig.mode).toBe(LogMode.OFF);
+
+    // Verify other properties are preserved
+    expect(currentConfig.redaction).toEqual({ enabled: false });
   });
 });

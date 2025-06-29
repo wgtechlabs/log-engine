@@ -12,110 +12,210 @@ There are many ways to contribute to this open source project. Any contributions
 
 ### 🧬 Development
 
-If you can write code then create a pull request to this repo and I will review your code. Please consider submitting your pull request to the `dev` branch. I will auto reject if you submit your pull request to the `main` branch.
+If you can write code then create a pull request to this repo and I will review your code.
+
+#### Branch Strategy
+
+**Local Development Workflow:**
+
+- **Work directly on any feature branch** for development and bug fixes
+- **No CI/CD pipeline** - all validation happens locally
+- **Use local testing commands** for quick validation before commits
+
+**Production Workflow:**  
+
+- **Create PR to `main`** for production releases
+- **Local validation required** before creating PR
+- **All quality checks must pass locally** before requesting review
+
+> **Important**: Please ensure all tests and linting pass locally before submitting pull requests. This project is configured for local-only development workflows.
 
 #### 🔧 Setup
 
 To get started with development:
 
 1. **Fork and clone the repository**
+
    ```bash
    git clone https://github.com/your-username/log-engine.git
    cd log-engine
    ```
+
 2. **Install dependencies**
+
    ```bash
-   npm install
-   # or
    yarn install
    ```
-3. **Set up environment variables**
-   - Copy `.env.example` to `.env` (if available)
-   - Fill in the required information as described in the README
-4. **Start the project in development mode**
+
+3. **Build the project**
+
    ```bash
-   npm run dev
-   # or
-   yarn dev
+   yarn build
    ```
+
+4. **Run tests to verify setup**
+
+   ```bash
+   yarn test
+   ```
+
+> **Note**: This project uses Yarn for dependency management. Please use `yarn` for all development tasks to ensure consistency with our package manager configuration.
 
 Please refer to the [README](./README.md) for more detailed setup instructions.
 
 ### 🧪 Testing
 
-This section provides comprehensive information about testing the log-engine project and how to contribute tests.
+This section provides comprehensive information about testing the log-engine project and our two-tier testing strategy optimized for different development workflows.
+
+#### Local Development Testing Strategy
+
+We use a **simplified local testing** approach optimized for developer productivity:
+
+🚀 **Local Development Testing**
+
+- **Fast feedback** in ~3-5 seconds with `yarn test`
+- **Quick validation** without coverage generation using `yarn test --silent`
+- **Optimized for iteration** speed and developer productivity
+
+🛡️ **Comprehensive Local Testing**
+
+- **Full coverage** reporting with `yarn test:coverage`
+- **Security validation** with `yarn secure` (requires Snyk account)
+- **Complete validation** with `yarn validate` before creating PRs
 
 #### Quick Start
 
 ```bash
 # Install dependencies
-npm install
+yarn install
 
-# Run all tests
-npm test
+# 🚀 Fast local testing (recommended for development)
+yarn test
 
-# Run tests with coverage
-npm run test:coverage
+# 🛡️ Full testing with coverage (before creating PRs)
+yarn test:coverage
 
-# Run tests in watch mode (for development)
-npm run test:watch
+# 📊 Coverage only
+yarn test:coverage
+
+# 👀 Watch mode for development
+yarn test:watch
+
+# 🐛 Debug test issues
+yarn test:debug
 ```
+
+#### Test Commands Reference
+
+| Command | Speed | Coverage | Use Case |
+|---------|-------|----------|----------|
+| `test` | ⚡⚡⚡⚡⚡ | ❌ | Quick validation, daily development |
+| `test:coverage` | ⚡⚡⚡ | ✅ | Pre-PR testing, quality assurance |
+| `test:debug` | ⚡⚡ | ❌ | Troubleshooting hanging tests |
+| `test:watch` | ⚡⚡⚡⚡ | ❌ | Live development, TDD workflow |
+
+#### Development Workflow
+
+**For Feature Development:**
+
+1. Work on feature branch from `main`
+2. Use `yarn test` for quick validation during development
+3. Use `yarn lint` to check code quality
+4. Commit changes with descriptive messages
+5. Iterate quickly with fast local feedback
+
+**For Production Release:**
+
+1. Run full validation: `yarn validate` (lint + test + build)
+2. Ensure coverage requirements are met with `yarn test:coverage`
+3. Run security checks: `yarn secure` (if Snyk is configured)
+4. Create PR to `main` for review
 
 #### Test Architecture
 
-- Tests are located in `src/__tests__/` and organized by component.
-- Utilities for mocking and setup are in `test-utils.ts`.
-- Each test file focuses on a single responsibility for maintainability and parallel execution.
+- **Location**: Tests are in `src/__tests__/` organized by component
+- **Utilities**: Async test utilities in `async-test-utils.ts` for reliable file/HTTP testing
+- **Isolation**: Each test uses unique directories to prevent conflicts
+- **Cleanup**: Automated cleanup with timeout protection
+- **CI Optimization**: Different configs for local vs CI environments
 
-#### Writing and Running Tests
+#### Test Output Suppression
 
-- Use the provided test file template and follow the Arrange-Act-Assert pattern.
-- Use descriptive test names (e.g., `should log debug messages when level is DEBUG`).
-- Mock console output using utilities from `test-utils.ts`.
-- Ensure each test is isolated using `beforeEach`/`afterEach`.
-- Check coverage with `npm run test:coverage` (targets: Statements ≥90%, Branches ≥85%, Functions ≥90%, Lines ≥90%).
+The project uses a clean testing approach that suppresses noisy console output:
 
-#### Common Testing Patterns
+- **Global Setup**: `jest.setup.js` automatically mocks `console.error` during tests to prevent confusing output
+- **Production Code**: Error logging works normally in production - suppression only applies to test environments
+- **Test Isolation**: Each test maintains proper error logging behavior while keeping console output clean
+- **CI/CD**: Clean test output in continuous integration environments without affecting production logging
 
-- Test both positive and negative cases.
-- Verify console method call counts and message content.
-- Test configuration changes and environment variable effects.
-- See the codebase and below for more examples.
-
-#### Continuous Integration
-
-- Tests must pass before merging pull requests.
-- Coverage is checked in CI/CD workflows.
-- Use pre-commit hooks to ensure tests pass locally.
-
-#### Troubleshooting
-
-- If modules are not found, ensure TypeScript is compiled (`npm run build`).
-- If console mocks do not work, set them up before using LogEngine in tests.
-- Always restore environment variables after environment-based tests.
+This approach ensures that test logs remain readable while preserving all error logging functionality in production code.
 
 #### Contributing Tests
 
-Before submitting:
-1. Run the full test suite: `npm test`
-2. Check coverage: `npm run test:coverage`
-3. Ensure new features have corresponding tests
-4. Follow the established testing patterns
-5. Update documentation if needed
+**Local Development:**
 
-Pull Request Checklist:
-- [ ] All tests pass locally
-- [ ] New functionality is tested
-- [ ] Edge cases are covered
-- [ ] Test names are descriptive
-- [ ] Coverage requirements are met
-- [ ] No test pollution (tests affect each other)
+1. Write your tests alongside feature development
+2. Run `yarn test` for quick validation (~3-5 seconds)
+3. Ensure tests follow established patterns and are isolated
+4. Use `yarn test:watch` for live development feedback
+
+**Pre-Pull Request:**
+
+1. Run full test suite: `yarn test:coverage`
+2. Verify coverage requirements are met (should be 80%+)
+3. Test across different scenarios and edge cases
+4. Run linting: `yarn lint`
+5. Run full validation: `yarn validate`
+
+**Pull Request Checklist:**
+
+- [ ] All tests pass with `yarn test`
+- [ ] Coverage requirements met with `yarn test:coverage`  
+- [ ] New functionality has corresponding tests
+- [ ] Edge cases and error scenarios are covered
+- [ ] Test names are descriptive and follow conventions
+- [ ] No test pollution (tests are properly isolated)
+- [ ] Tests complete quickly (no arbitrary timeouts)
+- [ ] Code quality checks pass with `yarn lint`
+
+#### Test Best Practices
+
+**✅ Do:**
+
+- Use `async/await` for asynchronous operations
+- Utilize `waitForFile()`, `waitForFileContent()` from `async-test-utils.ts`
+- Create unique test directories to prevent conflicts
+- Write descriptive test names
+- Test both success and failure scenarios
+
+**❌ Don't:**
+
+- Use arbitrary `setTimeout()` calls
+- Use `done` callbacks (prefer async/await)
+- Create tests that depend on other tests
+- Use fixed file paths that might conflict
+- Write tests that take longer than necessary
+
+#### Troubleshooting Tests
+
+**If tests are hanging:**
+
+```bash
+yarn test:ci:debug  # Shows open handles and verbose output
+```
+
+**If tests are flaky:**
+
+- Check for shared resources (files, directories)
+- Ensure proper cleanup in `afterEach`/`afterAll`
+- Use unique identifiers for test artifacts
 
 Thank you for contributing to the log-engine test suite! 🧪
 
 ### 📖 Documentation
 
 Improvements to documentation are always welcome! This includes:
+
 - README updates
 - Code comments
 - Examples and usage guides
@@ -125,6 +225,29 @@ Improvements to documentation are always welcome! This includes:
 
 For any security bugs or issues, please read the [security policy](./SECURITY.md).
 For other bugs, please create an issue using the bug report template.
+
+## Local Development Philosophy
+
+This project is intentionally configured for **local-only development workflows** to keep the setup simple and accessible:
+
+### 🎯 Benefits of Local-Only Development
+
+- **🚀 Faster iteration**: No waiting for CI/CD pipelines
+- **🛠️ Simpler setup**: No complex CI configurations to maintain
+- **💰 Cost-effective**: No CI/CD resource costs
+- **🔧 Developer control**: Full control over testing and validation
+- **📦 Lightweight**: Focus on code quality, not infrastructure
+
+### 🏗️ Quality Assurance
+
+Quality is maintained through:
+
+- **Comprehensive local testing** with 95%+ coverage
+- **Security scanning** via Snyk integration
+- **TypeScript strict mode** for type safety
+- **ESLint with security rules** for code quality
+- **Pre-commit validation** via `yarn validate`
+- **Manual review process** for all contributions
 
 ---
 

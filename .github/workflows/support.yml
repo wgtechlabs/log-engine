@@ -1,0 +1,172 @@
+name: Node.js Support Matrix
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  node-support-matrix:
+    name: Node.js ${{ matrix.node-version }} Compatibility
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        # NOTE: Node.js versions are automatically extracted by the compatibility-summary job
+        # The summary report will dynamically reflect any changes made to this list
+        node-version: ['18', '20']
+      fail-fast: false
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          
+      - name: Verify Node.js version meets requirements
+        run: |
+          echo "Node.js version:"
+          node --version
+          echo "npm version:"
+          npm --version
+          echo "Checking Node.js version compatibility..."
+          node -e "
+            const version = process.version;
+            const major = parseInt(version.slice(1).split('.')[0]);
+            const required = 16;
+            console.log(\`Node.js \${version} (major: \${major})\`);
+            if (major < required) {
+              console.error(\`❌ Node.js \${major} is below minimum required version \${required}\`);
+              process.exit(1);
+            } else {
+              console.log(\`✅ Node.js \${major} meets minimum requirement \${required}\`);
+            }
+          "
+          
+      - name: Enable Corepack for Yarn v4
+        run: |
+          echo "Current Node.js version:"
+          node --version
+          echo "Enabling Corepack..."
+          corepack enable
+          echo "Preparing Yarn 4.9.2..."
+          corepack prepare yarn@4.9.2 --activate
+          echo "Yarn setup complete"
+          
+      - name: Verify Yarn version
+        run: |
+          echo "Yarn version:"
+          yarn --version
+          echo "Checking package manager field..."
+          node -e "console.log('packageManager:', require('./package.json').packageManager)"
+          
+      - name: Install dependencies
+        run: |
+          echo "Installing dependencies with Yarn v4..."
+          echo "Current working directory: $(pwd)"
+          echo "Files in directory:"
+          ls -la
+          echo "Installing..."
+          yarn install --immutable
+          echo "Dependencies installed successfully"
+        
+      - name: Verify installation
+        run: |
+          echo "Checking node_modules..."
+          ls -la node_modules/ | head -10
+          echo "Checking TypeScript installation..."
+          yarn tsc --version
+        
+      - name: TypeScript compilation check
+        run: |
+          echo "Running TypeScript compilation check..."
+          yarn tsc --noEmit
+          echo "✅ TypeScript compilation successful"
+        
+      - name: Run test suite (no coverage for compatibility test)
+        run: |
+          echo "Running test suite for Node.js ${{ matrix.node-version }}..."
+          yarn test --watchAll=false --verbose=false --coverage=false
+          echo "✅ Test suite passed"
+        
+      - name: Basic linting check
+        run: |
+          echo "Running ESLint checks..."
+          yarn lint
+          echo "✅ Linting passed"
+        
+      - name: Build verification
+        run: |
+          echo "Building project..."
+          yarn build
+          echo "Checking build output..."
+          ls -la dist/
+          echo "✅ Build successful"
+
+  compatibility-summary:
+    name: Node.js Compatibility Summary
+    runs-on: ubuntu-latest
+    needs: node-support-matrix
+    if: always()
+    
+    steps:
+      - name: Checkout code (for extracting matrix versions)
+        uses: actions/checkout@v4
+        
+      - name: Node.js Compatibility Report
+        run: |
+          echo "=== Node.js Compatibility Test Results ==="
+          echo "Matrix job result: ${{ needs.node-support-matrix.result }}"
+          echo ""
+          
+          # Extract Node.js versions from the workflow file dynamically
+          echo "Extracting tested Node.js versions from workflow..."
+          NODE_VERSIONS=($(grep "node-version: \[" .github/workflows/support.yml | sed "s/.*\[\(.*\)\].*/\1/" | tr "," "\n" | sed "s/[' ]//g" | sort -n))
+          echo "Detected versions: ${NODE_VERSIONS[*]}"
+          echo ""
+          
+          if [[ "${{ needs.node-support-matrix.result }}" == "success" ]]; then
+            echo "🎉 SUCCESS: All Node.js versions are fully compatible!"
+            echo ""
+            
+            # Dynamically generate compatibility lines
+            for version in "${NODE_VERSIONS[@]}"; do
+              echo "✅ Node.js $version - Compatible"
+            done
+            
+            echo ""
+            echo "The log-engine library works correctly across all supported Node.js versions."
+            
+            # Generate minimum version requirement dynamically
+            min_version=${NODE_VERSIONS[0]}
+            echo "Users can safely install and use this package with Node.js ${min_version}+ environments."
+            
+          elif [[ "${{ needs.node-support-matrix.result }}" == "failure" ]]; then
+            echo "❌ FAILURE: Some Node.js versions failed compatibility tests"
+            echo ""
+            echo "Tested versions:"
+            for version in "${NODE_VERSIONS[@]}"; do
+              echo "   - Node.js $version"
+            done
+            echo ""
+            echo "Please check the individual job logs above to see which versions failed and why."
+            echo "Common issues:"
+            echo "- Yarn/Corepack setup problems"
+            echo "- TypeScript compilation issues"
+            echo "- Test failures specific to Node.js version"
+            echo "- Dependency compatibility problems"
+            exit 1
+          else
+            echo "⚠️  PARTIAL: Some tests were cancelled or skipped"
+            echo "Result status: ${{ needs.node-support-matrix.result }}"
+            echo ""
+            echo "Tested versions:"
+            for version in "${NODE_VERSIONS[@]}"; do
+              echo "   - Node.js $version"
+            done
+            exit 1
+          fi

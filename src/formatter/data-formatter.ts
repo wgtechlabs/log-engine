@@ -3,6 +3,8 @@
  * Handles serialization and formatting of data objects in log messages
  */
 
+import { LogData } from '../types';
+
 /**
  * Converts input data to a readable string suitable for log output.
  *
@@ -11,33 +13,33 @@
  * @param data - The value to format for logging
  * @returns The formatted string representation of the input data
  */
-export function formatData(data: any): string {
-    if (data === null) {
-        return 'null';
-    }
-    
-    if (data === undefined) {
-        return '';
-    }
-    
-    if (typeof data === 'string') {
-        return data;
-    }
-    
-    if (typeof data === 'number' || typeof data === 'boolean') {
-        return String(data);
-    }
-    
-    if (typeof data === 'symbol') {
-        return data.toString();
-    }
-    
-    try {
-        return JSON.stringify(data, null, 0);
-    } catch (error) {
-        // Fallback for objects that can't be stringified (e.g., circular references)
-        return '[Object]';
-    }
+export function formatData(data: LogData): string {
+  if (data === null) {
+    return 'null';
+  }
+
+  if (data === undefined) {
+    return '';
+  }
+
+  if (typeof data === 'string') {
+    return data;
+  }
+
+  if (typeof data === 'number' || typeof data === 'boolean') {
+    return String(data);
+  }
+
+  if (typeof data === 'symbol') {
+    return data.toString();
+  }
+
+  try {
+    return JSON.stringify(data, null, 0);
+  } catch {
+    // Fallback for objects that can't be stringified (e.g., circular references)
+    return '[Object]';
+  }
 }
 
 /**
@@ -48,9 +50,9 @@ export function formatData(data: any): string {
  * @returns The styled data string with color codes applied, or an empty string if `dataString` is falsy.
  */
 export function styleData(dataString: string, colors: { data: string; reset: string }): string {
-    if (!dataString) {
-        return '';
-    }
-    
-    return ` ${colors.data}${dataString}${colors.reset}`;
+  if (!dataString) {
+    return '';
+  }
+
+  return ` ${colors.data}${dataString}${colors.reset}`;
 }

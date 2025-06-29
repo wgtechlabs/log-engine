@@ -1,7 +1,8 @@
 {
   "name": "@wgtechlabs/log-engine",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "A lightweight, security-first logging utility with automatic data redaction for Node.js applications - the first logging library with built-in PII protection.",
+  "type": "module",
   "keywords": [
     "logging",
     "security",
@@ -17,6 +18,7 @@
     "gdpr",
     "compliance"
   ],
+  "packageManager": "yarn@4.9.2",
   "license": "MIT",
   "author": "WG Tech Labs <opensource@wgtechlabs.com> (https://wgtechlabs.com)",
   "contributors": [
@@ -36,31 +38,41 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "yarn build",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:coverage:watch": "jest --coverage --watch",
-    "test:ci": "jest --ci --coverage --watchAll=false",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
     "test:unit": "jest --testNamePattern=\"^((?!integration).)*$\"",
     "test:integration": "jest integration.test.ts",
     "test:redaction": "jest --testPathPattern=\"redaction/\"",
-    "test:redaction:core": "jest --testPathPattern=\"redaction/core.test.ts\"",
-    "test:redaction:env": "jest --testPathPattern=\"redaction/env.test.ts\"",
-    "test:redaction:advanced": "jest --testPathPattern=\"redaction/advanced.test.ts\"",
-    "test:redaction:logengine": "jest --testPathPattern=\"redaction/logengine.test.ts\"",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "lint:security": "eslint src/**/*.ts --config eslint.security.config.js",
+    "secure:scan": "snyk code test",
+    "secure:test": "snyk test --org=wgtechlabs",
+    "secure:code": "snyk code test --org=wgtechlabs",
+    "secure": "run-s lint:security secure:test secure:code",
+    "validate": "run-s lint test build",
     "clean": "rm -rf dist coverage",
-    "coverage:open": "open coverage/lcov-report/index.html"
+    "coverage:open": "open coverage/lcov-report/index.html",
+    "coverage:upload": "curl -Os https://uploader.codecov.io/latest/windows/codecov.exe && codecov.exe"
   },
-  "dependencies": {},
   "devDependencies": {
-    "typescript": "^5.0.0",
-    "ts-node": "^10.0.0",
-    "@types/node": "^18.0.0",
-    "jest": "^29.0.0",
+    "@types/eslint-plugin-security": "^3",
     "@types/jest": "^29.0.0",
-    "ts-jest": "^29.0.0"
+    "@types/node": "^18.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.35.0",
+    "@typescript-eslint/parser": "^8.35.0",
+    "eslint": "^8.45.0",
+    "eslint-plugin-security": "^2.0.0",
+    "jest": "^29.0.0",
+    "npm-run-all": "^4.1.5",
+    "snyk": "^1.1000.0",
+    "ts-jest": "^29.0.0",
+    "ts-node": "^10.0.0",
+    "typescript": "^5.8.3"
   },
   "engines": {
     "node": ">=16.0.0"

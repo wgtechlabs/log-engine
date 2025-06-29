@@ -6,113 +6,119 @@
 import { DataRedactor, defaultRedactionConfig, RedactionController } from '../../redaction';
 
 describe('Data Redaction - Environment Control', () => {
-    // Store original environment to restore after tests
-    const originalEnv = { ...process.env };
+  // Store original environment to restore after tests
+  const originalEnv = { ...process.env };
 
-    beforeEach(() => {
-        // Reset to default configuration before each test
-        DataRedactor.updateConfig(defaultRedactionConfig);
-        // Clear current environment and restore original
-        for (const key in process.env) {
-            delete process.env[key];
-        }
-        Object.assign(process.env, originalEnv);
+  beforeEach(() => {
+    // Reset to default configuration before each test
+    DataRedactor.updateConfig(defaultRedactionConfig);
+    // Clear current environment and restore original
+    for (const key in process.env) {
+      if (Object.prototype.hasOwnProperty.call(process.env, key)) {
+        delete process.env[key];
+      }
+    }
+    Object.assign(process.env, originalEnv);
+  });
+
+  afterAll(() => {
+    // Restore original environment completely
+    const envKeys = Object.keys(process.env);
+    for (const key of envKeys) {
+      if (Object.prototype.hasOwnProperty.call(process.env, key)) {
+        // Safe deletion using bracket notation with known string
+        delete (process.env as Record<string, string | undefined>)[key];
+      }
+    }
+    Object.assign(process.env, originalEnv);
+  });
+
+  describe('Environment-based control', () => {
+    test('should disable redaction in development environment', () => {
+      process.env.NODE_ENV = 'development';
+
+      // Re-initialize with environment config
+      DataRedactor.updateConfig({
+        ...defaultRedactionConfig,
+        ...RedactionController.getEnvironmentConfig()
+      });
+
+      const testData = { password: 'secret' };
+      const result = DataRedactor.redactData(testData);
+
+      expect(result.password).toBe('secret');
     });
 
-    afterAll(() => {
-        // Restore original environment completely
-        for (const key in process.env) {
-            delete process.env[key];
-        }
-        Object.assign(process.env, originalEnv);
+    test('should disable redaction when LOG_REDACTION_DISABLED is true', () => {
+      process.env.LOG_REDACTION_DISABLED = 'true';
+
+      DataRedactor.updateConfig({
+        ...defaultRedactionConfig,
+        ...RedactionController.getEnvironmentConfig()
+      });
+
+      const testData = { password: 'secret' };
+      const result = DataRedactor.redactData(testData);
+
+      expect(result.password).toBe('secret');
     });
 
-    describe('Environment-based control', () => {
-        test('should disable redaction in development environment', () => {
-            process.env.NODE_ENV = 'development';
-            
-            // Re-initialize with environment config
-            DataRedactor.updateConfig({
-                ...defaultRedactionConfig,
-                ...RedactionController.getEnvironmentConfig()
-            });
+    test('should disable redaction when DEBUG_FULL_PAYLOADS is true', () => {
+      process.env.DEBUG_FULL_PAYLOADS = 'true';
 
-            const testData = { password: 'secret' };
-            const result = DataRedactor.redactData(testData);
+      DataRedactor.updateConfig({
+        ...defaultRedactionConfig,
+        ...RedactionController.getEnvironmentConfig()
+      });
 
-            expect(result.password).toBe('secret');
-        });
+      const testData = { password: 'secret' };
+      const result = DataRedactor.redactData(testData);
 
-        test('should disable redaction when LOG_REDACTION_DISABLED is true', () => {
-            process.env.LOG_REDACTION_DISABLED = 'true';
-            
-            DataRedactor.updateConfig({
-                ...defaultRedactionConfig,
-                ...RedactionController.getEnvironmentConfig()
-            });
-
-            const testData = { password: 'secret' };
-            const result = DataRedactor.redactData(testData);
-
-            expect(result.password).toBe('secret');
-        });
-
-        test('should disable redaction when DEBUG_FULL_PAYLOADS is true', () => {
-            process.env.DEBUG_FULL_PAYLOADS = 'true';
-            
-            DataRedactor.updateConfig({
-                ...defaultRedactionConfig,
-                ...RedactionController.getEnvironmentConfig()
-            });
-
-            const testData = { password: 'secret' };
-            const result = DataRedactor.redactData(testData);
-
-            expect(result.password).toBe('secret');
-        });
-
-        test('should apply environment variable overrides', () => {
-            process.env.LOG_REDACTION_TEXT = '***ENV_REDACTED***';
-            process.env.LOG_MAX_CONTENT_LENGTH = '50';
-            process.env.LOG_SENSITIVE_FIELDS = 'customField,anotherField';
-
-            DataRedactor.updateConfig({
-                ...defaultRedactionConfig,
-                ...RedactionController.getEnvironmentConfig()
-            });
-
-            const testData = {
-                password: 'secret',
-                customField: 'custom',
-                content: 'A'.repeat(100)
-            };
-
-            const result = DataRedactor.redactData(testData);
-
-            expect(result.password).toBe('***ENV_REDACTED***');
-            expect(result.customField).toBe('***ENV_REDACTED***');
-            expect(result.content).toContain('... [TRUNCATED]');
-            expect(result.content.length).toBeLessThan(70); // 50 chars + truncation text
-        });
-
-        test('should apply LOG_TRUNCATION_TEXT environment variable', () => {
-            // Test to cover line 95 in config.ts
-            process.env.LOG_TRUNCATION_TEXT = '... [CUSTOM_TRUNCATED]';
-            process.env.LOG_MAX_CONTENT_LENGTH = '20';
-
-            DataRedactor.updateConfig({
-                ...defaultRedactionConfig,
-                ...RedactionController.getEnvironmentConfig()
-            });
-
-            const testData = {
-                content: 'This is a very long content that will be truncated'
-            };
-
-            const result = DataRedactor.redactData(testData);
-
-            expect(result.content).toContain('... [CUSTOM_TRUNCATED]');
-            expect(result.content.length).toBeLessThan(50);
-        });
+      expect(result.password).toBe('secret');
     });
+
+    test('should apply environment variable overrides', () => {
+      process.env.LOG_REDACTION_TEXT = '***ENV_REDACTED***';
+      process.env.LOG_MAX_CONTENT_LENGTH = '50';
+      process.env.LOG_SENSITIVE_FIELDS = 'customField,anotherField';
+
+      DataRedactor.updateConfig({
+        ...defaultRedactionConfig,
+        ...RedactionController.getEnvironmentConfig()
+      });
+
+      const testData = {
+        password: 'secret',
+        customField: 'custom',
+        content: 'A'.repeat(100)
+      };
+
+      const result = DataRedactor.redactData(testData);
+
+      expect(result.password).toBe('***ENV_REDACTED***');
+      expect(result.customField).toBe('***ENV_REDACTED***');
+      expect(result.content).toContain('... [TRUNCATED]');
+      expect(result.content.length).toBeLessThan(70); // 50 chars + truncation text
+    });
+
+    test('should apply LOG_TRUNCATION_TEXT environment variable', () => {
+      // Test to cover line 95 in config.ts
+      process.env.LOG_TRUNCATION_TEXT = '... [CUSTOM_TRUNCATED]';
+      process.env.LOG_MAX_CONTENT_LENGTH = '20';
+
+      DataRedactor.updateConfig({
+        ...defaultRedactionConfig,
+        ...RedactionController.getEnvironmentConfig()
+      });
+
+      const testData = {
+        content: 'This is a very long content that will be truncated'
+      };
+
+      const result = DataRedactor.redactData(testData);
+
+      expect(result.content).toContain('... [CUSTOM_TRUNCATED]');
+      expect(result.content.length).toBeLessThan(50);
+    });
+  });
 });

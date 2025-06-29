@@ -4,6 +4,13 @@
  */
 
 /**
+ * Type for log data - accepts any value since logs can contain literally anything
+ * This is intentionally `any` rather than `unknown` for maximum usability in a logging context
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type LogData = any;
+
+/**
  * Log levels representing message severity (lowest to highest)
  * Used for filtering messages based on importance
  */
@@ -53,6 +60,75 @@ export interface LogEntry {
 }
 
 /**
+ * Output handler function type for custom log output
+ * Receives the log level, formatted message, and optional data
+ */
+export type LogOutputHandler = (level: string, message: string, data?: LogData) => void;
+
+/**
+ * Built-in output handler types
+ */
+export type BuiltInOutputHandler = 'console' | 'silent' | 'file' | 'http';
+
+/**
+ * Configuration for file output handler
+ */
+export interface FileOutputConfig {
+    /** File path to write logs to */
+    filePath: string;
+    /** Whether to append to existing file (default: true) */
+    append?: boolean;
+    /** Maximum file size before rotation in bytes (optional) */
+    maxFileSize?: number;
+    /** Number of backup files to keep during rotation (default: 3) */
+    maxBackupFiles?: number;
+    /** Custom format function for file output */
+    formatter?: (level: string, message: string, data?: LogData) => string;
+}
+
+/**
+ * Configuration for HTTP output handler
+ */
+export interface HttpOutputConfig {
+    /** HTTP endpoint URL to send logs to */
+    url: string;
+    /** HTTP method (default: 'POST') */
+    method?: 'POST' | 'PUT' | 'PATCH';
+    /** Custom headers to include with requests */
+    headers?: Record<string, string>;
+    /** Batch size for sending multiple logs (default: 1) */
+    batchSize?: number;
+    /** Timeout for HTTP requests in ms (default: 5000) */
+    timeout?: number;
+    /** Custom format function for HTTP payload */
+    formatter?: (logs: Array<{ level: string; message: string; data?: LogData; timestamp: string }>) => LogData;
+}
+
+/**
+ * Configuration object for advanced built-in handlers
+ */
+export interface AdvancedOutputConfig {
+    file?: FileOutputConfig;
+    http?: HttpOutputConfig;
+}
+
+/**
+ * Enhanced output target - can be built-in handler, custom function, or configured handler object
+ */
+export type EnhancedOutputTarget = BuiltInOutputHandler | LogOutputHandler | {
+    type: 'file';
+    config: FileOutputConfig;
+} | {
+    type: 'http';
+    config: HttpOutputConfig;
+};
+
+/**
+ * Output target - can be a built-in handler string or custom function
+ */
+export type OutputTarget = BuiltInOutputHandler | LogOutputHandler;
+
+/**
  * Configuration options for the logger
  * Supports both legacy level-based and new mode-based configuration
  */
@@ -64,6 +140,16 @@ export interface LoggerConfig {
     level?: LogLevel;
     /** Optional environment identifier for context (e.g., 'production', 'staging') */
     environment?: string;
+    /** Custom output handler function to replace console output (backward compatibility) */
+    outputHandler?: LogOutputHandler;
+    /** Array of output targets for multiple simultaneous outputs */
+    outputs?: OutputTarget[];
+    /** Enhanced outputs with advanced configuration support */
+    enhancedOutputs?: EnhancedOutputTarget[];
+    /** Whether to suppress default console output (useful with custom outputHandler) */
+    suppressConsoleOutput?: boolean;
+    /** Advanced configuration for built-in handlers */
+    advancedOutputConfig?: AdvancedOutputConfig;
 }
 
 /**
@@ -97,31 +183,31 @@ export interface ILogEngine {
     // Configuration methods
     /** Configure the logger with new settings */
     configure(config: Partial<LoggerConfig>): void;
-    
+
     // Standard logging methods with automatic redaction
     /** Log a debug message with automatic data redaction */
-    debug(message: string, data?: any): void;
+    debug(message: string, data?: LogData): void;
     /** Log an info message with automatic data redaction */
-    info(message: string, data?: any): void;
+    info(message: string, data?: LogData): void;
     /** Log a warn message with automatic data redaction */
-    warn(message: string, data?: any): void;
+    warn(message: string, data?: LogData): void;
     /** Log an error message with automatic data redaction */
-    error(message: string, data?: any): void;
+    error(message: string, data?: LogData): void;
     /** Log a message with automatic data redaction */
-    log(message: string, data?: any): void;
-    
+    log(message: string, data?: LogData): void;
+
     // Raw logging methods (bypass redaction)
     /** Log a debug message without redaction */
-    debugRaw(message: string, data?: any): void;
+    debugRaw(message: string, data?: LogData): void;
     /** Log an info message without redaction */
-    infoRaw(message: string, data?: any): void;
+    infoRaw(message: string, data?: LogData): void;
     /** Log a warn message without redaction */
-    warnRaw(message: string, data?: any): void;
+    warnRaw(message: string, data?: LogData): void;
     /** Log an error message without redaction */
-    errorRaw(message: string, data?: any): void;
+    errorRaw(message: string, data?: LogData): void;
     /** Log a message without redaction */
-    logRaw(message: string, data?: any): void;
-    
+    logRaw(message: string, data?: LogData): void;
+
     // Redaction configuration methods
     /** Configure redaction settings */
     configureRedaction(config: Partial<RedactionConfig>): void;
@@ -131,7 +217,7 @@ export interface ILogEngine {
     refreshRedactionConfig(): void;
     /** Get current redaction configuration */
     getRedactionConfig(): RedactionConfig;
-    
+
     // Advanced redaction methods
     /** Add custom regex patterns for advanced field detection */
     addCustomRedactionPatterns(patterns: RegExp[]): void;
@@ -141,7 +227,7 @@ export interface ILogEngine {
     addSensitiveFields(fields: string[]): void;
     /** Test if a field name would be redacted with current configuration */
     testFieldRedaction(fieldName: string): boolean;
-    
+
     // Utility methods
     /** Temporarily disable redaction for a specific logging call */
     withoutRedaction(): ILogEngineWithoutRedaction;
@@ -153,15 +239,15 @@ export interface ILogEngine {
  */
 export interface ILogEngineWithoutRedaction {
     /** Log a debug message without redaction */
-    debug(message: string, data?: any): void;
+    debug(message: string, data?: LogData): void;
     /** Log an info message without redaction */
-    info(message: string, data?: any): void;
+    info(message: string, data?: LogData): void;
     /** Log a warn message without redaction */
-    warn(message: string, data?: any): void;
+    warn(message: string, data?: LogData): void;
     /** Log an error message without redaction */
-    error(message: string, data?: any): void;
+    error(message: string, data?: LogData): void;
     /** Log a message without redaction */
-    log(message: string, data?: any): void;
+    log(message: string, data?: LogData): void;
 }
 
 /**
@@ -184,7 +270,7 @@ export interface IDataRedactor {
     /** Test if a field name would be redacted */
     testFieldRedaction(fieldName: string): boolean;
     /** Redact sensitive data from any value */
-    redactData(data: any): any;
+    redactData(data: LogData): LogData;
 }
 
 /**

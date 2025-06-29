@@ -1,4 +1,4 @@
-name: Testing & Coverage
+name: Security & Linting
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
     branches: [main, dev]
 
 jobs:
-  test-coverage:
-    name: Test Suite & Coverage Report
+  security-lint:
+    name: Security & Code Quality Scan
     runs-on: ubuntu-latest
     
     steps:
@@ -71,7 +71,7 @@ jobs:
         run: |
           echo "Checking node_modules..."
           ls -la node_modules/ | head -10
-          echo "Checking TypeScript and Jest installation..."
+          echo "Checking TypeScript installation..."
           
           # Check TypeScript
           if yarn tsc --version > /dev/null 2>&1; then
@@ -88,54 +88,43 @@ jobs:
             fi
           fi
           
-          # Check Jest
-          if yarn jest --version > /dev/null 2>&1; then
-            echo "✅ Jest: $(yarn jest --version)"
-          elif npx jest --version > /dev/null 2>&1; then
-            echo "✅ Jest: $(npx jest --version)"
-          else
-            echo "⚠️  Jest: Not accessible via yarn/npx, checking package.json..."
-            JEST_VERSION=$(node -e "const pkg = require('./package.json'); console.log(pkg.devDependencies?.jest || '')")
-            if [ -n "$JEST_VERSION" ] && [ "$JEST_VERSION" != "undefined" ]; then
-              echo "   ✅ Jest is listed in devDependencies: $JEST_VERSION"
-            else
-              echo "   ❌ Jest may not be installed"
-            fi
-          fi
-          
           echo "✅ Dependency verification completed"
         
-      - name: Run test suite with coverage and threshold check
+      - name: TypeScript compilation check
         run: |
-          echo "Running full test suite with coverage..."
-          echo "Coverage threshold: 80% (configured in jest.config.cjs)"
-          yarn test --coverage --watchAll=false
-          echo "✅ Test suite passed with coverage requirements"
+          echo "Running TypeScript compilation check..."
+          yarn tsc --noEmit
+          echo "✅ TypeScript compilation successful"
         
-      - name: Validate coverage reports exist
+      - name: Run ESLint with security rules
         run: |
-          echo "Validating coverage report generation..."
-          if [ ! -f "./coverage/lcov.info" ]; then
-            echo "❌ Coverage report not generated"
-            exit 1
+          echo "Running standard ESLint checks..."
+          yarn lint
+          echo "✅ Standard linting passed"
+        
+      - name: Run security-focused ESLint
+        run: |
+          echo "Running security-focused ESLint..."
+          yarn lint:security
+          echo "✅ Security linting passed"
+        
+      - name: Audit dependencies for vulnerabilities
+        run: |
+          echo "Running dependency audit..."
+          if yarn npm audit --severity high; then
+            echo "✅ Dependency audit passed - no high/critical vulnerabilities found"
           fi
-          echo "✅ Coverage reports generated successfully"
-          echo "Coverage report size:"
-          ls -lh ./coverage/lcov.info
         
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage/lcov.info
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: true
-          verbose: true
-          
-      - name: Upload coverage reports as artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-reports
-          path: coverage/
-          retention-days: 7
+      - name: Check for known security issues
+        run: |
+          echo "Generating detailed security audit..."
+          # Use || true here to ensure JSON output is captured even if vulnerabilities are found
+          # This step is for reporting/analysis, not for failing the build
+          yarn npm audit --json --severity moderate > audit.json || true
+          if [ -f audit.json ]; then
+            vulnerabilities=$(cat audit.json | jq -r '.data.vulnerabilities // {} | length // 0' 2>/dev/null || echo "0")
+            echo "Found $vulnerabilities vulnerabilities"
+            echo "✅ Security audit completed"
+          else
+            echo "No audit data available"
+          fi

@@ -1,0 +1,18 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.25.0
+
+# Ignore hardcoded passwords/secrets in test files
+# These are legitimate test data for a redaction library, not real credentials
+ignore:
+  SNYK-JS-HARDCODEDPASSWORDS:
+    - '**/src/__tests__/**/*':
+        reason: Test data for redaction library - these are mock passwords/secrets used to test redaction functionality
+        expires: '2025-09-29T00:00:00.000Z'
+  
+  SNYK-JS-HARDCODEDSECRET:
+    - '**/src/__tests__/**/*':
+        reason: Test data for redaction library - these are mock secrets used to test redaction functionality
+        expires: '2025-09-29T00:00:00.000Z'
+
+# Patch any high/critical vulnerabilities if they arise
+patch: {}

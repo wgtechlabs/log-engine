@@ -11,19 +11,19 @@
 export function getTimestampComponents(): {
     isoTimestamp: string;
     timeString: string;
-} {
-    const now = new Date();
-    const isoTimestamp = now.toISOString();
-    const timeString = now.toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
-    }).replace(/\s+/g, '');
+    } {
+  const now = new Date();
+  const isoTimestamp = now.toISOString();
+  const timeString = now.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  }).replace(/\s+/g, '');
 
-    return {
-        isoTimestamp,
-        timeString
-    };
+  return {
+    isoTimestamp,
+    timeString
+  };
 }
 
 /**
@@ -35,12 +35,12 @@ export function getTimestampComponents(): {
  * @returns The combined, colorized timestamp string suitable for log messages
  */
 export function formatTimestamp(
-    isoTimestamp: string, 
-    timeString: string, 
-    colors: { timestamp: string; timeString: string; reset: string }
+  isoTimestamp: string,
+  timeString: string,
+  colors: { timestamp: string; timeString: string; reset: string }
 ): string {
-    const coloredTimestamp = `${colors.timestamp}[${isoTimestamp}]${colors.reset}`;
-    const coloredTimeString = `${colors.timeString}[${timeString}]${colors.reset}`;
-    
-    return `${coloredTimestamp}${coloredTimeString}`;
+  const coloredTimestamp = `${colors.timestamp}[${isoTimestamp}]${colors.reset}`;
+  const coloredTimeString = `${colors.timeString}[${timeString}]${colors.reset}`;
+
+  return `${coloredTimestamp}${coloredTimeString}`;
 }
