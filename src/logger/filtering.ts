@@ -56,12 +56,12 @@ export class LogFilter {
      */
   static getSeverityRank(level: LogLevel): number {
     switch (level) {
-      case LogLevel.DEBUG: return 0;
-      case LogLevel.INFO: return 1;
-      case LogLevel.WARN: return 2;
-      case LogLevel.ERROR: return 3;
-      case LogLevel.LOG: return 99;
-      default: return 0;
+    case LogLevel.DEBUG: return 0;
+    case LogLevel.INFO: return 1;
+    case LogLevel.WARN: return 2;
+    case LogLevel.ERROR: return 3;
+    case LogLevel.LOG: return 99;
+    default: return 0;
     }
   }
 
@@ -72,13 +72,13 @@ export class LogFilter {
      */
   static getModeThreshold(mode: LogMode): number {
     switch (mode) {
-      case LogMode.DEBUG: return 0;
-      case LogMode.INFO: return 1;
-      case LogMode.WARN: return 2;
-      case LogMode.ERROR: return 3;
-      case LogMode.SILENT: return 99;
-      case LogMode.OFF: return 100;
-      default: return 0;
+    case LogMode.DEBUG: return 0;
+    case LogMode.INFO: return 1;
+    case LogMode.WARN: return 2;
+    case LogMode.ERROR: return 3;
+    case LogMode.SILENT: return 99;
+    case LogMode.OFF: return 100;
+    default: return 0;
     }
   }
 }
