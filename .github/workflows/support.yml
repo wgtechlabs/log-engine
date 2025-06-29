@@ -33,7 +33,7 @@ jobs:
         run: yarn install --immutable
         
       - name: TypeScript compilation check
-        run: npx tsc --noEmit
+        run: yarn exec tsc --noEmit
         
       - name: Run test suite
         run: yarn test --watchAll=false --verbose=false

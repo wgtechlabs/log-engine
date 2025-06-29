@@ -28,7 +28,7 @@ jobs:
         run: yarn install --immutable
         
       - name: TypeScript compilation check
-        run: npx tsc --noEmit
+        run: yarn exec tsc --noEmit
         
       - name: Run ESLint with security rules
         run: yarn lint
