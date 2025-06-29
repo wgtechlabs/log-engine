@@ -24,25 +24,86 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'yarn'
           
-      - name: Enable Yarn v4
-        run: corepack enable
+      - name: Verify Node.js version meets requirements
+        run: |
+          echo "Node.js version:"
+          node --version
+          echo "npm version:"
+          npm --version
+          echo "Checking Node.js version compatibility..."
+          node -e "
+            const version = process.version;
+            const major = parseInt(version.slice(1).split('.')[0]);
+            const required = 16;
+            console.log(\`Node.js \${version} (major: \${major})\`);
+            if (major < required) {
+              console.error(\`❌ Node.js \${major} is below minimum required version \${required}\`);
+              process.exit(1);
+            } else {
+              console.log(\`✅ Node.js \${major} meets minimum requirement \${required}\`);
+            }
+          "
+          
+      - name: Enable Corepack for Yarn v4
+        run: |
+          echo "Current Node.js version:"
+          node --version
+          echo "Enabling Corepack..."
+          corepack enable
+          echo "Preparing Yarn 4.9.2..."
+          corepack prepare yarn@4.9.2 --activate
+          echo "Yarn setup complete"
+          
+      - name: Verify Yarn version
+        run: |
+          echo "Yarn version:"
+          yarn --version
+          echo "Checking package manager field..."
+          node -e "console.log('packageManager:', require('./package.json').packageManager)"
           
       - name: Install dependencies
-        run: yarn install --immutable
+        run: |
+          echo "Installing dependencies with Yarn v4..."
+          echo "Current working directory: $(pwd)"
+          echo "Files in directory:"
+          ls -la
+          echo "Installing..."
+          yarn install --immutable
+          echo "Dependencies installed successfully"
+        
+      - name: Verify installation
+        run: |
+          echo "Checking node_modules..."
+          ls -la node_modules/ | head -10
+          echo "Checking TypeScript installation..."
+          yarn tsc --version
         
       - name: TypeScript compilation check
-        run: yarn exec tsc --noEmit
+        run: |
+          echo "Running TypeScript compilation check..."
+          yarn tsc --noEmit
+          echo "✅ TypeScript compilation successful"
         
-      - name: Run test suite
-        run: yarn test --watchAll=false --verbose=false --coverage=false
+      - name: Run test suite (no coverage for compatibility test)
+        run: |
+          echo "Running test suite for Node.js ${{ matrix.node-version }}..."
+          yarn test --watchAll=false --verbose=false --coverage=false
+          echo "✅ Test suite passed"
         
       - name: Basic linting check
-        run: yarn lint
+        run: |
+          echo "Running ESLint checks..."
+          yarn lint
+          echo "✅ Linting passed"
         
       - name: Build verification
-        run: yarn build --if-present
+        run: |
+          echo "Building project..."
+          yarn build
+          echo "Checking build output..."
+          ls -la dist/
+          echo "✅ Build successful"
 
   compatibility-summary:
     name: Node.js Compatibility Summary
@@ -51,12 +112,32 @@ jobs:
     if: always()
     
     steps:
-      - name: Check all Node.js versions passed
+      - name: Node.js Compatibility Report
         run: |
+          echo "=== Node.js Compatibility Test Results ==="
+          echo "Matrix job result: ${{ needs.node-support-matrix.result }}"
+          echo ""
+          
           if [[ "${{ needs.node-support-matrix.result }}" == "success" ]]; then
-            echo "✅ All Node.js versions (18, 20) are compatible"
-            exit 0
+            echo "🎉 SUCCESS: All Node.js versions are fully compatible!"
+            echo ""
+            echo "✅ Node.js 18 - Compatible"
+            echo "✅ Node.js 20 - Compatible"
+            echo ""
+            echo "The log-engine library works correctly across all supported Node.js versions."
+            echo "Users can safely install and use this package with Node.js 18+ environments."
+          elif [[ "${{ needs.node-support-matrix.result }}" == "failure" ]]; then
+            echo "❌ FAILURE: Some Node.js versions failed compatibility tests"
+            echo ""
+            echo "Please check the individual job logs above to see which versions failed and why."
+            echo "Common issues:"
+            echo "- Yarn/Corepack setup problems"
+            echo "- TypeScript compilation issues"
+            echo "- Test failures specific to Node.js version"
+            echo "- Dependency compatibility problems"
+            exit 1
           else
-            echo "❌ Some Node.js versions failed compatibility tests"
+            echo "⚠️  PARTIAL: Some tests were cancelled or skipped"
+            echo "Result status: ${{ needs.node-support-matrix.result }}"
             exit 1
           fi

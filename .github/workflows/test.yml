@@ -19,24 +19,79 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'yarn'
           
-      - name: Enable Yarn v4
-        run: corepack enable
+      - name: Verify Node.js version meets requirements
+        run: |
+          echo "Node.js version:"
+          node --version
+          echo "npm version:"
+          npm --version
+          echo "Checking Node.js version compatibility..."
+          node -e "
+            const version = process.version;
+            const major = parseInt(version.slice(1).split('.')[0]);
+            const required = 16;
+            console.log(\`Node.js \${version} (major: \${major})\`);
+            if (major < required) {
+              console.error(\`❌ Node.js \${major} is below minimum required version \${required}\`);
+              process.exit(1);
+            } else {
+              console.log(\`✅ Node.js \${major} meets minimum requirement \${required}\`);
+            }
+          "
+          
+      - name: Enable Corepack for Yarn v4
+        run: |
+          echo "Current Node.js version:"
+          node --version
+          echo "Enabling Corepack..."
+          corepack enable
+          echo "Preparing Yarn 4.9.2..."
+          corepack prepare yarn@4.9.2 --activate
+          echo "Yarn setup complete"
+          
+      - name: Verify Yarn version
+        run: |
+          echo "Yarn version:"
+          yarn --version
+          echo "Checking package manager field..."
+          node -e "console.log('packageManager:', require('./package.json').packageManager)"
           
       - name: Install dependencies
-        run: yarn install --immutable
+        run: |
+          echo "Installing dependencies with Yarn v4..."
+          echo "Current working directory: $(pwd)"
+          echo "Files in directory:"
+          ls -la
+          echo "Installing..."
+          yarn install --immutable
+          echo "Dependencies installed successfully"
+        
+      - name: Verify installation
+        run: |
+          echo "Checking node_modules..."
+          ls -la node_modules/ | head -10
+          echo "Checking TypeScript and Jest installation..."
+          yarn tsc --version
+          yarn jest --version
         
       - name: Run test suite with coverage and threshold check
-        run: yarn test --coverage --watchAll=false
+        run: |
+          echo "Running full test suite with coverage..."
+          echo "Coverage threshold: 80% (configured in jest.config.cjs)"
+          yarn test --coverage --watchAll=false
+          echo "✅ Test suite passed with coverage requirements"
         
       - name: Validate coverage reports exist
         run: |
+          echo "Validating coverage report generation..."
           if [ ! -f "./coverage/lcov.info" ]; then
             echo "❌ Coverage report not generated"
             exit 1
           fi
           echo "✅ Coverage reports generated successfully"
+          echo "Coverage report size:"
+          ls -lh ./coverage/lcov.info
         
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4

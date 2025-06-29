@@ -19,33 +19,94 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'yarn'
           
-      - name: Enable Yarn v4
-        run: corepack enable
+      - name: Verify Node.js version meets requirements
+        run: |
+          echo "Node.js version:"
+          node --version
+          echo "npm version:"
+          npm --version
+          echo "Checking Node.js version compatibility..."
+          node -e "
+            const version = process.version;
+            const major = parseInt(version.slice(1).split('.')[0]);
+            const required = 16;
+            console.log(\`Node.js \${version} (major: \${major})\`);
+            if (major < required) {
+              console.error(\`❌ Node.js \${major} is below minimum required version \${required}\`);
+              process.exit(1);
+            } else {
+              console.log(\`✅ Node.js \${major} meets minimum requirement \${required}\`);
+            }
+          "
+          
+      - name: Enable Corepack for Yarn v4
+        run: |
+          echo "Current Node.js version:"
+          node --version
+          echo "Enabling Corepack..."
+          corepack enable
+          echo "Preparing Yarn 4.9.2..."
+          corepack prepare yarn@4.9.2 --activate
+          echo "Yarn setup complete"
+          
+      - name: Verify Yarn version
+        run: |
+          echo "Yarn version:"
+          yarn --version
+          echo "Checking package manager field..."
+          node -e "console.log('packageManager:', require('./package.json').packageManager)"
           
       - name: Install dependencies
-        run: yarn install --immutable
+        run: |
+          echo "Installing dependencies with Yarn v4..."
+          echo "Current working directory: $(pwd)"
+          echo "Files in directory:"
+          ls -la
+          echo "Installing..."
+          yarn install --immutable
+          echo "Dependencies installed successfully"
+        
+      - name: Verify installation
+        run: |
+          echo "Checking node_modules..."
+          ls -la node_modules/ | head -10
+          echo "Checking TypeScript installation..."
+          yarn tsc --version
         
       - name: TypeScript compilation check
-        run: yarn exec tsc --noEmit
+        run: |
+          echo "Running TypeScript compilation check..."
+          yarn tsc --noEmit
+          echo "✅ TypeScript compilation successful"
         
       - name: Run ESLint with security rules
-        run: yarn lint
+        run: |
+          echo "Running standard ESLint checks..."
+          yarn lint
+          echo "✅ Standard linting passed"
         
       - name: Run security-focused ESLint
-        run: yarn eslint . --config eslint.security.config.js --format=stylish
+        run: |
+          echo "Running security-focused ESLint..."
+          yarn lint:security
+          echo "✅ Security linting passed"
         
       - name: Audit dependencies for vulnerabilities
-        run: yarn audit --level high || true
+        run: |
+          echo "Running dependency audit..."
+          yarn audit --level high || true
+          echo "✅ Dependency audit completed"
         continue-on-error: true
         
       - name: Check for known security issues
         run: |
+          echo "Generating detailed security audit..."
           yarn audit --json --level moderate > audit.json || true
           if [ -f audit.json ]; then
             vulnerabilities=$(cat audit.json | jq -r '.data.vulnerabilities // {} | length // 0' 2>/dev/null || echo "0")
             echo "Found $vulnerabilities vulnerabilities"
+            echo "✅ Security audit completed"
           else
             echo "No audit data available"
           fi
