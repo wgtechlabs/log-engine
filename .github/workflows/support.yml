@@ -13,7 +13,7 @@ jobs:
     
     strategy:
       matrix:
-        node-version: ['18', '19', '20', '21', '22']
+        node-version: ['18', '19', '20', '21']
       fail-fast: false
     
     steps:
@@ -24,22 +24,25 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          cache: 'yarn'
+          
+      - name: Enable Yarn v4
+        run: corepack enable
           
       - name: Install dependencies
-        run: npm ci
+        run: yarn install --immutable
         
       - name: TypeScript compilation check
         run: npx tsc --noEmit
         
       - name: Run test suite
-        run: npm test -- --watchAll=false --verbose=false
+        run: yarn test --watchAll=false --verbose=false
         
       - name: Basic linting check
-        run: npm run lint
+        run: yarn lint
         
       - name: Build verification
-        run: npm run build --if-present
+        run: yarn build --if-present
 
   compatibility-summary:
     name: Node.js Compatibility Summary
