@@ -8,11 +8,14 @@ import * as path from 'path';
 import type { FileOutputConfig, HttpOutputConfig } from '../types';
 
 /**
- * File output handler with rotation support
+ * File output handler with rotation support and concurrency protection
+ * Implements atomic file operations and write queuing to prevent corruption
  */
 export class FileOutputHandler {
   private config: Required<FileOutputConfig>;
   private currentFileSize: number = 0;
+  private rotationInProgress: boolean = false;
+  private writeQueue: Array<{ level: string; message: string; data?: unknown }> = [];
 
   constructor(config: FileOutputConfig) {
     // Set defaults
@@ -52,23 +55,18 @@ export class FileOutputHandler {
   };
 
   /**
-     * Write log to file with rotation support
+     * Write log to file with rotation support and concurrency protection
+     * Queues writes during rotation to prevent file corruption
      */
   public write = (level: string, message: string, data?: unknown): void => {
+    // If rotation is in progress, queue the write
+    if (this.rotationInProgress) {
+      this.writeQueue.push({ level, message, data });
+      return;
+    }
+
     try {
-      const formattedMessage = this.config.formatter(level, message, data);
-
-      // Check if rotation is needed
-      if (this.config.maxFileSize > 0 &&
-                this.currentFileSize + Buffer.byteLength(formattedMessage) > this.config.maxFileSize) {
-        this.rotateFile();
-      }
-
-      // Write to file
-      const writeOptions = this.config.append ? { flag: 'a' } : { flag: 'w' };
-      fs.writeFileSync(this.config.filePath, formattedMessage, writeOptions);
-
-      this.currentFileSize += Buffer.byteLength(formattedMessage);
+      this.writeToFile(level, message, data);
     } catch (error) {
       // Fallback to console if file writing fails
       console.error('File output handler failed:', error);
@@ -77,9 +75,54 @@ export class FileOutputHandler {
   };
 
   /**
+   * Write to file with concurrency protection and rotation check
+   * If rotation is in progress, messages are queued to prevent corruption
+   */
+  private writeToFile(level: string, message: string, data?: unknown): void {
+    const formattedMessage = this.config.formatter(level, message, data);
+
+    // Check if rotation is needed
+    if (this.config.maxFileSize > 0 &&
+      this.currentFileSize + Buffer.byteLength(formattedMessage) > this.config.maxFileSize) {
+      this.rotateFile();
+    }
+
+    // Write to file
+    const writeOptions = this.config.append ? { flag: 'a' } : { flag: 'w' };
+    fs.writeFileSync(this.config.filePath, formattedMessage, writeOptions);
+
+    this.currentFileSize += Buffer.byteLength(formattedMessage);
+  }
+
+  /**
+   * Process queued writes after rotation completes
+   */
+  private processWriteQueue(): void {
+    while (this.writeQueue.length > 0) {
+      const queuedWrite = this.writeQueue.shift();
+      if (queuedWrite) {
+        try {
+          this.writeToFile(queuedWrite.level, queuedWrite.message, queuedWrite.data);
+        } catch (error) {
+          console.error('Failed to process queued write:', error);
+          console.log(`[${queuedWrite.level.toUpperCase()}] ${queuedWrite.message}`, queuedWrite.data);
+        }
+      }
+    }
+  }
+
+  /**
      * Rotate log files when size limit is reached
+     * Implements concurrency protection to prevent corruption during rotation
      */
   private rotateFile(): void {
+    // Prevent concurrent rotations
+    if (this.rotationInProgress) {
+      return;
+    }
+
+    this.rotationInProgress = true;
+
     try {
       // Move backup files
       for (let i = this.config.maxBackupFiles - 1; i >= 1; i--) {
@@ -104,7 +147,25 @@ export class FileOutputHandler {
       this.currentFileSize = 0;
     } catch (error) {
       console.error('File rotation failed:', error);
+    } finally {
+      // Always reset rotation flag and process queued writes
+      this.rotationInProgress = false;
+      this.processWriteQueue();
     }
+  }
+
+  /**
+   * Clean up resources and process any remaining queued writes
+   */
+  public destroy(): void {
+    // Process any remaining queued writes
+    if (this.writeQueue.length > 0) {
+      this.processWriteQueue();
+    }
+
+    // Clear the write queue
+    this.writeQueue = [];
+    this.rotationInProgress = false;
   }
 }
 
@@ -224,7 +285,6 @@ export class HttpOutputHandler {
     try {
       const https = require('https');
       const http = require('http');
-      const url = require('url');
 
       const parsedUrl = new URL(this.config.url);
       const isHttps = parsedUrl.protocol === 'https:';
@@ -270,6 +330,18 @@ export class HttpOutputHandler {
     } catch (error) {
       console.error('HTTP request setup failed:', error);
     }
+  }
+
+  /**
+   * Cleanup method to prevent memory leaks
+   */
+  public destroy(): void {
+    if (this.flushTimeout) {
+      clearTimeout(this.flushTimeout);
+      this.flushTimeout = null;
+    }
+    // Flush any remaining logs
+    this.flush();
   }
 }
 

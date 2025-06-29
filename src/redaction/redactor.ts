@@ -29,7 +29,7 @@ export class DataRedactor {
   static updateConfig(newConfig: Partial<RedactionConfig>): void {
     // Reload environment configuration to pick up any changes
     const envConfig = RedactionController.getEnvironmentConfig();
-    this.config = {
+    DataRedactor.config = {
       ...defaultRedactionConfig,
       ...envConfig,
       ...newConfig
@@ -42,10 +42,10 @@ export class DataRedactor {
      */
   static getConfig(): RedactionConfig {
     return {
-      ...this.config,
-      sensitiveFields: [...this.config.sensitiveFields],
-      contentFields: [...this.config.contentFields],
-      customPatterns: this.config.customPatterns ? [...this.config.customPatterns] : undefined
+      ...DataRedactor.config,
+      sensitiveFields: [...DataRedactor.config.sensitiveFields],
+      contentFields: [...DataRedactor.config.contentFields],
+      customPatterns: DataRedactor.config.customPatterns ? [...DataRedactor.config.customPatterns] : undefined
     };
   }
 
@@ -55,7 +55,7 @@ export class DataRedactor {
      */
   static refreshConfig(): void {
     const envConfig = RedactionController.getEnvironmentConfig();
-    this.config = {
+    DataRedactor.config = {
       ...defaultRedactionConfig,
       ...envConfig
     };
@@ -66,9 +66,9 @@ export class DataRedactor {
      * @param patterns - Array of regex patterns to add
      */
   static addCustomPatterns(patterns: RegExp[]): void {
-    const currentPatterns = this.config.customPatterns || [];
-    this.config = {
-      ...this.config,
+    const currentPatterns = DataRedactor.config.customPatterns || [];
+    DataRedactor.config = {
+      ...DataRedactor.config,
       customPatterns: [...currentPatterns, ...patterns]
     };
   }
@@ -77,8 +77,8 @@ export class DataRedactor {
      * Clear all custom regex patterns
      */
   static clearCustomPatterns(): void {
-    this.config = {
-      ...this.config,
+    DataRedactor.config = {
+      ...DataRedactor.config,
       customPatterns: []
     };
   }
@@ -88,9 +88,9 @@ export class DataRedactor {
      * @param fields - Array of field names to add
      */
   static addSensitiveFields(fields: string[]): void {
-    this.config = {
-      ...this.config,
-      sensitiveFields: [...this.config.sensitiveFields, ...fields]
+    DataRedactor.config = {
+      ...DataRedactor.config,
+      sensitiveFields: [...DataRedactor.config.sensitiveFields, ...fields]
     };
   }
 
@@ -101,7 +101,7 @@ export class DataRedactor {
      */
   static testFieldRedaction(fieldName: string): boolean {
     const testObj = { [fieldName]: 'test-value' };
-    const result = this.redactData(testObj);
+    const result = DataRedactor.redactData(testObj);
     // Use safe property access to prevent object injection
     return Object.prototype.hasOwnProperty.call(result, fieldName) && result[fieldName] !== 'test-value';
   }
@@ -114,11 +114,11 @@ export class DataRedactor {
      */
   static redactData(data: any): any {
     // Skip processing if redaction is disabled or data is null/undefined
-    if (!this.config.enabled || data === null || data === undefined) {
+    if (!DataRedactor.config.enabled || data === null || data === undefined) {
       return data;
     }
 
-    return this.processValue(data, new WeakSet(), 0);
+    return DataRedactor.processValue(data, new WeakSet(), 0);
   }
 
   /**
@@ -132,7 +132,7 @@ export class DataRedactor {
      */
   private static processValue(value: any, visited: WeakSet<object> = new WeakSet(), depth: number = 0): any {
     // Check recursion depth limit to prevent stack overflow
-    if (depth >= this.MAX_RECURSION_DEPTH) {
+    if (depth >= DataRedactor.MAX_RECURSION_DEPTH) {
       return '[Max Depth Exceeded]';
     }
 
@@ -149,7 +149,7 @@ export class DataRedactor {
       }
       visited.add(value);
 
-      const result = value.map(item => this.processValue(item, visited, depth + 1));
+      const result = value.map(item => DataRedactor.processValue(item, visited, depth + 1));
       // Keep value in visited set to detect circular references across branches
       return result;
     }
@@ -162,7 +162,7 @@ export class DataRedactor {
       }
       visited.add(value);
 
-      const result = this.redactObject(value, visited, depth + 1);
+      const result = DataRedactor.redactObject(value, visited, depth + 1);
       // Keep value in visited set to detect circular references across branches
       return result;
     }
@@ -181,7 +181,7 @@ export class DataRedactor {
      */
   private static redactObject(obj: Record<string, any>, visited: WeakSet<object> = new WeakSet(), depth: number = 0): Record<string, any> {
     // Check recursion depth limit to prevent stack overflow
-    if (depth >= this.MAX_REDACT_OBJECT_DEPTH) {
+    if (depth >= DataRedactor.MAX_REDACT_OBJECT_DEPTH) {
       return { '[Max Depth Exceeded]': '[Max Depth Exceeded]' };
     }
 
@@ -189,19 +189,16 @@ export class DataRedactor {
 
     for (const [key, value] of Object.entries(obj)) {
       // Check if this field should be completely redacted
-      if (this.isSensitiveField(key)) {
-        Object.defineProperty(redacted, key, { value: this.config.redactionText, enumerable: true, writable: true, configurable: true });
-      }
-      // Check if this field should be truncated (for large content)
-      else if (this.isContentField(key) && typeof value === 'string') {
-        Object.defineProperty(redacted, key, { value: this.truncateContent(value), enumerable: true, writable: true, configurable: true });
-      }
-      // Recursively process nested objects/arrays if deep redaction is enabled
-      else if (this.config.deepRedaction && (typeof value === 'object' && value !== null)) {
-        Object.defineProperty(redacted, key, { value: this.processValue(value, visited, depth + 1), enumerable: true, writable: true, configurable: true });
-      }
-      // Keep the value unchanged
-      else {
+      if (DataRedactor.isSensitiveField(key)) {
+        Object.defineProperty(redacted, key, { value: DataRedactor.config.redactionText, enumerable: true, writable: true, configurable: true });
+      } else if (DataRedactor.isContentField(key) && typeof value === 'string') {
+        // Check if this field should be truncated (for large content)
+        Object.defineProperty(redacted, key, { value: DataRedactor.truncateContent(value), enumerable: true, writable: true, configurable: true });
+      } else if (DataRedactor.config.deepRedaction && (typeof value === 'object' && value !== null)) {
+        // Recursively process nested objects/arrays if deep redaction is enabled
+        Object.defineProperty(redacted, key, { value: DataRedactor.processValue(value, visited, depth + 1), enumerable: true, writable: true, configurable: true });
+      } else {
+        // Keep the value unchanged
         Object.defineProperty(redacted, key, { value: value, enumerable: true, writable: true, configurable: true });
       }
     }
@@ -220,15 +217,15 @@ export class DataRedactor {
     const lowerField = fieldName.toLowerCase();
 
     // Check custom regex patterns first (highest priority)
-    if (this.config.customPatterns && this.config.customPatterns.length > 0) {
-      for (const pattern of this.config.customPatterns) {
+    if (DataRedactor.config.customPatterns && DataRedactor.config.customPatterns.length > 0) {
+      for (const pattern of DataRedactor.config.customPatterns) {
         if (pattern.test(fieldName)) {
           return true;
         }
       }
     }
 
-    return this.config.sensitiveFields.some(sensitive => {
+    return DataRedactor.config.sensitiveFields.some(sensitive => {
       const lowerSensitive = sensitive.toLowerCase();
 
       // Exact match (highest confidence)
@@ -272,7 +269,7 @@ export class DataRedactor {
      */
   private static isContentField(fieldName: string): boolean {
     const lowerField = fieldName.toLowerCase();
-    return this.config.contentFields.some(content => content.toLowerCase() === lowerField);
+    return DataRedactor.config.contentFields.some(content => content.toLowerCase() === lowerField);
   }
 
   /**
@@ -282,9 +279,9 @@ export class DataRedactor {
      * @returns Original content or truncated version with indicator
      */
   private static truncateContent(content: string): string {
-    if (content.length <= this.config.maxContentLength) {
+    if (content.length <= DataRedactor.config.maxContentLength) {
       return content;
     }
-    return content.substring(0, this.config.maxContentLength) + this.config.truncationText;
+    return content.substring(0, DataRedactor.config.maxContentLength) + DataRedactor.config.truncationText;
   }
 }

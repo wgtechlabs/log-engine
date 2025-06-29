@@ -21,7 +21,6 @@
  */
 
 import { Logger } from './logger';
-import { LogMode } from './types';
 import type { LoggerConfig, RedactionConfig } from './types';
 import { DataRedactor, defaultRedactionConfig } from './redaction';
 

@@ -34,7 +34,7 @@ export function formatData(data: any): string {
 
   try {
     return JSON.stringify(data, null, 0);
-  } catch (error) {
+  } catch {
     // Fallback for objects that can't be stringified (e.g., circular references)
     return '[Object]';
   }

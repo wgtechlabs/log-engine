@@ -12,7 +12,7 @@ There are many ways to contribute to this open source project. Any contributions
 
 ### 🧬 Development
 
-If you can write code then create a pull request to this repo and I will review your code. 
+If you can write code then create a pull request to this repo and I will review your code.
 
 #### Branch Strategy
 
@@ -71,13 +71,13 @@ This section provides comprehensive information about testing the log-engine pro
 
 We use a **simplified local testing** approach optimized for developer productivity:
 
-**🚀 Local Development Testing**
+🚀 **Local Development Testing**
 
 - **Fast feedback** in ~3-5 seconds with `yarn test`
 - **Quick validation** without coverage generation using `yarn test --silent`
 - **Optimized for iteration** speed and developer productivity
 
-**🛡️ Comprehensive Local Testing**  
+🛡️ **Comprehensive Local Testing**
 
 - **Full coverage** reporting with `yarn test:coverage`
 - **Security validation** with `yarn secure` (requires Snyk account)
@@ -181,6 +181,7 @@ This approach ensures that test logs remain readable while preserving all error 
 #### Test Best Practices
 
 **✅ Do:**
+
 - Use `async/await` for asynchronous operations
 - Utilize `waitForFile()`, `waitForFileContent()` from `async-test-utils.ts`
 - Create unique test directories to prevent conflicts
@@ -188,6 +189,7 @@ This approach ensures that test logs remain readable while preserving all error 
 - Test both success and failure scenarios
 
 **❌ Don't:**
+
 - Use arbitrary `setTimeout()` calls
 - Use `done` callbacks (prefer async/await)
 - Create tests that depend on other tests
@@ -197,11 +199,13 @@ This approach ensures that test logs remain readable while preserving all error 
 #### Troubleshooting Tests
 
 **If tests are hanging:**
+
 ```bash
 yarn test:ci:debug  # Shows open handles and verbose output
 ```
 
 **If tests are flaky:**
+
 - Check for shared resources (files, directories)
 - Ensure proper cleanup in `afterEach`/`afterAll`
 - Use unique identifiers for test artifacts
@@ -247,4 +251,4 @@ Quality is maintained through:
 
 ---
 
-� with ❤️ by [Waren Gonzaga](https://warengonzaga.com), [WG Technology Labs](https://wgtechlabs.com), and [Him](https://www.youtube.com/watch?v=HHrxS4diLew&t=44s) 🙏
+💻 with ❤️ by [Waren Gonzaga](https://warengonzaga.com), [WG Technology Labs](https://wgtechlabs.com), and [Him](https://www.youtube.com/watch?v=HHrxS4diLew&t=44s) 🙏

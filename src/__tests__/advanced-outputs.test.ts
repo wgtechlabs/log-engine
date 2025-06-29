@@ -1,6 +1,7 @@
 /**
  * Test suite for Advanced Output Handlers
  * Tests file output, HTTP output, and enhanced configuration options
+ * Uses async file operations for better CI environment compatibility
  */
 
 import { LogEngine, LogMode } from '../index';
@@ -105,17 +106,17 @@ describe('Advanced Output Handlers', () => {
       await waitForFile(logFile, 1000);
       await waitForFileContent(logFile, '[INFO] Test message', 1000);
 
-      const content = fs.readFileSync(logFile, 'utf8');
+      const content = await fs.promises.readFile(logFile, 'utf8');
       expect(content).toContain('[INFO] Test message');
       expect(content).toContain('test');
       expect(content).toContain('data');
     });
 
-    test('should append to existing file when append is true', () => {
+    test('should append to existing file when append is true', async () => {
       const logFile = path.join(testDir, 'append-test.log');
 
       // Write initial content
-      fs.writeFileSync(logFile, 'Initial content\\n');
+      await fs.promises.writeFile(logFile, 'Initial content\\n');
 
       LogEngine.configure({
         outputs: ['file'],
@@ -130,12 +131,12 @@ describe('Advanced Output Handlers', () => {
 
       LogEngine.info('Appended message');
 
-      const content = fs.readFileSync(logFile, 'utf8');
+      const content = await fs.promises.readFile(logFile, 'utf8');
       expect(content).toContain('Initial content');
       expect(content).toContain('[INFO] Appended message');
     });
 
-    test('should use custom formatter for file output', () => {
+    test('should use custom formatter for file output', async () => {
       const logFile = path.join(testDir, 'custom-format.log');
 
       LogEngine.configure({
@@ -153,7 +154,7 @@ describe('Advanced Output Handlers', () => {
 
       LogEngine.warn('Custom formatted message');
 
-      const content = fs.readFileSync(logFile, 'utf8');
+      const content = await fs.promises.readFile(logFile, 'utf8');
       expect(content).toBe('CUSTOM: WARN - Custom formatted message\\n');
     });
 
@@ -327,7 +328,7 @@ describe('Advanced Output Handlers', () => {
   });
 
   describe('Enhanced Output Targets', () => {
-    test('should support configured handler objects in enhancedOutputs', () => {
+    test('should support configured handler objects in enhancedOutputs', async () => {
       const logFile = path.join(testDir, 'enhanced-test.log');
       const capturedLogs: any[] = [];
 
@@ -351,7 +352,7 @@ describe('Advanced Output Handlers', () => {
 
       // Check file output
       expect(fs.existsSync(logFile)).toBe(true);
-      const fileContent = fs.readFileSync(logFile, 'utf8');
+      const fileContent = await fs.promises.readFile(logFile, 'utf8');
       expect(fileContent).toBe('FILE: info - Enhanced output test\\n');
 
       // Check custom function output
@@ -504,7 +505,7 @@ describe('Advanced Output Handlers', () => {
   });
 
   describe('Performance', () => {
-    test('should handle high-volume logging efficiently', () => {
+    test('should handle high-volume logging efficiently', async () => {
       const logFile = path.join(testDir, 'performance-test.log');
       const startTime = Date.now();
 
@@ -532,7 +533,7 @@ describe('Advanced Output Handlers', () => {
 
       // Check file was created and has content
       expect(fs.existsSync(logFile)).toBe(true);
-      const content = fs.readFileSync(logFile, 'utf8');
+      const content = await fs.promises.readFile(logFile, 'utf8');
       expect(content).toContain('Performance test message 0');
       expect(content).toContain('Performance test message 999');
     });

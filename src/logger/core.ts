@@ -36,11 +36,23 @@ export class Logger {
       return (level: string, message: string, data?: any) => {
         // Use appropriate console method based on level
         if (level === 'error') {
-          console.error(message);
+          if (data !== undefined) {
+            console.error(message, data);
+          } else {
+            console.error(message);
+          }
         } else if (level === 'warn') {
-          console.warn(message);
+          if (data !== undefined) {
+            console.warn(message, data);
+          } else {
+            console.warn(message);
+          }
         } else {
-          console.log(message);
+          if (data !== undefined) {
+            console.log(message, data);
+          } else {
+            console.log(message);
+          }
         }
       };
     case 'silent':
@@ -188,9 +200,12 @@ export class Logger {
     const config = this.configManager.getConfig();
 
     // Multiple outputs support (highest priority - newer API)
-    if (config.outputs !== undefined && config.outputs.length > 0) {
-      // Process outputs array only if it has actual outputs
-      this.processOutputs(config.outputs, level, rawMessage, formattedMessage, data);
+    if (config.outputs !== undefined) {
+      if (config.outputs.length > 0) {
+        // Process outputs array when it has actual outputs
+        this.processOutputs(config.outputs, level, rawMessage, formattedMessage, data);
+      }
+      // If outputs is explicitly set to empty array, disable all logging
       return;
     }
 

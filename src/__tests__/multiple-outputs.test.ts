@@ -259,7 +259,7 @@ describe('Multiple Output functionality', () => {
       const networkHandler: LogOutputHandler = (level, message) => {
         networkLogs.push({
           level,
-          message: message.replace(/\x1b\[[0-9;]*m/g, ''), // Strip ANSI colors
+          message: message.replace(/\u001b\[[0-9;]*m/g, ''), // Strip ANSI colors
           timestamp: new Date().toISOString()
         });
       };
@@ -320,7 +320,7 @@ describe('Multiple Output functionality', () => {
         prodLogs.push({
           timestamp: new Date().toISOString(),
           level,
-          message: message.replace(/\x1b\[[0-9;]*m/g, '')
+          message: message.replace(/\u001b\[[0-9;]*m/g, '')
         });
       };
 

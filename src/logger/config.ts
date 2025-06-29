@@ -42,6 +42,7 @@ export class LoggerConfigManager {
       // Normal configuration update
       // If mode is present, remove legacy level property to avoid conflicts
       if (config.mode !== undefined && config.level !== undefined) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { level, ...configWithoutLevel } = config;
         this.config = { ...this.config, ...configWithoutLevel };
       } else {
@@ -71,6 +72,7 @@ export class LoggerConfigManager {
 
     // Merge existing config with all keys from the passed config, and override mode with mapped value
     // Remove the legacy 'level' property to avoid conflicts with the new 'mode' property
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { level, ...configWithoutLevel } = config;
     this.config = { ...this.config, ...configWithoutLevel, mode: mappedMode };
   }
