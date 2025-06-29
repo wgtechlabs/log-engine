@@ -32,7 +32,7 @@ interface HttpRequestOptions {
 /**
  * Secure filesystem operations for logging operations
  *
- * SECURITY NOTE: This class implements comprehensive path validation and access controls
+ * SECURITY NOTE: These functions implement comprehensive path validation and access controls
  * to prevent path traversal attacks, directory injection, and unauthorized file access.
  * ESLint security rules are disabled for specific fs operations because:
  *
@@ -46,178 +46,177 @@ interface HttpRequestOptions {
  * 3. All operations are wrapped in try-catch with comprehensive error handling
  * 4. File operations are restricted to log and temp directories only
  */
-class SecureFileSystem {
-  /**
-   * Predefined safe base directories for different operation types
-   * Restricted to specific subdirectories to prevent unauthorized access
-   */
-  private static readonly SAFE_BASE_DIRS = {
-    LOG_FILES: [path.resolve('./logs'), path.resolve('./var/log'), path.resolve('./data/logs')],
-    TEMP_FILES: [path.resolve('./temp'), path.resolve('./logs'), path.resolve('./tmp'), os.tmpdir()],
-    CONFIG_FILES: [path.resolve('./config'), path.resolve('./etc'), path.resolve('./logs')]
-  };
 
-  /**
-   * Validates file path with comprehensive security checks
-   * Prevents path traversal, restricts to safe directories, blocks system paths
-   */
-  private static validatePath(filePath: string): string {
-    if (!filePath || typeof filePath !== 'string') {
-      throw new Error('File path must be a non-empty string');
-    }
+/**
+ * Predefined safe base directories for different operation types
+ * Restricted to specific subdirectories to prevent unauthorized access
+ */
+const SAFE_BASE_DIRS = {
+  LOG_FILES: [path.resolve('./logs'), path.resolve('./var/log'), path.resolve('./data/logs')],
+  TEMP_FILES: [path.resolve('./temp'), path.resolve('./logs'), path.resolve('./tmp'), os.tmpdir()],
+  CONFIG_FILES: [path.resolve('./config'), path.resolve('./etc'), path.resolve('./logs')]
+} as const;
 
-    // Resolve and normalize the path to handle relative paths and traversal attempts
-    const resolvedPath = path.resolve(filePath);
-    const normalizedPath = path.normalize(resolvedPath);
-
-    // Check for path traversal attempts in original path - reject ANY use of '..'
-    if (filePath.includes('..')) {
-      throw new Error(`Path traversal detected: ${filePath}`);
-    }
-
-    // Ensure path is within safe directories (logs, current directory, or temp)
-    const safeBaseDirs = [
-      ...this.SAFE_BASE_DIRS.LOG_FILES,
-      ...this.SAFE_BASE_DIRS.TEMP_FILES,
-      ...this.SAFE_BASE_DIRS.CONFIG_FILES
-    ];
-
-    const isInSafeDir = safeBaseDirs.some(safeDir => normalizedPath.startsWith(safeDir));
-    if (!isInSafeDir) {
-      throw new Error(`File path outside allowed directories: ${filePath}`);
-    }
-
-    // Block access to dangerous system directories
-    const dangerousPaths = [
-      '/etc', '/sys', '/proc', '/dev', '/root', '/bin', '/sbin',
-      'C:\\Windows', 'C:\\System32', 'C:\\Program Files', 'C:\\Users\\All Users'
-    ];
-
-    if (dangerousPaths.some(dangerous => normalizedPath.startsWith(dangerous))) {
-      throw new Error(`Access denied to system directory: ${filePath}`);
-    }
-
-    return normalizedPath;
+/**
+ * Validates file path with comprehensive security checks
+ * Prevents path traversal, restricts to safe directories, blocks system paths
+ */
+function validatePath(filePath: string): string {
+  if (!filePath || typeof filePath !== 'string') {
+    throw new Error('File path must be a non-empty string');
   }
 
-  /**
-   * Secure file existence check
-   * Uses fs.accessSync instead of fs.existsSync for better security practices
-   */
-  static existsSync(filePath: string): boolean {
-    try {
-      const safePath = this.validatePath(filePath);
-      // SECURITY: Path has been validated and restricted to safe directories
-      fs.accessSync(safePath, fs.constants.F_OK);
-      return true;
-    } catch {
-      return false;
-    }
+  // Resolve and normalize the path to handle relative paths and traversal attempts
+  const resolvedPath = path.resolve(filePath);
+  const normalizedPath = path.normalize(resolvedPath);
+
+  // Check for path traversal attempts in original path - reject ANY use of '..'
+  if (filePath.includes('..')) {
+    throw new Error(`Path traversal detected: ${filePath}`);
   }
 
-  /**
-   * Secure directory creation with recursive option support
-   * Restricted to log and temp directories only
-   */
-  static mkdirSync(dirPath: string, options?: { recursive?: boolean }): void {
-    const safePath = this.validatePath(dirPath);
+  // Ensure path is within safe directories (logs, current directory, or temp)
+  const safeBaseDirs = [
+    ...SAFE_BASE_DIRS.LOG_FILES,
+    ...SAFE_BASE_DIRS.TEMP_FILES,
+    ...SAFE_BASE_DIRS.CONFIG_FILES
+  ];
 
-    try {
-      const mkdirOptions = { recursive: Boolean(options?.recursive) };
-      // SECURITY: Path has been validated and restricted to safe directories
-      fs.mkdirSync(safePath, mkdirOptions);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to create directory ${dirPath}: ${errorMessage}`);
-    }
+  const isInSafeDir = safeBaseDirs.some(safeDir => normalizedPath.startsWith(safeDir));
+  if (!isInSafeDir) {
+    throw new Error(`File path outside allowed directories: ${filePath}`);
   }
 
-  /**
-   * Secure file stat operation
-   * Returns file system statistics for validated paths only
-   */
-  static statSync(filePath: string): fs.Stats {
-    const safePath = this.validatePath(filePath);
+  // Block access to dangerous system directories
+  const dangerousPaths = [
+    '/etc', '/sys', '/proc', '/dev', '/root', '/bin', '/sbin',
+    'C:\\Windows', 'C:\\System32', 'C:\\Program Files', 'C:\\Users\\All Users'
+  ];
 
-    try {
-      // SECURITY: Path has been validated and restricted to safe directories
-      return fs.statSync(safePath);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to stat file ${filePath}: ${errorMessage}`);
-    }
+  if (dangerousPaths.some(dangerous => normalizedPath.startsWith(dangerous))) {
+    throw new Error(`Access denied to system directory: ${filePath}`);
   }
 
-  /**
-   * Secure file write operation
-   * Validates path and data before writing to prevent injection attacks
-   */
-  static writeFileSync(filePath: string, data: string, options?: { flag?: string }): void {
-    const safePath = this.validatePath(filePath);
+  return normalizedPath;
+}
 
-    // Validate data parameter
-    if (typeof data !== 'string') {
-      throw new Error('Data must be a string for security');
-    }
+/**
+ * Secure file existence check
+ * Uses fs.accessSync instead of fs.existsSync for better security practices
+ */
+function secureExistsSync(filePath: string): boolean {
+  try {
+    const safePath = validatePath(filePath);
+    // SECURITY: Path has been validated and restricted to safe directories
+    fs.accessSync(safePath, fs.constants.F_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
-    try {
-      const writeOptions = options || {};
-      // SECURITY: Path has been validated and restricted to safe directories
-      fs.writeFileSync(safePath, data, writeOptions);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to write file ${filePath}: ${errorMessage}`);
-    }
+/**
+ * Secure directory creation with recursive option support
+ * Restricted to log and temp directories only
+ */
+function secureMkdirSync(dirPath: string, options?: { recursive?: boolean }): void {
+  const safePath = validatePath(dirPath);
+
+  try {
+    const mkdirOptions = { recursive: Boolean(options?.recursive) };
+    // SECURITY: Path has been validated and restricted to safe directories
+    fs.mkdirSync(safePath, mkdirOptions);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to create directory ${dirPath}: ${errorMessage}`);
+  }
+}
+
+/**
+ * Secure file stat operation
+ * Returns file system statistics for validated paths only
+ */
+function secureStatSync(filePath: string): fs.Stats {
+  const safePath = validatePath(filePath);
+
+  try {
+    // SECURITY: Path has been validated and restricted to safe directories
+    return fs.statSync(safePath);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to stat file ${filePath}: ${errorMessage}`);
+  }
+}
+
+/**
+ * Secure file write operation
+ * Validates path and data before writing to prevent injection attacks
+ */
+function secureWriteFileSync(filePath: string, data: string, options?: { flag?: string }): void {
+  const safePath = validatePath(filePath);
+
+  // Validate data parameter
+  if (typeof data !== 'string') {
+    throw new Error('Data must be a string for security');
   }
 
-  /**
-   * Secure file deletion
-   * Restricted to log and temp files only for safety
-   */
-  static unlinkSync(filePath: string): void {
-    const safePath = this.validatePath(filePath);
+  try {
+    const writeOptions = options || {};
+    // SECURITY: Path has been validated and restricted to safe directories
+    fs.writeFileSync(safePath, data, writeOptions);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to write file ${filePath}: ${errorMessage}`);
+  }
+}
 
-    // Additional safety check: only allow deletion of log and temp files
-    const logDirs = [...this.SAFE_BASE_DIRS.LOG_FILES, ...this.SAFE_BASE_DIRS.TEMP_FILES];
-    const isInLogDir = logDirs.some(logDir => safePath.startsWith(logDir));
+/**
+ * Secure file deletion
+ * Restricted to log and temp files only for safety
+ */
+function secureUnlinkSync(filePath: string): void {
+  const safePath = validatePath(filePath);
 
-    if (!isInLogDir) {
-      throw new Error(`File deletion not allowed outside log/temp directories: ${filePath}`);
-    }
+  // Additional safety check: only allow deletion of log and temp files
+  const logDirs = [...SAFE_BASE_DIRS.LOG_FILES, ...SAFE_BASE_DIRS.TEMP_FILES];
+  const isInLogDir = logDirs.some(logDir => safePath.startsWith(logDir));
 
-    try {
-      // SECURITY: Path has been validated and restricted to log/temp directories
-      fs.unlinkSync(safePath);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to delete file ${filePath}: ${errorMessage}`);
-    }
+  if (!isInLogDir) {
+    throw new Error(`File deletion not allowed outside log/temp directories: ${filePath}`);
   }
 
-  /**
-   * Secure file rename/move operation
-   * Both source and destination must be in safe directories
-   */
-  static renameSync(oldPath: string, newPath: string): void {
-    const safeOldPath = this.validatePath(oldPath);
-    const safeNewPath = this.validatePath(newPath);
+  try {
+    // SECURITY: Path has been validated and restricted to log/temp directories
+    fs.unlinkSync(safePath);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to delete file ${filePath}: ${errorMessage}`);
+  }
+}
 
-    // Ensure both paths are in allowed directories (log/temp only for safety)
-    const allowedDirs = [...this.SAFE_BASE_DIRS.LOG_FILES, ...this.SAFE_BASE_DIRS.TEMP_FILES];
-    const oldInAllowed = allowedDirs.some(dir => safeOldPath.startsWith(dir));
-    const newInAllowed = allowedDirs.some(dir => safeNewPath.startsWith(dir));
+/**
+ * Secure file rename/move operation
+ * Both source and destination must be in safe directories
+ */
+function secureRenameSync(oldPath: string, newPath: string): void {
+  const safeOldPath = validatePath(oldPath);
+  const safeNewPath = validatePath(newPath);
 
-    if (!oldInAllowed || !newInAllowed) {
-      throw new Error(`File rename not allowed outside safe directories: ${oldPath} -> ${newPath}`);
-    }
+  // Ensure both paths are in allowed directories (log/temp only for safety)
+  const allowedDirs = [...SAFE_BASE_DIRS.LOG_FILES, ...SAFE_BASE_DIRS.TEMP_FILES];
+  const oldInAllowed = allowedDirs.some(dir => safeOldPath.startsWith(dir));
+  const newInAllowed = allowedDirs.some(dir => safeNewPath.startsWith(dir));
 
-    try {
-      // SECURITY: Both paths have been validated and restricted to safe directories
-      fs.renameSync(safeOldPath, safeNewPath);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to rename file ${oldPath} to ${newPath}: ${errorMessage}`);
-    }
+  if (!oldInAllowed || !newInAllowed) {
+    throw new Error(`File rename not allowed outside safe directories: ${oldPath} -> ${newPath}`);
+  }
+
+  try {
+    // SECURITY: Both paths have been validated and restricted to safe directories
+    fs.renameSync(safeOldPath, safeNewPath);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to rename file ${oldPath} to ${newPath}: ${errorMessage}`);
   }
 }
 
@@ -245,13 +244,13 @@ export class FileOutputHandler {
     try {
       const dir = path.dirname(this.config.filePath);
 
-      if (!SecureFileSystem.existsSync(dir)) {
-        SecureFileSystem.mkdirSync(dir, { recursive: true });
+      if (!secureExistsSync(dir)) {
+        secureMkdirSync(dir, { recursive: true });
       }
 
       // Get current file size if it exists
-      if (SecureFileSystem.existsSync(this.config.filePath)) {
-        this.currentFileSize = SecureFileSystem.statSync(this.config.filePath).size;
+      if (secureExistsSync(this.config.filePath)) {
+        this.currentFileSize = secureStatSync(this.config.filePath).size;
       }
     } catch (error) {
       // Re-throw with context for better error handling
@@ -304,7 +303,7 @@ export class FileOutputHandler {
 
     // Write to file using secure filesystem wrapper
     const writeOptions = this.config.append ? { flag: 'a' } : { flag: 'w' };
-    SecureFileSystem.writeFileSync(this.config.filePath, formattedMessage, writeOptions);
+    secureWriteFileSync(this.config.filePath, formattedMessage, writeOptions);
 
     this.currentFileSize += Buffer.byteLength(formattedMessage);
   }
@@ -344,20 +343,20 @@ export class FileOutputHandler {
         const oldFile = `${this.config.filePath}.${i}`;
         const newFile = `${this.config.filePath}.${i + 1}`;
 
-        if (SecureFileSystem.existsSync(oldFile)) {
+        if (secureExistsSync(oldFile)) {
           if (i === this.config.maxBackupFiles - 1) {
             // Delete the oldest file
-            SecureFileSystem.unlinkSync(oldFile);
+            secureUnlinkSync(oldFile);
           } else {
-            SecureFileSystem.renameSync(oldFile, newFile);
+            secureRenameSync(oldFile, newFile);
           }
         }
       }
 
       // Move current file to .1
-      if (SecureFileSystem.existsSync(this.config.filePath)) {
+      if (secureExistsSync(this.config.filePath)) {
         const backupFile = `${this.config.filePath}.1`;
-        SecureFileSystem.renameSync(this.config.filePath, backupFile);
+        secureRenameSync(this.config.filePath, backupFile);
       }
 
       this.currentFileSize = 0;
@@ -617,5 +616,14 @@ export function createBuiltInHandler(type: string, config?: Record<string, unkno
   }
 }
 
-// Export for testing
-export { SecureFileSystem };
+// Export secure filesystem functions for testing
+export {
+  secureExistsSync,
+  secureMkdirSync,
+  secureStatSync,
+  secureWriteFileSync,
+  secureUnlinkSync,
+  secureRenameSync,
+  validatePath,
+  SAFE_BASE_DIRS
+};

@@ -810,71 +810,71 @@ describe('Advanced Output Handlers', () => {
       expect(unknownHandler).toBeNull();
     });
 
-    test('should handle file write with non-string data in SecureFileSystem', () => {
-      // Test error path in SecureFileSystem.writeFileSync
-      const { SecureFileSystem } = require('../logger/advanced-outputs');
+    test('should handle file write with non-string data in secure file functions', () => {
+      // Test error path in secureWriteFileSync
+      const { secureWriteFileSync } = require('../logger/advanced-outputs');
       const testFile = path.join(testDir, 'data-type-test.log');
 
       // This should throw an error for non-string data
       expect(() => {
-        SecureFileSystem.writeFileSync(testFile, 123 as any);
+        secureWriteFileSync(testFile, 123 as any);
       }).toThrow('Data must be a string for security');
     });
 
-    test('should handle SecureFileSystem path validation edge cases', () => {
-      const { SecureFileSystem } = require('../logger/advanced-outputs');
+    test('should handle secure file system path validation edge cases', () => {
+      const { secureStatSync } = require('../logger/advanced-outputs');
 
       // Test empty/null path
       expect(() => {
-        SecureFileSystem.statSync('');
+        secureStatSync('');
       }).toThrow('File path must be a non-empty string');
 
       expect(() => {
-        SecureFileSystem.statSync(null as any);
+        secureStatSync(null as any);
       }).toThrow('File path must be a non-empty string');
 
       // Test path traversal with different patterns
       expect(() => {
-        SecureFileSystem.statSync('../../etc/passwd');
+        secureStatSync('../../etc/passwd');
       }).toThrow('Path traversal detected');
 
       // Test access to system directories
       const systemPath = process.platform === 'win32' ? 'C:\\Windows\\system32\\test.log' : '/etc/passwd';
       expect(() => {
-        SecureFileSystem.statSync(systemPath);
+        secureStatSync(systemPath);
       }).toThrow('File path outside allowed directories');
 
       // Test path outside safe directories
       const outsidePath = process.platform === 'win32' ? 'C:\\Users\\test.log' : '/home/user/test.log';
       expect(() => {
-        SecureFileSystem.statSync(outsidePath);
+        secureStatSync(outsidePath);
       }).toThrow('File path outside allowed directories');
     });
 
-    test('should handle SecureFileSystem unlinkSync with invalid path restrictions', () => {
-      const { SecureFileSystem } = require('../logger/advanced-outputs');
+    test('should handle secure file system unlinkSync with invalid path restrictions', () => {
+      const { secureUnlinkSync } = require('../logger/advanced-outputs');
 
       // Try to delete a file outside log/temp directories - use a system directory
       const invalidPath = process.platform === 'win32' ? 'C:\\Users\\test.log' : '/home/user/test.log';
       expect(() => {
-        SecureFileSystem.unlinkSync(invalidPath);
+        secureUnlinkSync(invalidPath);
       }).toThrow('File path outside allowed directories');
     });
 
-    test('should handle SecureFileSystem renameSync with invalid paths', () => {
-      const { SecureFileSystem } = require('../logger/advanced-outputs');
+    test('should handle secure file system renameSync with invalid paths', () => {
+      const { secureRenameSync } = require('../logger/advanced-outputs');
 
       const validLogPath = path.join(testDir, 'test.log');
       const invalidPath = process.platform === 'win32' ? 'C:\\Users\\test.log' : '/home/user/test.log';
 
       // Try to rename with source outside allowed directories
       expect(() => {
-        SecureFileSystem.renameSync(invalidPath, validLogPath);
+        secureRenameSync(invalidPath, validLogPath);
       }).toThrow('File path outside allowed directories');
 
       // Try to rename with destination outside allowed directories
       expect(() => {
-        SecureFileSystem.renameSync(validLogPath, invalidPath);
+        secureRenameSync(validLogPath, invalidPath);
       }).toThrow('File path outside allowed directories');
     });
 
