@@ -28,7 +28,7 @@ export class Logger {
   }
 
   /**
-     * Built-in output handlers for common use cases (enhanced for Phase 3)
+     * Built-in output handlers for common use cases
      */
   private getBuiltInHandler(type: string, config?: any): LogOutputHandler | null {
     switch (type) {
@@ -57,7 +57,7 @@ export class Logger {
   }
 
   /**
-     * Process multiple output targets (enhanced for Phase 3)
+     * Process multiple output targets
      * @param outputs - Array of output targets to process
      * @param level - Log level
      * @param rawMessage - Original unformatted message
@@ -94,7 +94,7 @@ export class Logger {
   }
 
   /**
-     * Process enhanced output targets (Phase 3)
+     * Process enhanced output targets
      * @param enhancedOutputs - Array of enhanced output targets to process
      * @param level - Log level
      * @param rawMessage - Original unformatted message
@@ -175,7 +175,7 @@ export class Logger {
 
   /**
      * Writes log output using configured output handler or default console methods
-     * Supports single output handler (Phase 1), multiple outputs (Phase 2), and enhanced outputs (Phase 3)
+     * Supports single output handler, multiple outputs, and enhanced outputs
      * Priority: outputs > enhancedOutputs > outputHandler > default console
      * @param level - The log level as a string
      * @param rawMessage - The original unformatted message
@@ -187,20 +187,20 @@ export class Logger {
   private writeToOutput(level: string, rawMessage: string, formattedMessage: string, data?: any, isError = false, isWarn = false): void {
     const config = this.configManager.getConfig();
 
-    // Phase 2: Multiple outputs support (highest priority - newer API)
-    if (config.outputs !== undefined) {
-      // Process outputs array (even if empty)
+    // Multiple outputs support (highest priority - newer API)
+    if (config.outputs !== undefined && config.outputs.length > 0) {
+      // Process outputs array only if it has actual outputs
       this.processOutputs(config.outputs, level, rawMessage, formattedMessage, data);
       return;
     }
 
-    // Phase 3: Enhanced outputs with advanced configuration (second priority)
+    // Enhanced outputs with advanced configuration (second priority)
     if (config.enhancedOutputs !== undefined && config.enhancedOutputs.length > 0) {
       this.processEnhancedOutputs(config.enhancedOutputs, level, rawMessage, formattedMessage, data);
       return;
     }
 
-    // Phase 1: Single output handler (third priority - legacy compatibility)
+    // Single output handler (third priority - legacy compatibility)
     if (config.outputHandler) {
       try {
         config.outputHandler(level, formattedMessage, data);

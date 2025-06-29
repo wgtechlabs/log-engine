@@ -260,7 +260,7 @@ describe('LogEngine', () => {
     });
   });
 
-  describe('Output Handler API (Phase 1)', () => {
+  describe('Output Handler API', () => {
     it('should support custom output handler configuration', () => {
       const capturedLogs: Array<{ level: string; message: string }> = [];
 
@@ -317,7 +317,7 @@ describe('LogEngine', () => {
     });
   });
 
-  describe('Multiple Outputs API (Phase 2)', () => {
+  describe('Multiple Outputs API', () => {
     it('should support multiple output targets', () => {
       const capturedLogs1: Array<{ level: string; message: string }> = [];
       const capturedLogs2: Array<{ level: string; message: string }> = [];

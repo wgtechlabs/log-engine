@@ -59,7 +59,7 @@ export interface LogEntry {
 export type LogOutputHandler = (level: string, message: string, data?: unknown) => void;
 
 /**
- * Built-in output handler types (Phase 3 enhanced)
+ * Built-in output handler types
  */
 export type BuiltInOutputHandler = 'console' | 'silent' | 'file' | 'http';
 
@@ -133,15 +133,15 @@ export interface LoggerConfig {
     level?: LogLevel;
     /** Optional environment identifier for context (e.g., 'production', 'staging') */
     environment?: string;
-    /** Custom output handler function to replace console output (Phase 1 - backward compatibility) */
+    /** Custom output handler function to replace console output (backward compatibility) */
     outputHandler?: LogOutputHandler;
-    /** Array of output targets for multiple simultaneous outputs (Phase 2) */
+    /** Array of output targets for multiple simultaneous outputs */
     outputs?: OutputTarget[];
-    /** Enhanced outputs with advanced configuration support (Phase 3) */
+    /** Enhanced outputs with advanced configuration support */
     enhancedOutputs?: EnhancedOutputTarget[];
     /** Whether to suppress default console output (useful with custom outputHandler) */
     suppressConsoleOutput?: boolean;
-    /** Advanced configuration for built-in handlers (Phase 3) */
+    /** Advanced configuration for built-in handlers */
     advancedOutputConfig?: AdvancedOutputConfig;
 }
 

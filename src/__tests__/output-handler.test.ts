@@ -1,5 +1,5 @@
 /**
- * Tests for Output Handler functionality (Phase 1)
+ * Tests for Output Handler functionality
  * Verifies custom output handlers, console suppression, and backward compatibility
  */
 

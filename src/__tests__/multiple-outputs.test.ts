@@ -1,5 +1,5 @@
 /**
- * Tests for Multiple Output functionality (Phase 2)
+ * Tests for Multiple Output functionality
  * Verifies multiple output targets, built-in handlers, and mixed configurations
  */
 
@@ -8,7 +8,7 @@ import { LogMode } from '../types';
 import type { LogOutputHandler, OutputTarget } from '../types';
 import { setupConsoleMocks, restoreConsoleMocks, ConsoleMocks } from './test-utils';
 
-describe('Multiple Output functionality (Phase 2)', () => {
+describe('Multiple Output functionality', () => {
   let logger: Logger;
   let mocks: ConsoleMocks;
   let capturedLogs1: Array<{ level: string; message: string; data?: any }>;

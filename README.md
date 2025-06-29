@@ -1,6 +1,6 @@
 # Log Engine 📜🚂 [![made by](https://img.shields.io/badge/made%20by-WG%20Tech%20Labs-0060a0.svg?logo=github&longCache=true&labelColor=181717&style=flat-square)](https://github.com/wgtechlabs)
 
-[![github actions workflow status](https://img.shields.io/github/actions/workflow/status/wgtechlabs/log-engine/test.yml?branch=main&style=flat-square&logo=github&labelColor=181717)](https://github.com/wgtechlabs/log-engine/actions/workflows/test.yml) [![codecov](https://img.shields.io/codecov/c/github/wgtechlabs/log-engine?token=PWRJTBVKQ9&style=flat-square&logo=codecov&labelColor=181717)](https://codecov.io/gh/wgtechlabs/log-engine) [![npm downloads](https://img.shields.io/npm/d18m/%40wgtechlabs%2Flog-engine?style=flat-square&logo=npm&label=installs&labelColor=181717&color=%23CD0000)](https://www.npmjs.com/package/@wgtechlabs/log-engine) [![sponsors](https://img.shields.io/badge/sponsor-%E2%9D%A4-%23db61a2.svg?&logo=github&logoColor=white&labelColor=181717&style=flat-square)](https://github.com/sponsors/wgtechlabs) [![release](https://img.shields.io/github/release/wgtechlabs/log-engine.svg?logo=github&labelColor=181717&color=green&style=flat-square)](https://github.com/wgtechlabs/log-engine/releases) [![star](https://img.shields.io/github/stars/wgtechlabs/log-engine.svg?&logo=github&labelColor=181717&color=yellow&style=flat-square)](https://github.com/wgtechlabs/log-engine/stargazers) [![license](https://img.shields.io/github/license/wgtechlabs/log-engine.svg?&logo=github&labelColor=181717&style=flat-square)](https://github.com/wgtechlabs/log-engine/blob/main/license)
+[![npm downloads](https://img.shields.io/npm/d18m/%40wgtechlabs%2Flog-engine?style=flat-square&logo=npm&label=installs&labelColor=181717&color=%23CD0000)](https://www.npmjs.com/package/@wgtechlabs/log-engine) [![sponsors](https://img.shields.io/badge/sponsor-%E2%9D%A4-%23db61a2.svg?&logo=github&logoColor=white&labelColor=181717&style=flat-square)](https://github.com/sponsors/wgtechlabs) [![release](https://img.shields.io/github/release/wgtechlabs/log-engine.svg?logo=github&labelColor=181717&color=green&style=flat-square)](https://github.com/wgtechlabs/log-engine/releases) [![star](https://img.shields.io/github/stars/wgtechlabs/log-engine.svg?&logo=github&labelColor=181717&color=yellow&style=flat-square)](https://github.com/wgtechlabs/log-engine/stargazers) [![license](https://img.shields.io/github/license/wgtechlabs/log-engine.svg?&logo=github&labelColor=181717&style=flat-square)](https://github.com/wgtechlabs/log-engine/blob/main/license)
 
 [![banner](https://raw.githubusercontent.com/wgtechlabs/log-engine/main/.github/assets/repo_banner.jpg)](https://github.com/wgtechlabs/log-engine)
 
@@ -644,18 +644,18 @@ LogEngine.configure({
 ```typescript
 // Priority: outputs > enhancedOutputs > outputHandler > default console
 
-// Single handler (Phase 1)
+// Single handler (legacy compatibility)
 LogEngine.configure({
   outputHandler: myHandler,
   suppressConsoleOutput: true
 });
 
-// Multiple basic outputs (Phase 2) - takes priority over outputHandler
+// Multiple basic outputs - takes priority over outputHandler
 LogEngine.configure({
   outputs: ['console', myFileHandler, myNetworkHandler]
 });
 
-// Advanced outputs (Phase 3) - used when outputs not specified
+// Advanced outputs - used when outputs not specified
 LogEngine.configure({
   enhancedOutputs: [
     'console',
@@ -812,11 +812,26 @@ Contributions are welcome, create a pull request to this repo and I will review 
 
 **Development Environment:**
 
-- This project uses **yarn** as the primary package manager for consistency across development and CI/CD
-- Clean test output is maintained using `jest.setup.js` for suppressing console noise during testing
+- This project is configured for **local development workflows only** - no CI/CD setup required
+- Uses **yarn** as the primary package manager for consistency
+- Simple, cross-platform development setup with TypeScript, Jest, and ESLint
+- Clean test output maintained using `jest.setup.js` to suppress console noise during testing
 - All error logging functionality remains intact in production code
+- Security scanning available via Snyk for dependency vulnerability checking
 
-Read the project's [contributing guide](./CONTRIBUTING.md) for more info, including testing guidelines and requirements.
+**Available Scripts:**
+
+- `yarn test` - Run all tests
+- `yarn test:watch` - Run tests in watch mode
+- `yarn test:coverage` - Run tests with coverage reporting
+- `yarn lint` - Run TypeScript and code quality checks
+- `yarn lint:fix` - Automatically fix linting issues
+- `yarn lint:security` - Run security-focused linting
+- `yarn secure` - Run comprehensive security checks
+- `yarn build` - Build the TypeScript project
+- `yarn validate` - Run full validation (lint + test + build)
+
+Read the project's [contributing guide](./CONTRIBUTING.md) for detailed development setup, testing guidelines, and contribution requirements.
 
 ## 🙏 Sponsor
 
@@ -843,7 +858,7 @@ This project is licensed under the [MIT License](https://opensource.org/licenses
 
 This project is created by **[Waren Gonzaga](https://github.com/warengonzaga)** under [WG Technology Labs](https://github.com/wgtechlabs), with the help of awesome [contributors](https://github.com/wgtechlabs/log-engine/graphs/contributors).
 
-**Latest Version:** v1.3.0 - Enhanced with advanced redaction features, comprehensive TypeScript support, and 95%+ test coverage.
+**Latest Version:** v2.1.0 - Enhanced with advanced output handlers, comprehensive security-first logging, complete TypeScript support, and 95%+ test coverage for local development workflows.
 
 [![contributors](https://contrib.rocks/image?repo=wgtechlabs/log-engine)](https://github.com/wgtechlabs/log-engine/graphs/contributors)
 

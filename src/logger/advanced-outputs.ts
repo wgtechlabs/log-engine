@@ -1,5 +1,5 @@
 /**
- * Advanced output handlers for log-engine (Phase 3)
+ * Advanced output handlers for log-engine
  * Provides file, HTTP, and other production-ready output handlers
  */
 

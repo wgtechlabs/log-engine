@@ -169,7 +169,7 @@ export const LogEngine = {
      */
   getRedactionConfig: () => DataRedactor.getConfig(),
 
-  // Advanced redaction methods (Phase 3)
+  // Advanced redaction methods
   /**
      * Add custom regex patterns for advanced field detection
      * @param patterns - Array of regex patterns to add
@@ -219,7 +219,7 @@ export type {
   LogOutputHandler,
   BuiltInOutputHandler,
   OutputTarget,
-  // Phase 3 types
+  // Advanced types
   FileOutputConfig,
   HttpOutputConfig,
   AdvancedOutputConfig,

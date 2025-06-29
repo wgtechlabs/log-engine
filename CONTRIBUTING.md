@@ -16,17 +16,19 @@ If you can write code then create a pull request to this repo and I will review 
 
 #### Branch Strategy
 
-**Development Workflow:**
-- **Work on `dev` branch** for feature development and bug fixes
-- **Fast CI feedback** (~3-5 minutes) for quick iteration
-- **Use `yarn test:ci:fast`** for local validation
+**Local Development Workflow:**
+
+- **Work directly on any feature branch** for development and bug fixes
+- **No CI/CD pipeline** - all validation happens locally
+- **Use local testing commands** for quick validation before commits
 
 **Production Workflow:**  
-- **Create PR from `dev` to `main`** for production releases
-- **Comprehensive CI validation** (~8-10 minutes) with full coverage
-- **All Node.js versions tested** before merge
 
-> **Important**: Please submit pull requests to the `dev` branch. Pull requests to the `main` branch will be automatically rejected unless they are hotfixes or critical security updates.
+- **Create PR to `main`** for production releases
+- **Local validation required** before creating PR
+- **All quality checks must pass locally** before requesting review
+
+> **Important**: Please ensure all tests and linting pass locally before submitting pull requests. This project is configured for local-only development workflows.
 
 #### 🔧 Setup
 
@@ -65,19 +67,21 @@ Please refer to the [README](./README.md) for more detailed setup instructions.
 
 This section provides comprehensive information about testing the log-engine project and our two-tier testing strategy optimized for different development workflows.
 
-#### Two-Tier Testing Strategy
+#### Local Development Testing Strategy
 
-We use a **fast feedback** approach for development and **comprehensive validation** for production readiness:
+We use a **simplified local testing** approach optimized for developer productivity:
 
-**🚀 Development Testing (dev branch)**
-- **Fast feedback** in ~3-5 seconds
-- **Quick validation** without coverage generation
+**🚀 Local Development Testing**
+
+- **Fast feedback** in ~3-5 seconds with `yarn test`
+- **Quick validation** without coverage generation using `yarn test --silent`
 - **Optimized for iteration** speed and developer productivity
 
-**🛡️ Production Testing (main branch)**  
-- **Full coverage** reporting and analysis
-- **Cross-platform validation** (Node.js 16.x, 18.x, 20.x)
-- **Comprehensive checks** before production deployment
+**🛡️ Comprehensive Local Testing**  
+
+- **Full coverage** reporting with `yarn test:coverage`
+- **Security validation** with `yarn secure` (requires Snyk account)
+- **Complete validation** with `yarn validate` before creating PRs
 
 #### Quick Start
 
@@ -85,11 +89,11 @@ We use a **fast feedback** approach for development and **comprehensive validati
 # Install dependencies
 yarn install
 
-# 🚀 Fast development testing (recommended for local dev)
-yarn test:ci:fast
+# 🚀 Fast local testing (recommended for development)
+yarn test
 
-# 🛡️ Full testing with coverage (before PR to main)
-yarn test:ci
+# 🛡️ Full testing with coverage (before creating PRs)
+yarn test:coverage
 
 # 📊 Coverage only
 yarn test:coverage
@@ -98,31 +102,34 @@ yarn test:coverage
 yarn test:watch
 
 # 🐛 Debug test issues
-yarn test:ci:debug
+yarn test:debug
 ```
 
 #### Test Commands Reference
 
 | Command | Speed | Coverage | Use Case |
 |---------|-------|----------|----------|
-| `test:ci:fast` | ⚡⚡⚡⚡⚡ | ❌ | Quick validation, dev iteration |
-| `test:ci` | ⚡⚡⚡ | ✅ | Pre-PR testing, CI/CD |
-| `test:ci:debug` | ⚡⚡ | ✅ | Troubleshooting hanging tests |
-| `test:ci:safe` | ⚡⚡⚡ | ✅ | Unreliable environments |
+| `test` | ⚡⚡⚡⚡⚡ | ❌ | Quick validation, daily development |
+| `test:coverage` | ⚡⚡⚡ | ✅ | Pre-PR testing, quality assurance |
+| `test:debug` | ⚡⚡ | ❌ | Troubleshooting hanging tests |
+| `test:watch` | ⚡⚡⚡⚡ | ❌ | Live development, TDD workflow |
 
 #### Development Workflow
 
 **For Feature Development:**
-1. Work on `dev` branch
-2. Use `yarn test:ci:fast` for quick validation  
-3. Push to `dev` → triggers fast CI tests (3-5 min)
-4. Iterate quickly with fast feedback
+
+1. Work on feature branch from `main`
+2. Use `yarn test` for quick validation during development
+3. Use `yarn lint` to check code quality
+4. Commit changes with descriptive messages
+5. Iterate quickly with fast local feedback
 
 **For Production Release:**
-1. Create PR from `dev` to `main`
-2. Use `yarn test:ci` for full validation
-3. PR triggers comprehensive tests (8-10 min)
-4. Full coverage and cross-platform validation
+
+1. Run full validation: `yarn validate` (lint + test + build)
+2. Ensure coverage requirements are met with `yarn test:coverage`
+3. Run security checks: `yarn secure` (if Snyk is configured)
+4. Create PR to `main` for review
 
 #### Test Architecture
 
@@ -145,30 +152,31 @@ This approach ensures that test logs remain readable while preserving all error 
 
 #### Contributing Tests
 
-**Development Phase (dev branch):**
+**Local Development:**
 
 1. Write your tests alongside feature development
-2. Run `yarn test:ci:fast` for quick validation (~3-5 seconds)
+2. Run `yarn test` for quick validation (~3-5 seconds)
 3. Ensure tests follow established patterns and are isolated
-4. Push to `dev` branch for fast CI validation
+4. Use `yarn test:watch` for live development feedback
 
-**Pre-Production Phase (before main merge):**
+**Pre-Pull Request:**
 
-1. Run full test suite: `yarn test:ci`
-2. Verify coverage requirements are met
+1. Run full test suite: `yarn test:coverage`
+2. Verify coverage requirements are met (should be 80%+)
 3. Test across different scenarios and edge cases
-4. Ensure no test pollution or hanging issues
+4. Run linting: `yarn lint`
+5. Run full validation: `yarn validate`
 
 **Pull Request Checklist:**
 
-- [ ] All tests pass with `yarn test:ci:fast`
-- [ ] Full test suite passes with `yarn test:ci`  
+- [ ] All tests pass with `yarn test`
+- [ ] Coverage requirements met with `yarn test:coverage`  
 - [ ] New functionality has corresponding tests
 - [ ] Edge cases and error scenarios are covered
 - [ ] Test names are descriptive and follow conventions
-- [ ] Coverage requirements are met (80%+ for CI)
 - [ ] No test pollution (tests are properly isolated)
 - [ ] Tests complete quickly (no arbitrary timeouts)
+- [ ] Code quality checks pass with `yarn lint`
 
 #### Test Best Practices
 
@@ -198,34 +206,6 @@ yarn test:ci:debug  # Shows open handles and verbose output
 - Ensure proper cleanup in `afterEach`/`afterAll`
 - Use unique identifiers for test artifacts
 
-#### Environment Variables for Testing
-
-##### EXCLUDE_PROBLEMATIC_TESTS
-
-Controls whether to exclude tests that may cause hanging in certain CI environments:
-
-```bash
-# Include all tests (default - for local development)
-yarn test:ci
-
-# Exclude problematic tests (for CI environments with strict timeouts)
-EXCLUDE_PROBLEMATIC_TESTS=true yarn test:ci
-```
-
-**When to use:**
-
-- ✅ **CI environments** where file I/O operations may cause timeouts
-- ✅ **Unreliable network environments** with strict resource constraints  
-- ✅ **Docker containers** with limited filesystem access
-- ❌ **Local development** (should run all tests to catch regressions)
-
-**What gets excluded:**
-
-- `advanced-outputs.test.ts` - Contains file I/O operations that may hang in restricted environments
-- A CI-friendly alternative (`advanced-outputs-ci.test.ts`) provides coverage for core functionality
-
-> **Note**: The excluded tests are automatically replaced with simplified versions that test the same functionality without problematic file operations.
-
 Thank you for contributing to the log-engine test suite! 🧪
 
 ### 📖 Documentation
@@ -242,45 +222,29 @@ Improvements to documentation are always welcome! This includes:
 For any security bugs or issues, please read the [security policy](./SECURITY.md).
 For other bugs, please create an issue using the bug report template.
 
+## Local Development Philosophy
+
+This project is intentionally configured for **local-only development workflows** to keep the setup simple and accessible:
+
+### 🎯 Benefits of Local-Only Development
+
+- **🚀 Faster iteration**: No waiting for CI/CD pipelines
+- **🛠️ Simpler setup**: No complex CI configurations to maintain
+- **💰 Cost-effective**: No CI/CD resource costs
+- **🔧 Developer control**: Full control over testing and validation
+- **📦 Lightweight**: Focus on code quality, not infrastructure
+
+### 🏗️ Quality Assurance
+
+Quality is maintained through:
+
+- **Comprehensive local testing** with 95%+ coverage
+- **Security scanning** via Snyk integration
+- **TypeScript strict mode** for type safety
+- **ESLint with security rules** for code quality
+- **Pre-commit validation** via `yarn validate`
+- **Manual review process** for all contributions
+
 ---
 
-💻 with ❤️ by [Waren Gonzaga](https://warengonzaga.com), [WG Technology Labs](https://wgtechlabs.com), and [Him](https://www.youtube.com/watch?v=HHrxS4diLew&t=44s) 🙏
-
-#### CI/CD Testing Strategy
-
-Our GitHub Actions workflow implements a **two-tier testing strategy** to optimize for both speed and thoroughness:
-
-##### Dev Branch (Fast Feedback) 
-- **Trigger**: Push to `dev` branch or PR to `dev`
-- **Runtime**: ~3-5 minutes total
-- **Node Versions**: 18.x, 20.x (reduced matrix)
-- **Command**: `yarn test:ci:fast`
-- **Features**: No coverage, fail-fast, optimized for speed
-- **Purpose**: Quick validation for development iteration
-
-##### Main Branch (Comprehensive)
-- **Trigger**: Push to `main` branch or PR to `main`  
-- **Runtime**: ~8-10 minutes total
-- **Node Versions**: 16.x, 18.x, 20.x (full matrix)
-- **Command**: `yarn test:ci`
-- **Features**: Full coverage, Codecov reporting, comprehensive validation
-- **Purpose**: Production-ready validation
-
-##### Branch Protection Rules
-
-**Dev Branch Requirements:**
-- `test-dev` job must pass
-- Quick feedback for iterative development
-- Allows for faster iteration cycles
-
-**Main Branch Requirements:**
-- `test-main` job must pass
-- Coverage thresholds must be met
-- All Node.js versions must pass
-- Codecov integration for coverage tracking
-
-This strategy ensures:
-- 🚀 **Fast development** cycles with immediate feedback
-- 🛡️ **Thorough validation** before production deployment  
-- 💰 **Cost efficiency** through optimized CI resource usage
-- 🔍 **Quality assurance** with comprehensive testing on critical branches
+� with ❤️ by [Waren Gonzaga](https://warengonzaga.com), [WG Technology Labs](https://wgtechlabs.com), and [Him](https://www.youtube.com/watch?v=HHrxS4diLew&t=44s) 🙏
