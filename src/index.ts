@@ -21,7 +21,7 @@
  */
 
 import { Logger } from './logger';
-import type { LoggerConfig, RedactionConfig } from './types';
+import type { LoggerConfig, RedactionConfig, ILogEngineWithoutRedaction, LogData } from './types';
 import { DataRedactor, defaultRedactionConfig } from './redaction';
 
 // Create a singleton logger instance
@@ -40,7 +40,7 @@ export const LogEngine = {
      * LogEngine.configure({ mode: LogMode.PRODUCTION });
      * ```
      */
-  configure: (config: Partial<LoggerConfig>) => logger.configure(config),
+  configure: (config: Partial<LoggerConfig>): void => logger.configure(config),
 
   // Standard logging methods with automatic redaction
   /**
@@ -53,7 +53,7 @@ export const LogEngine = {
      * LogEngine.debug('Processing user data', { userId: 123, email: 'user@example.com' });
      * ```
      */
-  debug: (message: string, data?: any) => logger.debug(message, data),
+  debug: (message: string, data?: LogData): void => logger.debug(message, data),
 
   /**
      * Log an info message with automatic data redaction
@@ -65,7 +65,7 @@ export const LogEngine = {
      * LogEngine.info('User login successful', { username: 'john' });
      * ```
      */
-  info: (message: string, data?: any) => logger.info(message, data),
+  info: (message: string, data?: LogData): void => logger.info(message, data),
 
   /**
      * Log a warning message with automatic data redaction
@@ -77,7 +77,7 @@ export const LogEngine = {
      * LogEngine.warn('API rate limit approaching', { requestsRemaining: 10 });
      * ```
      */
-  warn: (message: string, data?: any) => logger.warn(message, data),
+  warn: (message: string, data?: LogData): void => logger.warn(message, data),
 
   /**
      * Log an error message with automatic data redaction
@@ -89,7 +89,7 @@ export const LogEngine = {
      * LogEngine.error('Database connection failed', { host: 'localhost', port: 5432 });
      * ```
      */
-  error: (message: string, data?: any) => logger.error(message, data),
+  error: (message: string, data?: LogData): void => logger.error(message, data),
 
   /**
      * Log a critical message with automatic data redaction
@@ -101,7 +101,7 @@ export const LogEngine = {
      * LogEngine.log('Application starting', { version: '1.0.0' });
      * ```
      */
-  log: (message: string, data?: any) => logger.log(message, data),
+  log: (message: string, data?: LogData): void => logger.log(message, data),
 
   // Raw methods that bypass redaction (use with caution)
   /**
@@ -110,7 +110,7 @@ export const LogEngine = {
      * @param message - The debug message to log
      * @param data - Optional data object to log (no redaction applied)
      */
-  debugRaw: (message: string, data?: any) => logger.debugRaw(message, data),
+  debugRaw: (message: string, data?: LogData): void => logger.debugRaw(message, data),
 
   /**
      * Log an info message without redaction (use with caution)
@@ -118,7 +118,7 @@ export const LogEngine = {
      * @param message - The info message to log
      * @param data - Optional data object to log (no redaction applied)
      */
-  infoRaw: (message: string, data?: any) => logger.infoRaw(message, data),
+  infoRaw: (message: string, data?: LogData): void => logger.infoRaw(message, data),
 
   /**
      * Log a warning message without redaction (use with caution)
@@ -126,7 +126,7 @@ export const LogEngine = {
      * @param message - The warning message to log
      * @param data - Optional data object to log (no redaction applied)
      */
-  warnRaw: (message: string, data?: any) => logger.warnRaw(message, data),
+  warnRaw: (message: string, data?: LogData): void => logger.warnRaw(message, data),
 
   /**
      * Log an error message without redaction (use with caution)
@@ -134,7 +134,7 @@ export const LogEngine = {
      * @param message - The error message to log
      * @param data - Optional data object to log (no redaction applied)
      */
-  errorRaw: (message: string, data?: any) => logger.errorRaw(message, data),
+  errorRaw: (message: string, data?: LogData): void => logger.errorRaw(message, data),
 
   /**
      * Log a critical message without redaction (use with caution)
@@ -142,56 +142,56 @@ export const LogEngine = {
      * @param message - The critical log message to log
      * @param data - Optional data object to log (no redaction applied)
      */
-  logRaw: (message: string, data?: any) => logger.logRaw(message, data),
+  logRaw: (message: string, data?: LogData): void => logger.logRaw(message, data),
 
   // Redaction configuration methods
   /**
      * Configure data redaction settings
      * @param config - Partial redaction configuration to apply
      */
-  configureRedaction: (config: Partial<RedactionConfig>) => DataRedactor.updateConfig(config),
+  configureRedaction: (config: Partial<RedactionConfig>): void => DataRedactor.updateConfig(config),
 
   /**
      * Refresh redaction configuration from environment variables
      * Useful for picking up runtime environment changes
      */
-  refreshRedactionConfig: () => DataRedactor.refreshConfig(),
+  refreshRedactionConfig: (): void => DataRedactor.refreshConfig(),
 
   /**
      * Reset redaction configuration to defaults
      */
-  resetRedactionConfig: () => DataRedactor.updateConfig(defaultRedactionConfig),
+  resetRedactionConfig: (): void => DataRedactor.updateConfig(defaultRedactionConfig),
 
   /**
      * Get current redaction configuration
      * @returns Current redaction configuration
      */
-  getRedactionConfig: () => DataRedactor.getConfig(),
+  getRedactionConfig: (): RedactionConfig => DataRedactor.getConfig(),
 
   // Advanced redaction methods
   /**
      * Add custom regex patterns for advanced field detection
      * @param patterns - Array of regex patterns to add
      */
-  addCustomRedactionPatterns: (patterns: RegExp[]) => DataRedactor.addCustomPatterns(patterns),
+  addCustomRedactionPatterns: (patterns: RegExp[]): void => DataRedactor.addCustomPatterns(patterns),
 
   /**
      * Clear all custom redaction patterns
      */
-  clearCustomRedactionPatterns: () => DataRedactor.clearCustomPatterns(),
+  clearCustomRedactionPatterns: (): void => DataRedactor.clearCustomPatterns(),
 
   /**
      * Add custom sensitive field names to the existing list
      * @param fields - Array of field names to add
      */
-  addSensitiveFields: (fields: string[]) => DataRedactor.addSensitiveFields(fields),
+  addSensitiveFields: (fields: string[]): void => DataRedactor.addSensitiveFields(fields),
 
   /**
      * Test if a field name would be redacted with current configuration
      * @param fieldName - Field name to test
      * @returns true if field would be redacted, false otherwise
      */
-  testFieldRedaction: (fieldName: string) => DataRedactor.testFieldRedaction(fieldName),
+  testFieldRedaction: (fieldName: string): boolean => DataRedactor.testFieldRedaction(fieldName),
 
   /**
      * Temporarily disable redaction for a specific logging call
@@ -201,12 +201,12 @@ export const LogEngine = {
      * LogEngine.withoutRedaction().info('Debug data', sensitiveObject);
      * ```
      */
-  withoutRedaction: () => ({
-    debug: (message: string, data?: any) => logger.debugRaw(message, data),
-    info: (message: string, data?: any) => logger.infoRaw(message, data),
-    warn: (message: string, data?: any) => logger.warnRaw(message, data),
-    error: (message: string, data?: any) => logger.errorRaw(message, data),
-    log: (message: string, data?: any) => logger.logRaw(message, data)
+  withoutRedaction: (): ILogEngineWithoutRedaction => ({
+    debug: (message: string, data?: LogData): void => logger.debugRaw(message, data),
+    info: (message: string, data?: LogData): void => logger.infoRaw(message, data),
+    warn: (message: string, data?: LogData): void => logger.warnRaw(message, data),
+    error: (message: string, data?: LogData): void => logger.errorRaw(message, data),
+    log: (message: string, data?: LogData): void => logger.logRaw(message, data)
   })
 };
 

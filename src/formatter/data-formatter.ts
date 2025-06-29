@@ -3,6 +3,8 @@
  * Handles serialization and formatting of data objects in log messages
  */
 
+import { LogData } from '../types';
+
 /**
  * Converts input data to a readable string suitable for log output.
  *
@@ -11,7 +13,7 @@
  * @param data - The value to format for logging
  * @returns The formatted string representation of the input data
  */
-export function formatData(data: any): string {
+export function formatData(data: LogData): string {
   if (data === null) {
     return 'null';
   }

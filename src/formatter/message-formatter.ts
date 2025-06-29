@@ -3,7 +3,7 @@
  * Handles the main log message formatting with colors, timestamps, and levels
  */
 
-import { LogLevel } from '../types';
+import { LogLevel, LogData } from '../types';
 import { colors, colorScheme } from './colors';
 import { getTimestampComponents, formatTimestamp } from './timestamp';
 import { formatData, styleData } from './data-formatter';
@@ -21,7 +21,7 @@ export class MessageFormatter {
      * @param data - Optional data object to include in the log output
      * @returns Formatted string with ANSI colors and timestamps
      */
-  static format(level: LogLevel, message: string, data?: any): string {
+  static format(level: LogLevel, message: string, data?: LogData): string {
     const { isoTimestamp, timeString } = getTimestampComponents();
     const timestamp = formatTimestamp(isoTimestamp, timeString, colorScheme);
 

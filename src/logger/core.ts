@@ -6,7 +6,7 @@
  * Includes automatic data redaction for sensitive information
  */
 
-import { LogLevel, LogMode, LoggerConfig, LogOutputHandler, OutputTarget, EnhancedOutputTarget } from '../types';
+import { LogLevel, LogMode, LoggerConfig, LogOutputHandler, OutputTarget, EnhancedOutputTarget, LogData } from '../types';
 import { LogFormatter } from '../formatter';
 import { DataRedactor, RedactionController, defaultRedactionConfig } from '../redaction';
 import { LoggerConfigManager } from './config';
@@ -30,10 +30,11 @@ export class Logger {
   /**
      * Built-in output handlers for common use cases
      */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private getBuiltInHandler(type: string, config?: any): LogOutputHandler | null {
     switch (type) {
     case 'console':
-      return (level: string, message: string, data?: any) => {
+      return (level: string, message: string, data?: LogData) => {
         // Use appropriate console method based on level
         if (level === 'error') {
           if (data !== undefined) {
@@ -76,7 +77,7 @@ export class Logger {
      * @param formattedMessage - Formatted message for console-based outputs
      * @param data - Optional data
      */
-  private processOutputs(outputs: OutputTarget[], level: string, rawMessage: string, formattedMessage: string, data?: any): void {
+  private processOutputs(outputs: OutputTarget[], level: string, rawMessage: string, formattedMessage: string, data?: LogData): void {
     const config = this.configManager.getConfig();
 
     for (const output of outputs) {
@@ -113,7 +114,7 @@ export class Logger {
      * @param formattedMessage - Formatted message for console-based outputs
      * @param data - Optional data
      */
-  private processEnhancedOutputs(enhancedOutputs: EnhancedOutputTarget[], level: string, rawMessage: string, formattedMessage: string, data?: any): void {
+  private processEnhancedOutputs(enhancedOutputs: EnhancedOutputTarget[], level: string, rawMessage: string, formattedMessage: string, data?: LogData): void {
     const config = this.configManager.getConfig();
     const advancedOutputConfig = config.advancedOutputConfig;
 
@@ -196,7 +197,7 @@ export class Logger {
      * @param isError - Whether this is an error level message (for console.error)
      * @param isWarn - Whether this is a warning level message (for console.warn)
      */
-  private writeToOutput(level: string, rawMessage: string, formattedMessage: string, data?: any, isError = false, isWarn = false): void {
+  private writeToOutput(level: string, rawMessage: string, formattedMessage: string, data?: LogData, isError = false, isWarn = false): void {
     const config = this.configManager.getConfig();
 
     // Multiple outputs support (highest priority - newer API)
@@ -253,7 +254,7 @@ export class Logger {
      * @param message - The debug message to log
      * @param data - Optional data object to log (will be redacted)
      */
-  debug(message: string, data?: any): void {
+  debug(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.DEBUG)) {
       const processedData = DataRedactor.redactData(data);
       const formatted = LogFormatter.format(LogLevel.DEBUG, message, processedData);
@@ -268,7 +269,7 @@ export class Logger {
      * @param message - The info message to log
      * @param data - Optional data object to log (will be redacted)
      */
-  info(message: string, data?: any): void {
+  info(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.INFO)) {
       const processedData = DataRedactor.redactData(data);
       const formatted = LogFormatter.format(LogLevel.INFO, message, processedData);
@@ -283,7 +284,7 @@ export class Logger {
      * @param message - The warning message to log
      * @param data - Optional data object to log (will be redacted)
      */
-  warn(message: string, data?: any): void {
+  warn(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.WARN)) {
       const processedData = DataRedactor.redactData(data);
       const formatted = LogFormatter.format(LogLevel.WARN, message, processedData);
@@ -298,7 +299,7 @@ export class Logger {
      * @param message - The error message to log
      * @param data - Optional data object to log (will be redacted)
      */
-  error(message: string, data?: any): void {
+  error(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.ERROR)) {
       const processedData = DataRedactor.redactData(data);
       const formatted = LogFormatter.format(LogLevel.ERROR, message, processedData);
@@ -314,7 +315,7 @@ export class Logger {
      * @param message - The log message to output
      * @param data - Optional data object to log (will be redacted)
      */
-  log(message: string, data?: any): void {
+  log(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.LOG)) {
       const processedData = DataRedactor.redactData(data);
       const formatted = LogFormatter.format(LogLevel.LOG, message, processedData);
@@ -328,7 +329,7 @@ export class Logger {
      * @param message - The debug message to log
      * @param data - Optional data object to log (no redaction applied)
      */
-  debugRaw(message: string, data?: any): void {
+  debugRaw(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.DEBUG)) {
       const formatted = LogFormatter.format(LogLevel.DEBUG, message, data);
       this.writeToOutput('debug', message, formatted, data);
@@ -340,7 +341,7 @@ export class Logger {
      * @param message - The info message to log
      * @param data - Optional data object to log (no redaction applied)
      */
-  infoRaw(message: string, data?: any): void {
+  infoRaw(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.INFO)) {
       const formatted = LogFormatter.format(LogLevel.INFO, message, data);
       this.writeToOutput('info', message, formatted, data);
@@ -352,7 +353,7 @@ export class Logger {
      * @param message - The warning message to log
      * @param data - Optional data object to log (no redaction applied)
      */
-  warnRaw(message: string, data?: any): void {
+  warnRaw(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.WARN)) {
       const formatted = LogFormatter.format(LogLevel.WARN, message, data);
       this.writeToOutput('warn', message, formatted, data, false, true);
@@ -364,7 +365,7 @@ export class Logger {
      * @param message - The error message to log
      * @param data - Optional data object to log (no redaction applied)
      */
-  errorRaw(message: string, data?: any): void {
+  errorRaw(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.ERROR)) {
       const formatted = LogFormatter.format(LogLevel.ERROR, message, data);
       this.writeToOutput('error', message, formatted, data, true, false);
@@ -376,7 +377,7 @@ export class Logger {
      * @param message - The log message to output
      * @param data - Optional data object to log (no redaction applied)
      */
-  logRaw(message: string, data?: any): void {
+  logRaw(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.LOG)) {
       const formatted = LogFormatter.format(LogLevel.LOG, message, data);
       this.writeToOutput('log', message, formatted, data);

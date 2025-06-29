@@ -3,7 +3,7 @@
  * Handles automatic detection and redaction of sensitive information in log data
  */
 
-import { RedactionConfig } from '../types';
+import { RedactionConfig, LogData } from '../types';
 import { defaultRedactionConfig, RedactionController } from './config';
 
 /**
@@ -116,7 +116,7 @@ export class DataRedactor {
      * @param data - Data to be processed for redaction
      * @returns Redacted version of the data
      */
-  static redactData(data: any): any {
+  static redactData(data: LogData): LogData {
     // Skip processing if redaction is disabled or data is null/undefined
     if (!DataRedactor.config.enabled || data === null || data === undefined) {
       return data;
@@ -134,7 +134,7 @@ export class DataRedactor {
      * @param depth - Current recursion depth (prevents stack overflow)
      * @returns Processed value with redaction applied
      */
-  private static processValue(value: any, visited: WeakSet<object> = new WeakSet(), depth: number = 0): any {
+  private static processValue(value: LogData, visited: WeakSet<object> = new WeakSet(), depth: number = 0): LogData {
     // Check recursion depth limit to prevent stack overflow
     if (depth >= DataRedactor.MAX_RECURSION_DEPTH) {
       return '[Max Depth Exceeded]';
@@ -183,13 +183,13 @@ export class DataRedactor {
      * @param depth - Current recursion depth (prevents stack overflow)
      * @returns Object with sensitive fields redacted
      */
-  private static redactObject(obj: Record<string, any>, visited: WeakSet<object> = new WeakSet(), depth: number = 0): Record<string, any> {
+  private static redactObject(obj: Record<string, LogData>, visited: WeakSet<object> = new WeakSet(), depth: number = 0): Record<string, LogData> {
     // Check recursion depth limit to prevent stack overflow
     if (depth >= DataRedactor.MAX_REDACT_OBJECT_DEPTH) {
       return { '[Max Depth Exceeded]': '[Max Depth Exceeded]' };
     }
 
-    const redacted: Record<string, any> = {};
+    const redacted: Record<string, LogData> = {};
 
     for (const [key, value] of Object.entries(obj)) {
       // Check if this field should be completely redacted

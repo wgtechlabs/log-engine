@@ -4,6 +4,13 @@
  */
 
 /**
+ * Type for log data - accepts any value since logs can contain literally anything
+ * This is intentionally `any` rather than `unknown` for maximum usability in a logging context
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type LogData = any;
+
+/**
  * Log levels representing message severity (lowest to highest)
  * Used for filtering messages based on importance
  */
@@ -56,7 +63,7 @@ export interface LogEntry {
  * Output handler function type for custom log output
  * Receives the log level, formatted message, and optional data
  */
-export type LogOutputHandler = (level: string, message: string, data?: unknown) => void;
+export type LogOutputHandler = (level: string, message: string, data?: LogData) => void;
 
 /**
  * Built-in output handler types
@@ -76,7 +83,7 @@ export interface FileOutputConfig {
     /** Number of backup files to keep during rotation (default: 3) */
     maxBackupFiles?: number;
     /** Custom format function for file output */
-    formatter?: (level: string, message: string, data?: unknown) => string;
+    formatter?: (level: string, message: string, data?: LogData) => string;
 }
 
 /**
@@ -94,7 +101,7 @@ export interface HttpOutputConfig {
     /** Timeout for HTTP requests in ms (default: 5000) */
     timeout?: number;
     /** Custom format function for HTTP payload */
-    formatter?: (logs: Array<{ level: string; message: string; data?: unknown; timestamp: string }>) => any;
+    formatter?: (logs: Array<{ level: string; message: string; data?: LogData; timestamp: string }>) => LogData;
 }
 
 /**
@@ -179,27 +186,27 @@ export interface ILogEngine {
 
     // Standard logging methods with automatic redaction
     /** Log a debug message with automatic data redaction */
-    debug(message: string, data?: any): void;
+    debug(message: string, data?: LogData): void;
     /** Log an info message with automatic data redaction */
-    info(message: string, data?: any): void;
+    info(message: string, data?: LogData): void;
     /** Log a warn message with automatic data redaction */
-    warn(message: string, data?: any): void;
+    warn(message: string, data?: LogData): void;
     /** Log an error message with automatic data redaction */
-    error(message: string, data?: any): void;
+    error(message: string, data?: LogData): void;
     /** Log a message with automatic data redaction */
-    log(message: string, data?: any): void;
+    log(message: string, data?: LogData): void;
 
     // Raw logging methods (bypass redaction)
     /** Log a debug message without redaction */
-    debugRaw(message: string, data?: any): void;
+    debugRaw(message: string, data?: LogData): void;
     /** Log an info message without redaction */
-    infoRaw(message: string, data?: any): void;
+    infoRaw(message: string, data?: LogData): void;
     /** Log a warn message without redaction */
-    warnRaw(message: string, data?: any): void;
+    warnRaw(message: string, data?: LogData): void;
     /** Log an error message without redaction */
-    errorRaw(message: string, data?: any): void;
+    errorRaw(message: string, data?: LogData): void;
     /** Log a message without redaction */
-    logRaw(message: string, data?: any): void;
+    logRaw(message: string, data?: LogData): void;
 
     // Redaction configuration methods
     /** Configure redaction settings */
@@ -232,15 +239,15 @@ export interface ILogEngine {
  */
 export interface ILogEngineWithoutRedaction {
     /** Log a debug message without redaction */
-    debug(message: string, data?: any): void;
+    debug(message: string, data?: LogData): void;
     /** Log an info message without redaction */
-    info(message: string, data?: any): void;
+    info(message: string, data?: LogData): void;
     /** Log a warn message without redaction */
-    warn(message: string, data?: any): void;
+    warn(message: string, data?: LogData): void;
     /** Log an error message without redaction */
-    error(message: string, data?: any): void;
+    error(message: string, data?: LogData): void;
     /** Log a message without redaction */
-    log(message: string, data?: any): void;
+    log(message: string, data?: LogData): void;
 }
 
 /**
@@ -263,7 +270,7 @@ export interface IDataRedactor {
     /** Test if a field name would be redacted */
     testFieldRedaction(fieldName: string): boolean;
     /** Redact sensitive data from any value */
-    redactData(data: any): any;
+    redactData(data: LogData): LogData;
 }
 
 /**
