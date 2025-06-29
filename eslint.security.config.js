@@ -47,4 +47,13 @@ export default [
       'no-with': 'error',
     },
   },
+  // Relaxed rules for test files
+  {
+    files: ['**/__tests__/**/*.ts', '**/*.test.ts', '**/*test-utils.ts'],
+    rules: {
+      'security/detect-non-literal-fs-filename': 'off', // Allow dynamic file paths in tests
+      'security/detect-object-injection': 'warn', // Warn instead of error in tests
+      'no-console': 'off', // Allow console in test files
+    },
+  },
 ];

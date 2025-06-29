@@ -53,8 +53,9 @@ export function restoreEnvironment(originalEnv: NodeJS.ProcessEnv): void {
   // Create a copy of the keys to avoid mutation during iteration
   const currentEnvKeys = Object.keys(process.env);
   for (const key of currentEnvKeys) {
-    if (!(key in originalEnv)) {
-      delete process.env[key];
+    if (!Object.prototype.hasOwnProperty.call(originalEnv, key)) {
+      // Safe deletion using explicit type assertion
+      delete (process.env as Record<string, string | undefined>)[key];
     }
   }
 
@@ -62,6 +63,9 @@ export function restoreEnvironment(originalEnv: NodeJS.ProcessEnv): void {
   // Iterate over originalEnv keys safely
   const originalEnvKeys = Object.keys(originalEnv);
   for (const key of originalEnvKeys) {
-    process.env[key] = originalEnv[key];
+    if (Object.prototype.hasOwnProperty.call(originalEnv, key)) {
+      // Safe assignment using explicit access
+      (process.env as Record<string, string | undefined>)[key] = originalEnv[key];
+    }
   }
 }

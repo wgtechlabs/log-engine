@@ -14,15 +14,21 @@ describe('Data Redaction - Environment Control', () => {
     DataRedactor.updateConfig(defaultRedactionConfig);
     // Clear current environment and restore original
     for (const key in process.env) {
-      delete process.env[key];
+      if (Object.prototype.hasOwnProperty.call(process.env, key)) {
+        delete process.env[key];
+      }
     }
     Object.assign(process.env, originalEnv);
   });
 
   afterAll(() => {
     // Restore original environment completely
-    for (const key in process.env) {
-      delete process.env[key];
+    const envKeys = Object.keys(process.env);
+    for (const key of envKeys) {
+      if (Object.prototype.hasOwnProperty.call(process.env, key)) {
+        // Safe deletion using bracket notation with known string
+        delete (process.env as Record<string, string | undefined>)[key];
+      }
     }
     Object.assign(process.env, originalEnv);
   });

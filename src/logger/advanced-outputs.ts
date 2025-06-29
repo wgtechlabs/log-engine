@@ -7,6 +7,107 @@ import * as fs from 'fs';
 import * as path from 'path';
 import type { FileOutputConfig, HttpOutputConfig } from '../types';
 
+// Type definitions for HTTP operations
+interface LogEntry {
+  level: string;
+  message: string;
+  data?: unknown;
+  timestamp: string;
+}
+
+interface HttpPayload {
+  logs: LogEntry[];
+}
+
+interface HttpRequestOptions {
+  hostname: string;
+  port: number;
+  path: string;
+  method: string;
+  headers: Record<string, string | number>;
+  timeout: number;
+}
+
+/**
+ * Secure filesystem operations wrapper
+ * Validates all paths before performing operations
+ */
+class SecureFileSystem {
+  /**
+   * Validates that a file path is safe to use
+   * Prevents directory traversal and other path-based attacks
+   */
+  private static isValidPath(filePath: string): boolean {
+    try {
+      // Normalize the path to resolve any '..' or '.' segments
+      const normalized = path.normalize(filePath);
+
+      // Check for directory traversal attempts
+      if (normalized.includes('..')) {
+        return false;
+      }
+
+      // Check for absolute paths pointing to system directories (basic protection)
+      const dangerous = ['/etc', '/sys', '/proc', '/dev', 'C:\\Windows', 'C:\\System32'];
+      if (dangerous.some(dangerousPath => normalized.startsWith(dangerousPath))) {
+        return false;
+      }
+
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Safely validates and normalizes a file path
+   */
+  private static validateAndNormalize(filePath: string): string {
+    const normalizedPath = path.normalize(filePath);
+    if (!this.isValidPath(normalizedPath)) {
+      throw new Error(`Invalid file path: ${filePath}`);
+    }
+    return normalizedPath;
+  }
+
+  static existsSync(filePath: string): boolean {
+    const validatedPath = this.validateAndNormalize(filePath);
+    // Safe fs operation with validated path
+    return fs.existsSync(validatedPath);
+  }
+
+  static mkdirSync(dirPath: string, options?: { recursive?: boolean }): void {
+    const validatedPath = this.validateAndNormalize(dirPath);
+    // Safe fs operation with validated path
+    fs.mkdirSync(validatedPath, options);
+  }
+
+  static statSync(filePath: string): fs.Stats {
+    const validatedPath = this.validateAndNormalize(filePath);
+    // Safe fs operation with validated path
+    return fs.statSync(validatedPath);
+  }
+
+  static writeFileSync(filePath: string, data: string, options?: { flag?: string }): void {
+    const validatedPath = this.validateAndNormalize(filePath);
+    // Safe fs operation with validated path
+    fs.writeFileSync(validatedPath, data, options);
+  }
+
+  static unlinkSync(filePath: string): void {
+    const validatedPath = this.validateAndNormalize(filePath);
+    // Safe fs operation with validated path
+    fs.unlinkSync(validatedPath);
+  }
+
+  static renameSync(oldPath: string, newPath: string): void {
+    const validatedOldPath = this.validateAndNormalize(oldPath);
+    const validatedNewPath = this.validateAndNormalize(newPath);
+    // Safe fs operation with validated paths
+    fs.renameSync(validatedOldPath, validatedNewPath);
+  }
+}
+
 /**
  * File output handler with rotation support and concurrency protection
  * Implements atomic file operations and write queuing to prevent corruption
@@ -27,16 +128,17 @@ export class FileOutputHandler {
       formatter: config.formatter ?? this.defaultFormatter
     };
 
-    // Ensure directory exists
+    // Ensure directory exists and validate paths
     try {
       const dir = path.dirname(this.config.filePath);
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
+
+      if (!SecureFileSystem.existsSync(dir)) {
+        SecureFileSystem.mkdirSync(dir, { recursive: true });
       }
 
       // Get current file size if it exists
-      if (fs.existsSync(this.config.filePath)) {
-        this.currentFileSize = fs.statSync(this.config.filePath).size;
+      if (SecureFileSystem.existsSync(this.config.filePath)) {
+        this.currentFileSize = SecureFileSystem.statSync(this.config.filePath).size;
       }
     } catch (error) {
       // Re-throw with context for better error handling
@@ -87,9 +189,9 @@ export class FileOutputHandler {
       this.rotateFile();
     }
 
-    // Write to file
+    // Write to file using secure filesystem wrapper
     const writeOptions = this.config.append ? { flag: 'a' } : { flag: 'w' };
-    fs.writeFileSync(this.config.filePath, formattedMessage, writeOptions);
+    SecureFileSystem.writeFileSync(this.config.filePath, formattedMessage, writeOptions);
 
     this.currentFileSize += Buffer.byteLength(formattedMessage);
   }
@@ -129,19 +231,20 @@ export class FileOutputHandler {
         const oldFile = `${this.config.filePath}.${i}`;
         const newFile = `${this.config.filePath}.${i + 1}`;
 
-        if (fs.existsSync(oldFile)) {
+        if (SecureFileSystem.existsSync(oldFile)) {
           if (i === this.config.maxBackupFiles - 1) {
             // Delete the oldest file
-            fs.unlinkSync(oldFile);
+            SecureFileSystem.unlinkSync(oldFile);
           } else {
-            fs.renameSync(oldFile, newFile);
+            SecureFileSystem.renameSync(oldFile, newFile);
           }
         }
       }
 
       // Move current file to .1
-      if (fs.existsSync(this.config.filePath)) {
-        fs.renameSync(this.config.filePath, `${this.config.filePath}.1`);
+      if (SecureFileSystem.existsSync(this.config.filePath)) {
+        const backupFile = `${this.config.filePath}.1`;
+        SecureFileSystem.renameSync(this.config.filePath, backupFile);
       }
 
       this.currentFileSize = 0;
@@ -174,7 +277,7 @@ export class FileOutputHandler {
  */
 export class HttpOutputHandler {
   private config: Required<HttpOutputConfig>;
-  private logBuffer: Array<{ level: string; message: string; data?: unknown; timestamp: string }> = [];
+  private logBuffer: LogEntry[] = [];
   private flushTimeout: NodeJS.Timeout | null = null;
 
   constructor(config: HttpOutputConfig) {
@@ -192,7 +295,7 @@ export class HttpOutputHandler {
   /**
      * Default formatter for HTTP output
      */
-  private defaultFormatter = (logs: Array<{ level: string; message: string; data?: unknown; timestamp: string }>): any => {
+  private defaultFormatter = (logs: LogEntry[]): HttpPayload => {
     return {
       logs: logs.map(log => ({
         timestamp: log.timestamp,
@@ -261,7 +364,7 @@ export class HttpOutputHandler {
   /**
      * Send HTTP request with appropriate method based on environment
      */
-  private sendHttpRequest(payload: any): void {
+  private sendHttpRequest(payload: HttpPayload): void {
     // Try to use fetch (Node.js 18+ or browser)
     if (typeof fetch !== 'undefined') {
       fetch(this.config.url, {
@@ -281,26 +384,23 @@ export class HttpOutputHandler {
   /**
      * Fallback HTTP implementation for Node.js environments without fetch
      */
-  private sendHttpRequestNodeJS(payload: any): void {
+  private sendHttpRequestNodeJS(payload: HttpPayload): void {
     try {
       const https = require('https');
-      const http = require('http');
 
       const parsedUrl = new URL(this.config.url);
       const isHttps = parsedUrl.protocol === 'https:';
 
-      // Security: Warn when using HTTP (cleartext) instead of HTTPS
+      // Security: Block HTTP (cleartext) connections by default
       if (!isHttps) {
-        console.warn('SECURITY WARNING: Using HTTP (cleartext) for log transmission. Consider using HTTPS for production.');
+        throw new Error('SECURITY ERROR: HTTP (cleartext) connections are not allowed for log transmission. Use HTTPS URLs only.');
       }
-
-      const httpModule = isHttps ? https : http;
 
       const postData = JSON.stringify(payload);
 
-      const options = {
+      const options: HttpRequestOptions = {
         hostname: parsedUrl.hostname,
-        port: parsedUrl.port || (isHttps ? 443 : 80),
+        port: parsedUrl.port ? parseInt(parsedUrl.port, 10) : 443,
         path: parsedUrl.pathname + parsedUrl.search,
         method: this.config.method,
         headers: {
@@ -310,13 +410,13 @@ export class HttpOutputHandler {
         timeout: this.config.timeout
       };
 
-      const req = httpModule.request(options, (res: any) => {
+      const req = https.request(options, (res: NodeJS.ReadableStream) => {
         // Handle response (optional: log success/failure)
         res.on('data', () => {}); // Consume response
         res.on('end', () => {});
       });
 
-      req.on('error', (error: any) => {
+      req.on('error', (error: Error) => {
         console.error('HTTP request failed:', error);
       });
 
@@ -359,14 +459,14 @@ export class HttpOutputHandler {
  * @param type - The type of output handler to create (`'console'`, `'silent'`, `'file'`, or `'http'`)
  * @returns A log handler function or `null` if the handler cannot be created
  */
-export function createBuiltInHandler(type: string, config?: any): ((level: string, message: string, data?: unknown) => void) | null {
+export function createBuiltInHandler(type: string, config?: Record<string, unknown>): ((level: string, message: string, data?: unknown) => void) | null {
   switch (type) {
   case 'console':
     return (level: string, message: string, data?: unknown) => {
       const method = level === 'error' ? 'error' : level === 'warn' ? 'warn' : 'log';
       // Use safe method call to prevent object injection
       if (Object.prototype.hasOwnProperty.call(console, method) && typeof console[method as keyof Console] === 'function') {
-        (console[method as keyof Console] as (...args: any[]) => void)(message, data);
+        (console[method as keyof Console] as (...args: unknown[]) => void)(message, data);
       } else {
         console.log(message, data);
       }
@@ -376,9 +476,9 @@ export function createBuiltInHandler(type: string, config?: any): ((level: strin
     return () => {}; // No-op handler
 
   case 'file':
-    if (config && config.filePath) {
+    if (config && typeof config.filePath === 'string') {
       try {
-        const handler = new FileOutputHandler(config);
+        const handler = new FileOutputHandler(config as unknown as FileOutputConfig);
         return handler.write;
       } catch (error) {
         // Return a handler that logs the expected error message and falls back to console
@@ -392,8 +492,8 @@ export function createBuiltInHandler(type: string, config?: any): ((level: strin
     return null;
 
   case 'http':
-    if (config && config.url) {
-      const handler = new HttpOutputHandler(config);
+    if (config && typeof config.url === 'string') {
+      const handler = new HttpOutputHandler(config as unknown as HttpOutputConfig);
       return handler.write;
     }
     console.error('HTTP output handler requires url in config');

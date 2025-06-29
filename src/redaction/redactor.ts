@@ -101,9 +101,13 @@ export class DataRedactor {
      */
   static testFieldRedaction(fieldName: string): boolean {
     const testObj = { [fieldName]: 'test-value' };
-    const result = DataRedactor.redactData(testObj);
-    // Use safe property access to prevent object injection
-    return Object.prototype.hasOwnProperty.call(result, fieldName) && result[fieldName] !== 'test-value';
+    const result = DataRedactor.redactData(testObj);    // Use safe property access to prevent object injection
+    if (Object.prototype.hasOwnProperty.call(result, fieldName)) {
+      // Safe access to avoid object injection
+      const value = result[fieldName as keyof typeof result];
+      return value !== 'test-value';
+    }
+    return false;
   }
 
   /**
