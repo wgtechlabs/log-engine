@@ -19,7 +19,7 @@ import {
 
 describe('Advanced Output Handlers', () => {
   // Use a unique test directory for each test run to prevent conflicts
-  const testDir = path.join(os.tmpdir(), `log-engine-test-advanced-${Date.now()}-${Math.random().toString(36).substring(7)}`);
+  let testDir = path.join(os.tmpdir(), `log-engine-test-advanced-${Date.now()}-${Math.random().toString(36).substring(7)}`);
 
   beforeEach(async () => {
     // Reset to default configuration
