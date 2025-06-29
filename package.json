@@ -53,7 +53,7 @@
     "secure:scan": "snyk code test",
     "secure:test": "snyk test --org=wgtechlabs",
     "secure:code": "snyk code test --org=wgtechlabs",
-    "secure": "run-s lint:security secure:test",
+    "secure": "run-s lint:security secure:test secure:code",
     "validate": "run-s lint test build",
     "clean": "rm -rf dist coverage",
     "coverage:open": "open coverage/lcov-report/index.html",

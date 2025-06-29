@@ -1,12 +1,6 @@
 /**
  * Core Logger class that handles log message output with configurable levels
- * Supports        if (handler) {
-          // Advanced handlers (file, http) get raw message, console gets formatted
-          const messageToUse = (output === 'file' || output === 'http') ? rawMessage : formattedMessage;
-          handler(level, messageToUse, data);
-        } else {
-          console.error(`[LogEngine] Unknown built-in output handler:`, JSON.stringify(output));
-        } INFO, WARN, ERROR, and LOG levels with intelligent filtering
+ * Supports DEBUG, INFO, WARN, ERROR, and LOG levels with intelligent filtering
  * LOG level always outputs regardless of configuration
  * Uses colorized console output with timestamps for better readability
  * Includes automatic data redaction for sensitive information

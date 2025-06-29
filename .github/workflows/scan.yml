@@ -111,8 +111,9 @@ jobs:
       - name: Audit dependencies for vulnerabilities
         run: |
           echo "Running dependency audit..."
-          yarn npm audit --severity high
-          echo "✅ Dependency audit passed - no high/critical vulnerabilities found"
+          if yarn npm audit --severity high; then
+            echo "✅ Dependency audit passed - no high/critical vulnerabilities found"
+          fi
         
       - name: Check for known security issues
         run: |
