@@ -50,11 +50,10 @@
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "lint:security": "eslint src/**/*.ts --config eslint.security.config.js",
-    "secure:scan": "snyk code test --public",
+    "secure:scan": "snyk code test",
     "secure:test": "snyk test --org=wgtechlabs",
     "secure:code": "snyk code test --org=wgtechlabs",
-    "secure": "run-s lint:security secure:test",
-    "validate": "run-s lint test build",
+    "secure": "run-s lint:security secure:test",    "validate": "run-s lint test build",
     "clean": "rm -rf dist coverage",
     "coverage:open": "open coverage/lcov-report/index.html",
     "coverage:upload": "curl -Os https://uploader.codecov.io/latest/windows/codecov.exe && codecov.exe"
