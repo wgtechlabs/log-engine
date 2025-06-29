@@ -38,6 +38,15 @@ describe('Advanced Output Handlers', () => {
       }
     } catch (error) {
       // If directory creation fails, use a backup directory
+      console.warn('Failed to create primary test directory:', error);
+      testDir = path.join(os.tmpdir(), 'log-engine-test-backup-' + Date.now());
+      try {
+        fs.mkdirSync(testDir, { recursive: true });
+        console.log('Using backup test directory:', testDir);
+      } catch (backupError) {
+        console.error('Failed to create backup test directory:', backupError);
+        throw new Error('Unable to create test directory for advanced-outputs tests');
+      }
     }
   });
 
@@ -116,7 +125,7 @@ describe('Advanced Output Handlers', () => {
       const logFile = path.join(testDir, 'append-test.log');
 
       // Write initial content
-      await fs.promises.writeFile(logFile, 'Initial content\\n');
+      await fs.promises.writeFile(logFile, 'Initial content\n');
 
       LogEngine.configure({
         outputs: ['file'],
