@@ -1,6 +1,12 @@
 /**
  * Core Logger class that handles log message output with configurable levels
- * Supports DEBUG, INFO, WARN, ERROR, and LOG levels with intelligent filtering
+ * Supports        if (handler) {
+          // Advanced handlers (file, http) get raw message, console gets formatted
+          const messageToUse = (output === 'file' || output === 'http') ? rawMessage : formattedMessage;
+          handler(level, messageToUse, data);
+        } else {
+          console.error(`[LogEngine] Unknown built-in output handler:`, JSON.stringify(output));
+        } INFO, WARN, ERROR, and LOG levels with intelligent filtering
  * LOG level always outputs regardless of configuration
  * Uses colorized console output with timestamps for better readability
  * Includes automatic data redaction for sensitive information
@@ -70,6 +76,60 @@ export class Logger {
   }
 
   /**
+     * Process a single output target with error handling
+     * @param output - Single output target to process
+     * @param level - Log level
+     * @param rawMessage - Original unformatted message
+     * @param formattedMessage - Formatted message for console-based outputs
+     * @param data - Optional data
+     * @param isEnhanced - Whether this is an enhanced output (supports configured handler objects)
+     */
+  private processSingleOutput(
+    output: OutputTarget | EnhancedOutputTarget,
+    level: string,
+    rawMessage: string,
+    formattedMessage: string,
+    data?: LogData,
+    isEnhanced = false
+  ): void {
+    const config = this.configManager.getConfig();
+
+    try {
+      if (typeof output === 'string') {
+        // Built-in handler - get config if available
+        const outputConfig = config.advancedOutputConfig?.[output as keyof typeof config.advancedOutputConfig];
+        const handler = this.getBuiltInHandler(output, outputConfig);
+        if (handler) {
+          // Advanced handlers (file, http) get raw message, console gets formatted
+          const messageToUse = (output === 'file' || output === 'http') ? rawMessage : formattedMessage;
+          handler(level, messageToUse, data);
+        } else {
+          console.error('[LogEngine] Unknown built-in output handler:', JSON.stringify(output));
+        }
+      } else if (typeof output === 'function') {
+        // Custom function handler gets formatted message for backward compatibility
+        output(level, formattedMessage, data);
+      } else if (isEnhanced && typeof output === 'object' && output.type && output.config) {
+        // Configured handler object (only available for enhanced outputs)
+        const handler = this.getBuiltInHandler(output.type, output.config);
+        if (handler) {
+          // Advanced configured handlers get raw message
+          handler(level, rawMessage, data);
+        } else {
+          console.error('[LogEngine] Unknown enhanced output handler type:', JSON.stringify(output));
+        }
+      } else {
+        const outputType = isEnhanced ? 'enhanced output target' : 'output target';
+        console.error(`[LogEngine] Invalid ${outputType}:`, output);
+      }
+    } catch (error) {
+      // Continue processing other outputs even if one fails
+      const handlerType = isEnhanced ? 'Enhanced output' : 'Output';
+      console.error(`[LogEngine] ${handlerType} handler failed: ${error}`);
+    }
+  }
+
+  /**
      * Process multiple output targets
      * @param outputs - Array of output targets to process
      * @param level - Log level
@@ -78,31 +138,8 @@ export class Logger {
      * @param data - Optional data
      */
   private processOutputs(outputs: OutputTarget[], level: string, rawMessage: string, formattedMessage: string, data?: LogData): void {
-    const config = this.configManager.getConfig();
-
     for (const output of outputs) {
-      try {
-        if (typeof output === 'string') {
-          // Built-in handler - get config if available
-          const outputConfig = config.advancedOutputConfig?.[output as keyof typeof config.advancedOutputConfig];
-          const handler = this.getBuiltInHandler(output, outputConfig);
-          if (handler) {
-            // Advanced handlers (file, http) get raw message, console gets formatted
-            const messageToUse = (output === 'file' || output === 'http') ? rawMessage : formattedMessage;
-            handler(level, messageToUse, data);
-          } else {
-            console.error(`[LogEngine] Unknown built-in output handler: ${output}`);
-          }
-        } else if (typeof output === 'function') {
-          // Custom function handler gets formatted message for backward compatibility
-          output(level, formattedMessage, data);
-        } else {
-          console.error('[LogEngine] Invalid output target:', output);
-        }
-      } catch (error) {
-        // Continue processing other outputs even if one fails
-        console.error(`[LogEngine] Output handler failed: ${error}`);
-      }
+      this.processSingleOutput(output, level, rawMessage, formattedMessage, data, false);
     }
   }
 
@@ -115,40 +152,8 @@ export class Logger {
      * @param data - Optional data
      */
   private processEnhancedOutputs(enhancedOutputs: EnhancedOutputTarget[], level: string, rawMessage: string, formattedMessage: string, data?: LogData): void {
-    const config = this.configManager.getConfig();
-    const advancedOutputConfig = config.advancedOutputConfig;
-
     for (const output of enhancedOutputs) {
-      try {
-        if (typeof output === 'string') {
-          // Built-in handler string - get config if available
-          const outputConfig = advancedOutputConfig?.[output as keyof typeof advancedOutputConfig];
-          const handler = this.getBuiltInHandler(output, outputConfig);
-          if (handler) {
-            const messageToUse = (output === 'file' || output === 'http') ? rawMessage : formattedMessage;
-            handler(level, messageToUse, data);
-          } else {
-            console.error(`[LogEngine] Unknown built-in output handler: ${output}`);
-          }
-        } else if (typeof output === 'function') {
-          // Custom function handler gets formatted message for backward compatibility
-          output(level, formattedMessage, data);
-        } else if (typeof output === 'object' && output.type && output.config) {
-          // Configured handler object
-          const handler = this.getBuiltInHandler(output.type, output.config);
-          if (handler) {
-            // Advanced configured handlers get raw message
-            handler(level, rawMessage, data);
-          } else {
-            console.error(`[LogEngine] Unknown enhanced output handler type: ${output.type}`);
-          }
-        } else {
-          console.error('[LogEngine] Invalid enhanced output target:', output);
-        }
-      } catch (error) {
-        // Continue processing other outputs even if one fails
-        console.error(`[LogEngine] Enhanced output handler failed: ${error}`);
-      }
+      this.processSingleOutput(output, level, rawMessage, formattedMessage, data, true);
     }
   }
 

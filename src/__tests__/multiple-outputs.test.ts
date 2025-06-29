@@ -87,7 +87,8 @@ describe('Multiple Output functionality', () => {
 
       // Should log error about unknown handler
       expect(mocks.mockConsoleError).toHaveBeenCalledWith(
-        expect.stringContaining('Unknown built-in output handler: unknown')
+        expect.stringContaining('Unknown built-in output handler:'),
+        '"unknown"'
       );
     });
   });
