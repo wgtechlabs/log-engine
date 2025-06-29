@@ -55,7 +55,14 @@ export class LogFilter {
      * @returns Numeric severity rank
      */
   static getSeverityRank(level: LogLevel): number {
-    return LogFilter.SEVERITY_RANKS[level] ?? 0;
+    switch (level) {
+      case LogLevel.DEBUG: return 0;
+      case LogLevel.INFO: return 1;
+      case LogLevel.WARN: return 2;
+      case LogLevel.ERROR: return 3;
+      case LogLevel.LOG: return 99;
+      default: return 0;
+    }
   }
 
   /**
@@ -64,6 +71,14 @@ export class LogFilter {
      * @returns Numeric threshold value
      */
   static getModeThreshold(mode: LogMode): number {
-    return LogFilter.MODE_THRESHOLDS[mode] ?? 0;
+    switch (mode) {
+      case LogMode.DEBUG: return 0;
+      case LogMode.INFO: return 1;
+      case LogMode.WARN: return 2;
+      case LogMode.ERROR: return 3;
+      case LogMode.SILENT: return 99;
+      case LogMode.OFF: return 100;
+      default: return 0;
+    }
   }
 }
