@@ -18,6 +18,7 @@
     "gdpr",
     "compliance"
   ],
+  "packageManager": "yarn@4.9.2",
   "license": "MIT",
   "author": "WG Tech Labs <opensource@wgtechlabs.com> (https://wgtechlabs.com)",
   "contributors": [
@@ -57,7 +58,6 @@
     "coverage:open": "open coverage/lcov-report/index.html",
     "coverage:upload": "curl -Os https://uploader.codecov.io/latest/windows/codecov.exe && codecov.exe"
   },
-  "dependencies": {},
   "devDependencies": {
     "@types/eslint-plugin-security": "^3",
     "@types/jest": "^29.0.0",
@@ -75,6 +75,5 @@
   },
   "engines": {
     "node": ">=16.0.0"
-  },
-  "packageManager": "yarn@1.22.22"
+  }
 }
