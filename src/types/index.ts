@@ -176,7 +176,7 @@ export interface ILogEngine {
     // Configuration methods
     /** Configure the logger with new settings */
     configure(config: Partial<LoggerConfig>): void;
-    
+
     // Standard logging methods with automatic redaction
     /** Log a debug message with automatic data redaction */
     debug(message: string, data?: any): void;
@@ -188,7 +188,7 @@ export interface ILogEngine {
     error(message: string, data?: any): void;
     /** Log a message with automatic data redaction */
     log(message: string, data?: any): void;
-    
+
     // Raw logging methods (bypass redaction)
     /** Log a debug message without redaction */
     debugRaw(message: string, data?: any): void;
@@ -200,7 +200,7 @@ export interface ILogEngine {
     errorRaw(message: string, data?: any): void;
     /** Log a message without redaction */
     logRaw(message: string, data?: any): void;
-    
+
     // Redaction configuration methods
     /** Configure redaction settings */
     configureRedaction(config: Partial<RedactionConfig>): void;
@@ -210,7 +210,7 @@ export interface ILogEngine {
     refreshRedactionConfig(): void;
     /** Get current redaction configuration */
     getRedactionConfig(): RedactionConfig;
-    
+
     // Advanced redaction methods
     /** Add custom regex patterns for advanced field detection */
     addCustomRedactionPatterns(patterns: RegExp[]): void;
@@ -220,7 +220,7 @@ export interface ILogEngine {
     addSensitiveFields(fields: string[]): void;
     /** Test if a field name would be redacted with current configuration */
     testFieldRedaction(fieldName: string): boolean;
-    
+
     // Utility methods
     /** Temporarily disable redaction for a specific logging call */
     withoutRedaction(): ILogEngineWithoutRedaction;

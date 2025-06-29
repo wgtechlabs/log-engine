@@ -21,11 +21,11 @@ describe('Multiple Output functionality (Phase 2)', () => {
     mocks = setupConsoleMocks();
     capturedLogs1 = [];
     capturedLogs2 = [];
-    
+
     mockHandler1 = jest.fn((level: string, message: string, data?: any) => {
       capturedLogs1.push({ level, message, data });
     });
-    
+
     mockHandler2 = jest.fn((level: string, message: string, data?: any) => {
       capturedLogs2.push({ level, message, data });
     });
@@ -50,7 +50,7 @@ describe('Multiple Output functionality (Phase 2)', () => {
       expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
       expect(mocks.mockConsoleWarn).toHaveBeenCalledTimes(1);
       expect(mocks.mockConsoleError).toHaveBeenCalledTimes(1);
-      
+
       expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
         expect.stringContaining('Test message')
       );
@@ -104,7 +104,7 @@ describe('Multiple Output functionality (Phase 2)', () => {
       // Both handlers should be called
       expect(mockHandler1).toHaveBeenCalledTimes(1);
       expect(mockHandler2).toHaveBeenCalledTimes(1);
-      
+
       expect(mockHandler1).toHaveBeenCalledWith(
         'info',
         expect.stringContaining('Test message'),
@@ -201,7 +201,7 @@ describe('Multiple Output functionality (Phase 2)', () => {
   describe('Backward Compatibility', () => {
     it('should prioritize outputs over outputHandler when both are provided', () => {
       const legacyHandler = jest.fn();
-      
+
       logger.configure({
         mode: LogMode.DEBUG,
         outputHandler: legacyHandler,
@@ -217,7 +217,7 @@ describe('Multiple Output functionality (Phase 2)', () => {
 
     it('should fall back to outputHandler when outputs is not configured', () => {
       const legacyHandler = jest.fn();
-      
+
       logger.configure({
         mode: LogMode.DEBUG,
         outputHandler: legacyHandler
@@ -233,7 +233,7 @@ describe('Multiple Output functionality (Phase 2)', () => {
 
     it('should work with outputHandler when no outputs configured', () => {
       const legacyHandler = jest.fn();
-      
+
       logger.configure({
         mode: LogMode.DEBUG,
         outputHandler: legacyHandler
@@ -251,11 +251,11 @@ describe('Multiple Output functionality (Phase 2)', () => {
     it('should support console + file + network logging pattern', () => {
       const fileLogs: string[] = [];
       const networkLogs: Array<{ level: string; message: string; timestamp: string }> = [];
-      
+
       const fileHandler: LogOutputHandler = (level, message) => {
         fileLogs.push(`[${level.toUpperCase()}] ${message}`);
       };
-      
+
       const networkHandler: LogOutputHandler = (level, message) => {
         networkLogs.push({
           level,
@@ -362,14 +362,14 @@ describe('Multiple Output functionality (Phase 2)', () => {
       expect(mockHandler1).toHaveBeenCalledTimes(1);
       expect(mockHandler2).toHaveBeenCalledTimes(1);
       expect(mocks.mockConsoleError).toHaveBeenCalledTimes(1);
-      
+
       expect(mocks.mockConsoleLog).not.toHaveBeenCalled();
       expect(mocks.mockConsoleWarn).not.toHaveBeenCalled();
     });
 
     it('should process outputs efficiently', () => {
       const start = process.hrtime.bigint();
-      
+
       logger.configure({
         mode: LogMode.DEBUG,
         outputs: [mockHandler1, mockHandler2, 'console', 'silent']
@@ -385,7 +385,7 @@ describe('Multiple Output functionality (Phase 2)', () => {
 
       // Should complete reasonably fast (less than 100ms for 100 messages)
       expect(duration).toBeLessThan(100);
-      
+
       // All outputs should be called
       expect(mockHandler1).toHaveBeenCalledTimes(100);
       expect(mockHandler2).toHaveBeenCalledTimes(100);

@@ -11,10 +11,10 @@ describe('LogFormatter', () => {
   it('should format messages with timestamp and level', () => {
     // Test complete message formatting with all components
     const formatted = LogFormatter.format(LogLevel.INFO, 'Test message');
-    
+
     // Remove ANSI color codes for pattern matching
     const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
-    
+
     // Verify format: [ISO_TIMESTAMP][LOCAL_TIME][LEVEL]: message
     expect(cleanFormatted).toMatch(/^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]\[\d{1,2}:\d{2}[AP]M\]\[INFO\]: Test message$/);
   });
@@ -26,7 +26,7 @@ describe('LogFormatter', () => {
     const warnFormatted = LogFormatter.format(LogLevel.WARN, 'Warn test');
     const errorFormatted = LogFormatter.format(LogLevel.ERROR, 'Error test');
     const logFormatted = LogFormatter.format(LogLevel.LOG, 'LOG test');
-    
+
     // Remove ANSI color codes and verify each level appears correctly
     expect(debugFormatted.replace(/\x1b\[[0-9;]*m/g, '')).toContain('[DEBUG]');
     expect(infoFormatted.replace(/\x1b\[[0-9;]*m/g, '')).toContain('[INFO]');
@@ -39,17 +39,17 @@ describe('LogFormatter', () => {
     // Test that custom messages are preserved in formatted output
     const message = 'Custom test message';
     const formatted = LogFormatter.format(LogLevel.INFO, message);
-    
+
     expect(formatted).toContain(message);
   });
 
   it('should handle empty messages', () => {
     // Test edge case: empty message should still produce valid format
     const formatted = LogFormatter.format(LogLevel.INFO, '');
-    
+
     // Remove ANSI color codes for pattern matching
     const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
-    
+
     // Should have timestamps and level but empty message at end
     expect(cleanFormatted).toMatch(/^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]\[\d{1,2}:\d{2}[AP]M\]\[INFO\]: $/);
   });
@@ -58,7 +58,7 @@ describe('LogFormatter', () => {
     // Test that special characters don't break formatting
     const message = 'Test with special chars: !@#$%^&*()';
     const formatted = LogFormatter.format(LogLevel.INFO, message);
-    
+
     expect(formatted).toContain(message);
   });
 
@@ -66,7 +66,7 @@ describe('LogFormatter', () => {
     // Test LOG level formatting with specific color
     const formatted = LogFormatter.format(LogLevel.LOG, 'LOG level message');
     const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
-    
+
     expect(cleanFormatted).toContain('[LOG]');
     expect(cleanFormatted).toContain('LOG level message');
     // Verify green color code is applied (ANSI code 32)
@@ -78,7 +78,7 @@ describe('LogFormatter', () => {
     // @ts-ignore - intentionally passing invalid enum value for testing
     const formatted = LogFormatter.format(999 as LogLevel, 'Unknown level message');
     const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
-    
+
     expect(cleanFormatted).toContain('[UNKNOWN]');
     expect(cleanFormatted).toContain('Unknown level message');
   });
@@ -87,13 +87,13 @@ describe('LogFormatter', () => {
     it('should format system messages with [LOG ENGINE] prefix', () => {
       const message = 'This is a system message';
       const formatted = LogFormatter.formatSystemMessage(message);
-      
+
       // Should contain the LOG ENGINE prefix
       expect(formatted).toContain('[LOG ENGINE]');
-      
+
       // Should contain the message content
       expect(formatted).toContain(message);
-      
+
       // Should contain timestamp components
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
       expect(cleanFormatted).toMatch(/\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]/); // ISO timestamp
@@ -103,11 +103,11 @@ describe('LogFormatter', () => {
     it('should format system messages with colors', () => {
       const message = 'Colored system message';
       const formatted = LogFormatter.formatSystemMessage(message);
-      
+
       // Should contain ANSI color codes
       expect(formatted).toContain('\x1b['); // ANSI escape sequence start
       expect(formatted).toContain('\x1b[0m'); // Reset color code
-      
+
       // Should contain yellow color for LOG ENGINE prefix
       expect(formatted).toContain('\x1b[33m'); // Yellow color code
     });
@@ -115,10 +115,10 @@ describe('LogFormatter', () => {
     it('should maintain consistent format structure', () => {
       const message = 'Test message';
       const formatted = LogFormatter.formatSystemMessage(message);
-      
+
       // Remove ANSI color codes for pattern matching
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
-      
+
       // Should follow the format: [TIMESTAMP][TIME][LOG ENGINE]: message
       const formatPattern = /\[.*?\]\[.*?\]\[LOG ENGINE\]: Test message/;
       expect(cleanFormatted).toMatch(formatPattern);
@@ -152,7 +152,7 @@ describe('LogFormatter', () => {
       // Test boolean handling (covers line 110)
       const formatted = LogFormatter.format(LogLevel.INFO, 'Message', true);
       expect(formatted).toContain('true');
-      
+
       const formatted2 = LogFormatter.format(LogLevel.INFO, 'Message', false);
       expect(formatted2).toContain('false');
     });
@@ -161,7 +161,7 @@ describe('LogFormatter', () => {
       // Test JSON.stringify error handling (covers line 117)
       const circularObj: any = {};
       circularObj.self = circularObj; // Create circular reference
-      
+
       const formatted = LogFormatter.format(LogLevel.INFO, 'Message', circularObj);
       expect(formatted).toContain('[Object]');
     });
@@ -223,7 +223,7 @@ describe('LogFormatter', () => {
   describe('Module exports', () => {
     it('should export all formatter functions and classes', () => {
       const formatter = require('../formatter');
-      
+
       // Test that all expected exports are available
       expect(formatter.MessageFormatter).toBeDefined();
       expect(formatter.LogFormatter).toBeDefined(); // Backward compatibility
@@ -233,10 +233,10 @@ describe('LogFormatter', () => {
       expect(formatter.formatTimestamp).toBeDefined();
       expect(formatter.formatData).toBeDefined();
       expect(formatter.styleData).toBeDefined();
-      
+
       // Test that LogFormatter is alias for MessageFormatter
       expect(formatter.LogFormatter).toBe(formatter.MessageFormatter);
-      
+
       // Test that functions are callable
       expect(typeof formatter.getTimestampComponents).toBe('function');
       expect(typeof formatter.formatTimestamp).toBe('function');

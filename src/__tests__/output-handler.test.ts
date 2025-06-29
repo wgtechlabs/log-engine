@@ -210,7 +210,7 @@ describe('Output Handler functionality', () => {
 
       expect(mockOutputHandler).toHaveBeenCalledTimes(1);
       const [level, message, data] = mockOutputHandler.mock.calls[0];
-      
+
       expect(level).toBe('info');
       expect(message).toContain('User login');
       expect(data).toEqual({ username: 'john', password: '[REDACTED]' });
@@ -227,7 +227,7 @@ describe('Output Handler functionality', () => {
 
       expect(mockOutputHandler).toHaveBeenCalledTimes(1);
       const [level, message, data] = mockOutputHandler.mock.calls[0];
-      
+
       expect(level).toBe('info');
       expect(message).toContain('User login');
       expect(data).toEqual(originalData);
@@ -252,7 +252,7 @@ describe('Output Handler functionality', () => {
 
       // Should have called the faulty handler
       expect(faultyHandler).toHaveBeenCalledTimes(1);
-      
+
       // Should have fallen back to console
       expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
       expect(mocks.mockConsoleError).toHaveBeenCalledTimes(1); // Error message about handler failure
@@ -262,7 +262,7 @@ describe('Output Handler functionality', () => {
   describe('Real-world Use Cases', () => {
     it('should support GUI application log capture', () => {
       const uiLogs: Array<{ level: string; message: string; timestamp: Date }> = [];
-      
+
       logger.configure({
         mode: LogMode.DEBUG,
         suppressConsoleOutput: true,
@@ -283,7 +283,7 @@ describe('Output Handler functionality', () => {
 
     it('should support testing framework log capture', () => {
       const testLogs: Array<{ level: string; message: string }> = [];
-      
+
       logger.configure({
         mode: LogMode.DEBUG,
         suppressConsoleOutput: true,

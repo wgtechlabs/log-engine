@@ -25,7 +25,7 @@ export const setupConsoleMocks = (): ConsoleMocks => {
   const mockConsoleLog = jest.spyOn(console, 'log').mockImplementation();
   const mockConsoleWarn = jest.spyOn(console, 'warn').mockImplementation();
   const mockConsoleError = jest.spyOn(console, 'error').mockImplementation();
-  
+
   return { mockConsoleLog, mockConsoleWarn, mockConsoleError };
 };
 

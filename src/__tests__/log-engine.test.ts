@@ -12,10 +12,10 @@ describe('LogEngine', () => {
   beforeEach(() => {
     // Set up console mocks to capture log output
     mocks = setupConsoleMocks();
-    
+
     // Reset LogEngine to consistent default state for each test using new mode API
     // Clear any output handler and console suppression from previous tests
-    LogEngine.configure({ 
+    LogEngine.configure({
       mode: LogMode.INFO,
       outputHandler: undefined,
       suppressConsoleOutput: undefined
@@ -32,7 +32,7 @@ describe('LogEngine', () => {
       // Test that DEBUG mode enables debug message output
       LogEngine.configure({ mode: LogMode.DEBUG });
       LogEngine.debug('Debug message');
-      
+
       expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
       expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
         expect.stringContaining('Debug message')
@@ -42,72 +42,72 @@ describe('LogEngine', () => {
     it('should log info messages when mode is INFO or lower', () => {
       // Test that INFO mode shows info messages
       LogEngine.configure({ mode: LogMode.INFO });
-       LogEngine.info('Info message');
-       
-       expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
-       expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
-         expect.stringContaining('Info message')
-       );
-     });
+      LogEngine.info('Info message');
+
+      expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
+      expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
+        expect.stringContaining('Info message')
+      );
+    });
 
     it('should log warn messages when mode is WARN or lower', () => {
       // Test that WARN mode shows warning messages using console.warn
       LogEngine.configure({ mode: LogMode.WARN });
-       LogEngine.warn('Warning message');
-       
-       expect(mocks.mockConsoleWarn).toHaveBeenCalledTimes(1);
-       expect(mocks.mockConsoleWarn).toHaveBeenCalledWith(
-         expect.stringContaining('Warning message')
-       );
-     });
+      LogEngine.warn('Warning message');
+
+      expect(mocks.mockConsoleWarn).toHaveBeenCalledTimes(1);
+      expect(mocks.mockConsoleWarn).toHaveBeenCalledWith(
+        expect.stringContaining('Warning message')
+      );
+    });
 
     it('should log error messages when mode is ERROR or lower', () => {
       // Test that ERROR mode shows error messages using console.error
       LogEngine.configure({ mode: LogMode.ERROR });
-       LogEngine.error('Error message');
-       
-       expect(mocks.mockConsoleError).toHaveBeenCalledTimes(1);
-       expect(mocks.mockConsoleError).toHaveBeenCalledWith(
-         expect.stringContaining('Error message')
-       );
-     });
+      LogEngine.error('Error message');
 
-it('should log LOG level messages regardless of configuration', () => {
-       // Test that LOG level always outputs with console.log
+      expect(mocks.mockConsoleError).toHaveBeenCalledTimes(1);
+      expect(mocks.mockConsoleError).toHaveBeenCalledWith(
+        expect.stringContaining('Error message')
+      );
+    });
+
+    it('should log LOG level messages regardless of configuration', () => {
+      // Test that LOG level always outputs with console.log
       LogEngine.configure({ mode: LogMode.ERROR });
-       LogEngine.log('LOG level message');
-       
-       expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
-       expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
-         expect.stringContaining('LOG level message')
-       );
-     });
+      LogEngine.log('LOG level message');
+
+      expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
+      expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
+        expect.stringContaining('LOG level message')
+      );
+    });
   });
 
   describe('Log level filtering', () => {
     it('should not log debug messages when mode is INFO', () => {
-       // Test that higher log levels filter out lower priority messages
+      // Test that higher log levels filter out lower priority messages
       LogEngine.configure({ mode: LogMode.INFO });
-       LogEngine.debug('Debug message');
-       
-       expect(mocks.mockConsoleLog).not.toHaveBeenCalled();
-     });
+      LogEngine.debug('Debug message');
+
+      expect(mocks.mockConsoleLog).not.toHaveBeenCalled();
+    });
 
     it('should not log info messages when mode is WARN', () => {
       // Test that WARN mode filters out INFO messages
       LogEngine.configure({ mode: LogMode.WARN });
-       LogEngine.info('Info message');
-       
-       expect(mocks.mockConsoleLog).not.toHaveBeenCalled();
-     });
+      LogEngine.info('Info message');
+
+      expect(mocks.mockConsoleLog).not.toHaveBeenCalled();
+    });
 
     it('should not log warn messages when mode is ERROR', () => {
       // Test that ERROR mode filters out WARN messages
       LogEngine.configure({ mode: LogMode.ERROR });
-       LogEngine.warn('Warning message');
-       
-       expect(mocks.mockConsoleWarn).not.toHaveBeenCalled();
-     });
+      LogEngine.warn('Warning message');
+
+      expect(mocks.mockConsoleWarn).not.toHaveBeenCalled();
+    });
 
     it('should not log any messages when mode is SILENT', () => {
       // Test that SILENT mode completely disables all logging except LOG
@@ -116,7 +116,7 @@ it('should log LOG level messages regardless of configuration', () => {
       LogEngine.info('Info message');
       LogEngine.warn('Warning message');
       LogEngine.error('Error message');
-      
+
       // No console methods should be called with SILENT mode (except LOG)
       expect(mocks.mockConsoleLog).not.toHaveBeenCalled();
       expect(mocks.mockConsoleWarn).not.toHaveBeenCalled();
@@ -127,11 +127,11 @@ it('should log LOG level messages regardless of configuration', () => {
       // Test that LOG level bypasses SILENT configuration
       LogEngine.configure({ mode: LogMode.SILENT });
       LogEngine.debug('Debug message');
-      LogEngine.info('Info message');  
+      LogEngine.info('Info message');
       LogEngine.warn('Warning message');
       LogEngine.error('Error message');
       LogEngine.log('LOG level message');
-      
+
       // Only LOG should be visible
       expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
       expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
@@ -145,11 +145,11 @@ it('should log LOG level messages regardless of configuration', () => {
       // Test that OFF mode completely disables all logging including LOG
       LogEngine.configure({ mode: LogMode.OFF });
       LogEngine.debug('Debug message');
-      LogEngine.info('Info message');  
+      LogEngine.info('Info message');
       LogEngine.warn('Warning message');
       LogEngine.error('Error message');
       LogEngine.log('LOG level message');
-      
+
       // No console methods should be called with OFF level (including LOG)
       expect(mocks.mockConsoleLog).not.toHaveBeenCalled();
       expect(mocks.mockConsoleWarn).not.toHaveBeenCalled();
@@ -162,7 +162,7 @@ it('should log LOG level messages regardless of configuration', () => {
       // Test that partial config updates work (only changing mode)
       LogEngine.configure({ mode: LogMode.DEBUG });
       LogEngine.debug('Debug message');
-      
+
       expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
         expect.stringContaining('Debug message')
       );
@@ -173,7 +173,7 @@ it('should log LOG level messages regardless of configuration', () => {
       LogEngine.configure({ mode: LogMode.ERROR });
       LogEngine.info('Should not appear');
       LogEngine.error('Should appear');
-      
+
       // Only ERROR should be logged based on configuration
       expect(mocks.mockConsoleLog).not.toHaveBeenCalled();
       expect(mocks.mockConsoleError).toHaveBeenCalledTimes(1);
@@ -188,7 +188,7 @@ it('should log LOG level messages regardless of configuration', () => {
       LogEngine.info('Info message');
       LogEngine.warn('Warning message');
       LogEngine.error('Error message');
-      
+
       // Only WARN and ERROR should be logged when level is WARN
       expect(mocks.mockConsoleLog).not.toHaveBeenCalled();
       expect(mocks.mockConsoleWarn).toHaveBeenCalledTimes(1);
@@ -203,7 +203,7 @@ it('should log LOG level messages regardless of configuration', () => {
       LogEngine.warn('Warning message');
       LogEngine.error('Error message');
       LogEngine.log('LOG level message');
-      
+
       // Only LOG should be visible with SILENT mode
       expect(mocks.mockConsoleLog).toHaveBeenCalledTimes(1);
       expect(mocks.mockConsoleLog).toHaveBeenCalledWith(
@@ -221,7 +221,7 @@ it('should log LOG level messages regardless of configuration', () => {
       LogEngine.warn('Warning message');
       LogEngine.error('Error message');
       LogEngine.log('LOG level message');
-      
+
       // No messages should be visible with OFF mode
       expect(mocks.mockConsoleLog).not.toHaveBeenCalled();
       expect(mocks.mockConsoleWarn).not.toHaveBeenCalled();
@@ -232,12 +232,12 @@ it('should log LOG level messages regardless of configuration', () => {
   describe('Main module exports', () => {
     it('should export LogEngine and all types', () => {
       const main = require('../index');
-      
+
       // Test that main exports are available
       expect(main.LogEngine).toBeDefined();
       expect(main.LogLevel).toBeDefined();
       expect(main.LogMode).toBeDefined();
-      
+
       // Test that LogEngine has expected methods
       expect(typeof main.LogEngine.debug).toBe('function');
       expect(typeof main.LogEngine.info).toBe('function');
@@ -249,7 +249,7 @@ it('should log LOG level messages regardless of configuration', () => {
     it('should test withoutRedaction method', () => {
       const main = require('../index');
       const withoutRedaction = main.LogEngine.withoutRedaction();
-      
+
       // Test that withoutRedaction returns an object with logging methods
       expect(withoutRedaction).toBeDefined();
       expect(typeof withoutRedaction.debug).toBe('function');
@@ -263,7 +263,7 @@ it('should log LOG level messages regardless of configuration', () => {
   describe('Output Handler API (Phase 1)', () => {
     it('should support custom output handler configuration', () => {
       const capturedLogs: Array<{ level: string; message: string }> = [];
-      
+
       LogEngine.configure({
         mode: LogMode.DEBUG,
         outputHandler: (level, message) => {
@@ -321,7 +321,7 @@ it('should log LOG level messages regardless of configuration', () => {
     it('should support multiple output targets', () => {
       const capturedLogs1: Array<{ level: string; message: string }> = [];
       const capturedLogs2: Array<{ level: string; message: string }> = [];
-      
+
       LogEngine.configure({
         mode: LogMode.DEBUG,
         outputs: [
@@ -341,7 +341,7 @@ it('should log LOG level messages regardless of configuration', () => {
       // Both custom handlers should capture logs
       expect(capturedLogs1).toHaveLength(2);
       expect(capturedLogs2).toHaveLength(2);
-      
+
       expect(capturedLogs1[0]).toMatchObject({
         level: 'info',
         message: expect.stringContaining('Multi-output test')

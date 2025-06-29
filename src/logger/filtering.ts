@@ -10,26 +10,26 @@ import { LogLevel, LogMode } from '../types';
  * Determines whether a message should be output based on current configuration
  */
 export class LogFilter {
-    // Maps LogLevel values to severity ranks for consistent comparison
-    private static readonly SEVERITY_RANKS: Record<LogLevel, number> = {
-        [LogLevel.DEBUG]: 0,
-        [LogLevel.INFO]: 1,
-        [LogLevel.WARN]: 2,
-        [LogLevel.ERROR]: 3,
-        [LogLevel.LOG]: 99  // Special case - always outputs (except when OFF)
-    };
+  // Maps LogLevel values to severity ranks for consistent comparison
+  private static readonly SEVERITY_RANKS: Record<LogLevel, number> = {
+    [LogLevel.DEBUG]: 0,
+    [LogLevel.INFO]: 1,
+    [LogLevel.WARN]: 2,
+    [LogLevel.ERROR]: 3,
+    [LogLevel.LOG]: 99  // Special case - always outputs (except when OFF)
+  };
 
-    // Maps LogMode values to minimum severity rank required for output
-    private static readonly MODE_THRESHOLDS: Record<LogMode, number> = {
-        [LogMode.DEBUG]: 0,   // Shows DEBUG and above
-        [LogMode.INFO]: 1,    // Shows INFO and above
-        [LogMode.WARN]: 2,    // Shows WARN and above
-        [LogMode.ERROR]: 3,   // Shows ERROR and above
-        [LogMode.SILENT]: 99, // Only shows LOG messages
-        [LogMode.OFF]: 100    // Shows nothing
-    };
+  // Maps LogMode values to minimum severity rank required for output
+  private static readonly MODE_THRESHOLDS: Record<LogMode, number> = {
+    [LogMode.DEBUG]: 0,   // Shows DEBUG and above
+    [LogMode.INFO]: 1,    // Shows INFO and above
+    [LogMode.WARN]: 2,    // Shows WARN and above
+    [LogMode.ERROR]: 3,   // Shows ERROR and above
+    [LogMode.SILENT]: 99, // Only shows LOG messages
+    [LogMode.OFF]: 100    // Shows nothing
+  };
 
-    /**
+  /**
      * Determines if a message should be logged based on current log mode
      * Messages are shown only if their level is appropriate for the configured mode
      * LOG level is special - it always outputs regardless of configured mode (except when OFF is set)
@@ -38,32 +38,64 @@ export class LogFilter {
      * @param currentMode - The current logging mode
      * @returns true if message should be logged, false otherwise
      */
-    static shouldLog(level: LogLevel, currentMode: LogMode): boolean {
-        // Get the severity rank for the message level
-        const messageSeverity = this.SEVERITY_RANKS[level];
-        
-        // Get the minimum severity threshold for the current mode
-        const modeThreshold = this.MODE_THRESHOLDS[currentMode];
-        
-        // Allow the message if its severity meets or exceeds the mode threshold
-        return messageSeverity >= modeThreshold;
+  static shouldLog(level: LogLevel, currentMode: LogMode): boolean {
+    // Get the severity rank for the message level - use safe property access with switch
+    let messageSeverity = 0;
+    switch (level) {
+    case LogLevel.DEBUG: messageSeverity = this.SEVERITY_RANKS[LogLevel.DEBUG]; break;
+    case LogLevel.INFO: messageSeverity = this.SEVERITY_RANKS[LogLevel.INFO]; break;
+    case LogLevel.WARN: messageSeverity = this.SEVERITY_RANKS[LogLevel.WARN]; break;
+    case LogLevel.ERROR: messageSeverity = this.SEVERITY_RANKS[LogLevel.ERROR]; break;
+    case LogLevel.LOG: messageSeverity = this.SEVERITY_RANKS[LogLevel.LOG]; break;
+    default: messageSeverity = 0;
     }
 
-    /**
+    // Get the minimum severity threshold for the current mode - use safe property access with switch
+    let modeThreshold = 0;
+    switch (currentMode) {
+    case LogMode.DEBUG: modeThreshold = this.MODE_THRESHOLDS[LogMode.DEBUG]; break;
+    case LogMode.INFO: modeThreshold = this.MODE_THRESHOLDS[LogMode.INFO]; break;
+    case LogMode.WARN: modeThreshold = this.MODE_THRESHOLDS[LogMode.WARN]; break;
+    case LogMode.ERROR: modeThreshold = this.MODE_THRESHOLDS[LogMode.ERROR]; break;
+    case LogMode.SILENT: modeThreshold = this.MODE_THRESHOLDS[LogMode.SILENT]; break;
+    case LogMode.OFF: modeThreshold = this.MODE_THRESHOLDS[LogMode.OFF]; break;
+    default: modeThreshold = 0;
+    }
+
+    // Allow the message if its severity meets or exceeds the mode threshold
+    return messageSeverity >= modeThreshold;
+  }
+
+  /**
      * Get the severity rank for a log level
      * @param level - The log level to get rank for
      * @returns Numeric severity rank
      */
-    static getSeverityRank(level: LogLevel): number {
-        return this.SEVERITY_RANKS[level];
+  static getSeverityRank(level: LogLevel): number {
+    switch (level) {
+    case LogLevel.DEBUG: return this.SEVERITY_RANKS[LogLevel.DEBUG];
+    case LogLevel.INFO: return this.SEVERITY_RANKS[LogLevel.INFO];
+    case LogLevel.WARN: return this.SEVERITY_RANKS[LogLevel.WARN];
+    case LogLevel.ERROR: return this.SEVERITY_RANKS[LogLevel.ERROR];
+    case LogLevel.LOG: return this.SEVERITY_RANKS[LogLevel.LOG];
+    default: return 0;
     }
+  }
 
-    /**
+  /**
      * Get the threshold for a log mode
      * @param mode - The log mode to get threshold for
      * @returns Numeric threshold value
      */
-    static getModeThreshold(mode: LogMode): number {
-        return this.MODE_THRESHOLDS[mode];
+  static getModeThreshold(mode: LogMode): number {
+    switch (mode) {
+    case LogMode.DEBUG: return this.MODE_THRESHOLDS[LogMode.DEBUG];
+    case LogMode.INFO: return this.MODE_THRESHOLDS[LogMode.INFO];
+    case LogMode.WARN: return this.MODE_THRESHOLDS[LogMode.WARN];
+    case LogMode.ERROR: return this.MODE_THRESHOLDS[LogMode.ERROR];
+    case LogMode.SILENT: return this.MODE_THRESHOLDS[LogMode.SILENT];
+    case LogMode.OFF: return this.MODE_THRESHOLDS[LogMode.OFF];
+    default: return 0;
     }
+  }
 }
