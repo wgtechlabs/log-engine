@@ -39,11 +39,11 @@ export class LogFilter {
      * @returns true if message should be logged, false otherwise
      */
   static shouldLog(level: LogLevel, currentMode: LogMode): boolean {
-    // Get the severity rank for the message level using safe lookup with fallback
-    const messageSeverity = this.SEVERITY_RANKS[level] ?? 0;
+    // Get the severity rank for the message level using safe lookup
+    const messageSeverity = this.getSeverityRank(level);
 
-    // Get the minimum severity threshold for the current mode using safe lookup with fallback
-    const modeThreshold = this.MODE_THRESHOLDS[currentMode] ?? 0;
+    // Get the minimum severity threshold for the current mode using safe lookup
+    const modeThreshold = this.getModeThreshold(currentMode);
 
     // Allow the message if its severity meets or exceeds the mode threshold
     return messageSeverity >= modeThreshold;
