@@ -80,10 +80,11 @@ jobs:
             echo "✅ TypeScript: $(npx tsc --version)"
           else
             echo "⚠️  TypeScript: Not accessible via yarn/npx, checking package.json..."
-            if node -e "console.log(require('./package.json').devDependencies?.typescript || 'Not found')" | grep -v "Not found"; then
-              echo "   TypeScript is listed in devDependencies"
+            TS_VERSION=$(node -e "const pkg = require('./package.json'); console.log(pkg.devDependencies?.typescript || '')")
+            if [ -n "$TS_VERSION" ] && [ "$TS_VERSION" != "undefined" ]; then
+              echo "   ✅ TypeScript is listed in devDependencies: $TS_VERSION"
             else
-              echo "   TypeScript may not be installed"
+              echo "   ❌ TypeScript may not be installed"
             fi
           fi
           
@@ -94,10 +95,11 @@ jobs:
             echo "✅ Jest: $(npx jest --version)"
           else
             echo "⚠️  Jest: Not accessible via yarn/npx, checking package.json..."
-            if node -e "console.log(require('./package.json').devDependencies?.jest || 'Not found')" | grep -v "Not found"; then
-              echo "   Jest is listed in devDependencies"
+            JEST_VERSION=$(node -e "const pkg = require('./package.json'); console.log(pkg.devDependencies?.jest || '')")
+            if [ -n "$JEST_VERSION" ] && [ "$JEST_VERSION" != "undefined" ]; then
+              echo "   ✅ Jest is listed in devDependencies: $JEST_VERSION"
             else
-              echo "   Jest may not be installed"
+              echo "   ❌ Jest may not be installed"
             fi
           fi
           
