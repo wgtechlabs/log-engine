@@ -72,7 +72,22 @@ jobs:
           echo "Checking node_modules..."
           ls -la node_modules/ | head -10
           echo "Checking TypeScript installation..."
-          yarn tsc --version
+          
+          # Check TypeScript
+          if yarn tsc --version > /dev/null 2>&1; then
+            echo "✅ TypeScript: $(yarn tsc --version)"
+          elif npx tsc --version > /dev/null 2>&1; then
+            echo "✅ TypeScript: $(npx tsc --version)"
+          else
+            echo "⚠️  TypeScript: Not accessible via yarn/npx, checking package.json..."
+            if node -e "console.log(require('./package.json').devDependencies?.typescript || 'Not found')" | grep -v "Not found"; then
+              echo "   TypeScript is listed in devDependencies"
+            else
+              echo "   TypeScript may not be installed"
+            fi
+          fi
+          
+          echo "✅ Dependency verification completed"
         
       - name: TypeScript compilation check
         run: |

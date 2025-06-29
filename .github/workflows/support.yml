@@ -13,6 +13,8 @@ jobs:
     
     strategy:
       matrix:
+        # NOTE: Node.js versions are automatically extracted by the compatibility-summary job
+        # The summary report will dynamically reflect any changes made to this list
         node-version: ['18', '20']
       fail-fast: false
     
@@ -112,22 +114,44 @@ jobs:
     if: always()
     
     steps:
+      - name: Checkout code (for extracting matrix versions)
+        uses: actions/checkout@v4
+        
       - name: Node.js Compatibility Report
         run: |
           echo "=== Node.js Compatibility Test Results ==="
           echo "Matrix job result: ${{ needs.node-support-matrix.result }}"
           echo ""
           
+          # Extract Node.js versions from the workflow file dynamically
+          echo "Extracting tested Node.js versions from workflow..."
+          NODE_VERSIONS=($(grep "node-version: \[" .github/workflows/support.yml | sed "s/.*\[\(.*\)\].*/\1/" | tr "," "\n" | sed "s/[' ]//g" | sort -n))
+          echo "Detected versions: ${NODE_VERSIONS[*]}"
+          echo ""
+          
           if [[ "${{ needs.node-support-matrix.result }}" == "success" ]]; then
             echo "🎉 SUCCESS: All Node.js versions are fully compatible!"
             echo ""
-            echo "✅ Node.js 18 - Compatible"
-            echo "✅ Node.js 20 - Compatible"
+            
+            # Dynamically generate compatibility lines
+            for version in "${NODE_VERSIONS[@]}"; do
+              echo "✅ Node.js $version - Compatible"
+            done
+            
             echo ""
             echo "The log-engine library works correctly across all supported Node.js versions."
-            echo "Users can safely install and use this package with Node.js 18+ environments."
+            
+            # Generate minimum version requirement dynamically
+            min_version=${NODE_VERSIONS[0]}
+            echo "Users can safely install and use this package with Node.js ${min_version}+ environments."
+            
           elif [[ "${{ needs.node-support-matrix.result }}" == "failure" ]]; then
             echo "❌ FAILURE: Some Node.js versions failed compatibility tests"
+            echo ""
+            echo "Tested versions:"
+            for version in "${NODE_VERSIONS[@]}"; do
+              echo "   - Node.js $version"
+            done
             echo ""
             echo "Please check the individual job logs above to see which versions failed and why."
             echo "Common issues:"
@@ -139,5 +163,10 @@ jobs:
           else
             echo "⚠️  PARTIAL: Some tests were cancelled or skipped"
             echo "Result status: ${{ needs.node-support-matrix.result }}"
+            echo ""
+            echo "Tested versions:"
+            for version in "${NODE_VERSIONS[@]}"; do
+              echo "   - Node.js $version"
+            done
             exit 1
           fi
