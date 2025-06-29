@@ -411,4 +411,48 @@ describe('LoggerConfigManager', () => {
     // Verify no level property exists
     expect(currentConfig).not.toHaveProperty('level');
   });
+
+  it('should map legacy SILENT level (4) to LogMode.SILENT', () => {
+    // Test that legacy SILENT level (4) maps correctly to LogMode.SILENT
+    const configWithLegacySilent = {
+      level: 4, // Legacy SILENT value
+      redaction: { enabled: true }
+    };
+
+    configManager.updateConfig(configWithLegacySilent);
+
+    // Get the current config
+    const currentConfig = configManager.getConfig();
+
+    // Verify that the legacy level property is not present (it gets mapped to mode)
+    expect(currentConfig).not.toHaveProperty('level');
+
+    // Verify that mode is correctly mapped from legacy SILENT (4) to LogMode.SILENT
+    expect(currentConfig.mode).toBe(LogMode.SILENT);
+
+    // Verify other properties are preserved
+    expect(currentConfig.redaction).toEqual({ enabled: true });
+  });
+
+  it('should map legacy OFF level (5) to LogMode.OFF', () => {
+    // Test that legacy OFF level (5) maps correctly to LogMode.OFF
+    const configWithLegacyOff = {
+      level: 5, // Legacy OFF value
+      redaction: { enabled: false }
+    };
+
+    configManager.updateConfig(configWithLegacyOff);
+
+    // Get the current config
+    const currentConfig = configManager.getConfig();
+
+    // Verify that the legacy level property is not present (it gets mapped to mode)
+    expect(currentConfig).not.toHaveProperty('level');
+
+    // Verify that mode is correctly mapped from legacy OFF (5) to LogMode.OFF
+    expect(currentConfig.mode).toBe(LogMode.OFF);
+
+    // Verify other properties are preserved
+    expect(currentConfig.redaction).toEqual({ enabled: false });
+  });
 });
