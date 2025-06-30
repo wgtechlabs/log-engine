@@ -195,15 +195,7 @@ function validateCommand(command, args = []) {
  */
 function parseArgs() {
   const args = process.argv.slice(2);
-  const config = {
-    entry: 'src/index.ts',
-    outDir: 'dist',
-    formats: ['esm', 'cjs'],
-    clean: false,
-    watch: false,
-    verbose: false,
-    dryRun: false,
-  };
+  const config = { ...defaultConfig };
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
@@ -466,41 +458,40 @@ async function cleanOutputDir(outDir, config) {
 /**
  * Create TypeScript configuration for a specific module format
  * 
- * Generates appropriate compiler options for either ESM or CommonJS output,
- * including correct module settings, output directories, and build options.
+ * Reads the existing tsconfig files and creates a temporary configuration
+ * with the appropriate output directory for the build process. This approach
+ * centralizes configuration in the dedicated tsconfig files rather than
+ * duplicating compiler options.
  * 
  * @param {string} format - Target format ('esm' or 'cjs')
  * @param {Object} config - Build configuration
  * @param {string} config.outDir - Base output directory
- * @returns {Object} TypeScript configuration object
+ * @returns {Promise<Object>} TypeScript configuration object
  */
-function createTsConfig(format, config) {
+async function createTsConfig(format, config) {
   // Validate paths to prevent traversal
   const validatedOutDir = validatePath(config.outDir);
   
-  const baseConfig = {
-    compilerOptions: {
-      target: 'ES2020',
-      lib: ['ES2020'],
-      module: format === 'esm' ? 'ESNext' : 'CommonJS',
-      moduleResolution: 'node',
-      declaration: true,
-      declarationMap: true,
-      sourceMap: true,
-      outDir: join(validatedOutDir, format),
-      rootDir: 'src',
-      strict: true,
-      esModuleInterop: true,
-      skipLibCheck: true,
-      forceConsistentCasingInFileNames: true,
-      removeComments: false,
-      preserveConstEnums: true,
-    },
-    include: ['src/**/*'],
-    exclude: ['node_modules', 'dist', '**/*.test.ts', '**/*.spec.ts']
-  };
-
-  return baseConfig;
+  try {
+    // Read the appropriate existing config file
+    const configFileName = format === 'esm' ? 'tsconfig.esm.json' : 'tsconfig.cjs.json';
+    const configPath = join(process.cwd(), configFileName);
+    const configContent = await readFile(configPath, 'utf8');
+    const existingConfig = JSON.parse(configContent);
+    
+    // Create a new config based on the existing one, only overriding the outDir
+    const tsConfig = {
+      ...existingConfig,
+      compilerOptions: {
+        ...existingConfig.compilerOptions,
+        outDir: join(validatedOutDir, format)
+      }
+    };
+    
+    return tsConfig;
+  } catch (error) {
+    throw new Error(`Failed to read TypeScript config for ${format}: ${error.message}`);
+  }
 }
 
 /**
@@ -731,7 +722,7 @@ async function createTempTsConfig(format, config) {
   const TEMP_CONFIG_CJS = 'tsconfig.cjs.temp.json';
   
   const safeTempFilename = (format === 'esm') ? TEMP_CONFIG_ESM : TEMP_CONFIG_CJS;
-  const tsConfig = createTsConfig(format, config);
+  const tsConfig = await createTsConfig(format, config);
   const workingDir = process.cwd();
   const tempFilePath = join(workingDir, safeTempFilename);
   
@@ -1179,5 +1170,21 @@ async function fixCjsRequires(cjsDir, config) {
   
   return { filesFixed, requiresFixed };
 }
+
+/**
+ * Default configuration object for Forklift builds
+ * 
+ * This serves as the single source of truth for default configuration values,
+ * ensuring consistency between the main build module and the runner.
+ */
+export const defaultConfig = {
+  entry: 'src/index.ts',
+  outDir: 'dist',
+  formats: ['esm', 'cjs'],
+  clean: false,
+  watch: false,
+  verbose: false,
+  dryRun: false,
+};
 
 export { build, watchMode, validateConfig, fixEsmImports, createCjsPackageMarker };
