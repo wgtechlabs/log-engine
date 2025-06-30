@@ -455,11 +455,12 @@ async function cleanOutputDir(outDir, config) {
     console.log(`🧹 Cleaning output directory: ${validatedOutDir}`);
   }
 
-  if (!config.dryRun && existsSync(validatedOutDir)) {
+  if (config.dryRun) {
+    console.log(`🧹 Simulated cleanup: ${relative(process.cwd(), validatedOutDir)}`);
+  } else if (existsSync(validatedOutDir)) {
     await rm(validatedOutDir, { recursive: true, force: true });
+    console.log(`✅ Cleaned: ${relative(process.cwd(), validatedOutDir)}`);
   }
-
-  console.log(`✅ Cleaned: ${relative(process.cwd(), validatedOutDir)}`);
 }
 
 /**
