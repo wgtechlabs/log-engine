@@ -1,6 +1,6 @@
 {
   "name": "@wgtechlabs/log-engine",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "A lightweight, security-first logging utility with automatic data redaction for Node.js applications - the first logging library with built-in PII protection.",
   "type": "module",
   "keywords": [
@@ -24,8 +24,21 @@
   "contributors": [
     "Waren Gonzaga <opensource@warengonzaga.com> (https://warengonzaga.com)"
   ],
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/cjs/index.cjs",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.cjs"
+      }
+    }
+  },
   "files": [
     "dist/**/*",
     "README.md",
@@ -36,8 +49,9 @@
     "url": "https://github.com/wgtechlabs/log-engine.git"
   },
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/index.js",
+    "build": "node scripts/forklift-runner.js --clean",
+    "build:watch": "node scripts/forklift-runner.js --watch",
+    "start": "node dist/cjs/index.cjs",
     "prepublishOnly": "yarn build",
     "test": "jest",
     "test:watch": "jest --watch",
