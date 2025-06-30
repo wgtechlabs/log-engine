@@ -73,7 +73,7 @@
  */
 
 import { spawn } from 'child_process';
-import { rm, mkdir, stat, watch, readdir, readFile, writeFile } from 'fs/promises';
+import { rm, mkdir, stat, watch, readdir, readFile, writeFile, rename } from 'fs/promises';
 import { join, dirname, relative, resolve, extname, basename, normalize, isAbsolute } from 'path';
 import { fileURLToPath } from 'url';
 import { existsSync } from 'fs';
@@ -657,6 +657,67 @@ async function createCjsPackageMarker(cjsDir, config) {
 }
 
 /**
+ * Rename CommonJS JavaScript files to use .cjs extension
+ * 
+ * This prevents module type conflicts when package.json has "type": "module"
+ * by ensuring CommonJS files are properly identified by their extension.
+ * 
+ * @param {string} cjsDir - CJS output directory path
+ * @param {Object} config - Build configuration
+ * @param {boolean} config.verbose - Whether to show verbose output
+ * @param {boolean} config.dryRun - Whether to run in dry-run mode
+ * @returns {Promise<{filesRenamed: number}>} Rename results
+ */
+async function renameCjsFiles(cjsDir, config) {
+  const validatedCjsDir = validatePath(cjsDir);
+  
+  if (config.verbose) {
+    console.log(`🔄 Renaming CommonJS files to .cjs extension in: ${validatedCjsDir}`);
+  }
+
+  let filesRenamed = 0;
+
+  async function processDirectory(currentDir) {
+    const validatedCurrentDir = validatePath(currentDir);
+    const entries = await readdir(validatedCurrentDir, { withFileTypes: true });
+
+    for (const entry of entries) {
+      // Validate entry name to prevent traversal
+      if (entry.name.includes('..') || entry.name.includes('/') || entry.name.includes('\\')) {
+        console.warn(`⚠️  Skipping suspicious filename: ${entry.name}`);
+        continue;
+      }
+      
+      const fullPath = join(validatedCurrentDir, entry.name);
+      const validatedFullPath = validatePath(fullPath);
+      
+      if (entry.isDirectory()) {
+        await processDirectory(validatedFullPath);
+      } else if (entry.isFile() && entry.name.endsWith('.js')) {
+        // Rename .js files to .cjs in CJS build
+        const newFileName = entry.name.replace(/\.js$/, '.cjs');
+        const newPath = join(validatedCurrentDir, newFileName);
+        const validatedNewPath = validatePath(newPath);
+        
+        if (!config.dryRun) {
+          // Rename .js files to .cjs in CJS build
+          await rename(validatedFullPath, validatedNewPath);
+        }
+        
+        filesRenamed++;
+        if (config.verbose) {
+          console.log(`   📝 Renamed: ${entry.name} → ${newFileName}`);
+        }
+      }
+    }
+  }
+
+  await processDirectory(validatedCjsDir);
+  
+  return { filesRenamed };
+}
+
+/**
  * Create a temporary TypeScript config file safely without path traversal risks
  * 
  * @param {string} format - The build format ('esm' or 'cjs')
@@ -763,8 +824,24 @@ async function buildFormat(format, config, stats) {
         }
       }
 
-      // Create CJS package marker
+      // Create CJS package marker and rename files
       if (format === 'cjs') {
+        console.log(`🔄 Processing CommonJS files...`);
+        const renameResults = await renameCjsFiles(validatedOutputPath, config);
+        stats.addFix('CJS file renames', renameResults.filesRenamed);
+        
+        if (config.verbose && renameResults.filesRenamed > 0) {
+          console.log(`   ✅ Renamed ${renameResults.filesRenamed} files to .cjs extension`);
+        }
+        
+        console.log(`🔧 Fixing CJS require statements...`);
+        const requireResults = await fixCjsRequires(validatedOutputPath, config);
+        stats.addFix('CJS require fixes', requireResults.requiresFixed);
+        
+        if (config.verbose && requireResults.requiresFixed > 0) {
+          console.log(`   ✅ Fixed ${requireResults.requiresFixed} require statements in ${requireResults.filesFixed} files`);
+        }
+        
         await createCjsPackageMarker(validatedOutputPath, config);
       }
     }
@@ -994,6 +1071,112 @@ process.on('unhandledRejection', (reason, promise) => {
 // Run the script if called directly
 if (import.meta.url === new URL(process.argv[1], 'file://').href) {
   main();
+}
+
+/**
+ * Fix require statements in CJS files to use .cjs extensions
+ * 
+ * Updates internal require statements to use the correct .cjs extension
+ * for relative imports within the CommonJS build.
+ * 
+ * @param {string} cjsDir - CJS output directory path
+ * @param {Object} config - Build configuration
+ * @param {boolean} config.verbose - Whether to show verbose output
+ * @param {boolean} config.dryRun - Whether to run in dry-run mode
+ * @returns {Promise<{filesFixed: number, requiresFixed: number}>} Fix results
+ */
+async function fixCjsRequires(cjsDir, config) {
+  const validatedCjsDir = validatePath(cjsDir);
+  
+  if (config.verbose) {
+    console.log(`🔧 Fixing require statements in: ${validatedCjsDir}`);
+  }
+
+  let filesFixed = 0;
+  let requiresFixed = 0;
+
+  async function processDirectory(currentDir) {
+    const validatedCurrentDir = validatePath(currentDir);
+    const entries = await readdir(validatedCurrentDir, { withFileTypes: true });
+
+    for (const entry of entries) {
+      // Validate entry name to prevent traversal
+      if (entry.name.includes('..') || entry.name.includes('/') || entry.name.includes('\\')) {
+        console.warn(`⚠️  Skipping suspicious filename: ${entry.name}`);
+        continue;
+      }
+      
+      const fullPath = join(validatedCurrentDir, entry.name);
+      const validatedFullPath = validatePath(fullPath);
+      
+      if (entry.isDirectory()) {
+        await processDirectory(validatedFullPath);
+      } else if (entry.isFile() && entry.name.endsWith('.cjs')) {
+        const fixed = await fixRequiresInFile(validatedFullPath);
+        if (fixed > 0) {
+          filesFixed++;
+          requiresFixed += fixed;
+          if (config.verbose) {
+            console.log(`   📝 Fixed ${fixed} require statements in: ${relative(validatedCjsDir, validatedFullPath)}`);
+          }
+        }
+      }
+    }
+  }
+
+  async function fixRequiresInFile(filePath) {
+    const validatedFilePath = validatePath(filePath);
+    const content = await readFile(validatedFilePath, 'utf-8');
+    let fixedContent = content;
+    let requiresFixedInFile = 0;
+
+    // Pattern for require statements with relative paths
+    const requirePatterns = [
+      // require('./path')
+      /require\s*\(\s*['"](\.[^'"]*?)(?<!\.cjs|\.json)['"]\s*\)/g,
+      // require("./path")
+      /require\s*\(\s*["'](\.[^"']*?)(?<!\.cjs|\.json)["']\s*\)/g,
+    ];
+
+    for (const pattern of requirePatterns) {
+      fixedContent = fixedContent.replace(pattern, (match, requirePath) => {
+        // Validate require path to prevent traversal
+        try {
+          const targetPath = validatePath(resolve(dirname(validatedFilePath), requirePath));
+          const indexPath = join(targetPath, 'index.cjs');
+          const directPath = targetPath + '.cjs';
+          
+          let newRequirePath;
+          if (existsSync(indexPath)) {
+            // Directory with index.cjs - add /index.cjs
+            newRequirePath = requirePath + '/index.cjs';
+          } else if (existsSync(directPath)) {
+            // Direct file - add .cjs
+            newRequirePath = requirePath + '.cjs';
+          } else {
+            // Can't determine, assume .cjs
+            newRequirePath = requirePath + '.cjs';
+          }
+          
+          requiresFixedInFile++;
+          return match.replace(requirePath, newRequirePath);
+        } catch (error) {
+          console.warn(`⚠️  Skipping suspicious require path: ${requirePath}`);
+          return match; // Return unchanged if path validation fails
+        }
+      });
+    }
+
+    if (requiresFixedInFile > 0 && !config.dryRun) {
+      await writeFile(validatedFilePath, fixedContent, 'utf-8');
+    }
+
+    return requiresFixedInFile;
+  }
+
+  await processDirectory(validatedCjsDir);
+  
+  return { filesFixed, requiresFixed };
 }
 
 export { build, watchMode, validateConfig, fixEsmImports, createCjsPackageMarker };
