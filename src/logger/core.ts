@@ -256,7 +256,8 @@ export class Logger {
   debug(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.DEBUG)) {
       const processedData = DataRedactor.redactData(data);
-      const formatted = LogFormatter.format(LogLevel.DEBUG, message, processedData);
+      const config = this.configManager.getConfig();
+      const formatted = LogFormatter.format(LogLevel.DEBUG, message, processedData, config.format);
       this.writeToOutput('debug', message, formatted, processedData);
     }
   }
@@ -271,7 +272,8 @@ export class Logger {
   info(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.INFO)) {
       const processedData = DataRedactor.redactData(data);
-      const formatted = LogFormatter.format(LogLevel.INFO, message, processedData);
+      const config = this.configManager.getConfig();
+      const formatted = LogFormatter.format(LogLevel.INFO, message, processedData, config.format);
       this.writeToOutput('info', message, formatted, processedData);
     }
   }
@@ -286,7 +288,8 @@ export class Logger {
   warn(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.WARN)) {
       const processedData = DataRedactor.redactData(data);
-      const formatted = LogFormatter.format(LogLevel.WARN, message, processedData);
+      const config = this.configManager.getConfig();
+      const formatted = LogFormatter.format(LogLevel.WARN, message, processedData, config.format);
       this.writeToOutput('warn', message, formatted, processedData, false, true);
     }
   }
@@ -301,7 +304,8 @@ export class Logger {
   error(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.ERROR)) {
       const processedData = DataRedactor.redactData(data);
-      const formatted = LogFormatter.format(LogLevel.ERROR, message, processedData);
+      const config = this.configManager.getConfig();
+      const formatted = LogFormatter.format(LogLevel.ERROR, message, processedData, config.format);
       this.writeToOutput('error', message, formatted, processedData, true, false);
     }
   }
@@ -317,7 +321,8 @@ export class Logger {
   log(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.LOG)) {
       const processedData = DataRedactor.redactData(data);
-      const formatted = LogFormatter.format(LogLevel.LOG, message, processedData);
+      const config = this.configManager.getConfig();
+      const formatted = LogFormatter.format(LogLevel.LOG, message, processedData, config.format);
       this.writeToOutput('log', message, formatted, processedData);
     }
   }
@@ -330,7 +335,8 @@ export class Logger {
      */
   debugRaw(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.DEBUG)) {
-      const formatted = LogFormatter.format(LogLevel.DEBUG, message, data);
+      const config = this.configManager.getConfig();
+      const formatted = LogFormatter.format(LogLevel.DEBUG, message, data, config.format);
       this.writeToOutput('debug', message, formatted, data);
     }
   }
@@ -342,7 +348,8 @@ export class Logger {
      */
   infoRaw(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.INFO)) {
-      const formatted = LogFormatter.format(LogLevel.INFO, message, data);
+      const config = this.configManager.getConfig();
+      const formatted = LogFormatter.format(LogLevel.INFO, message, data, config.format);
       this.writeToOutput('info', message, formatted, data);
     }
   }
@@ -354,7 +361,8 @@ export class Logger {
      */
   warnRaw(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.WARN)) {
-      const formatted = LogFormatter.format(LogLevel.WARN, message, data);
+      const config = this.configManager.getConfig();
+      const formatted = LogFormatter.format(LogLevel.WARN, message, data, config.format);
       this.writeToOutput('warn', message, formatted, data, false, true);
     }
   }
@@ -366,7 +374,8 @@ export class Logger {
      */
   errorRaw(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.ERROR)) {
-      const formatted = LogFormatter.format(LogLevel.ERROR, message, data);
+      const config = this.configManager.getConfig();
+      const formatted = LogFormatter.format(LogLevel.ERROR, message, data, config.format);
       this.writeToOutput('error', message, formatted, data, true, false);
     }
   }
@@ -378,7 +387,8 @@ export class Logger {
      */
   logRaw(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.LOG)) {
-      const formatted = LogFormatter.format(LogLevel.LOG, message, data);
+      const config = this.configManager.getConfig();
+      const formatted = LogFormatter.format(LogLevel.LOG, message, data, config.format);
       this.writeToOutput('log', message, formatted, data);
     }
   }

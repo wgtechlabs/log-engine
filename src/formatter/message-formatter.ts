@@ -3,7 +3,7 @@
  * Handles the main log message formatting with colors, timestamps, and levels
  */
 
-import { LogLevel, LogData } from '../types';
+import { LogLevel, LogData, LogFormatConfig } from '../types';
 import { colors, colorScheme } from './colors';
 import { getTimestampComponents, formatTimestamp } from './timestamp';
 import { formatData, styleData } from './data-formatter';
@@ -19,17 +19,39 @@ export class MessageFormatter {
      * @param level - The log level to format for
      * @param message - The message content to format
      * @param data - Optional data object to include in the log output
+     * @param formatConfig - Optional format configuration to control element inclusion
      * @returns Formatted string with ANSI colors and timestamps
      */
-  static format(level: LogLevel, message: string, data?: LogData): string {
-    const { isoTimestamp, timeString } = getTimestampComponents();
-    const timestamp = formatTimestamp(isoTimestamp, timeString, colorScheme);
+  static format(level: LogLevel, message: string, data?: LogData, formatConfig?: LogFormatConfig): string {
+    // Use default format configuration if not provided (backward compatibility)
+    const config: LogFormatConfig = {
+      includeIsoTimestamp: true,
+      includeLocalTime: true,
+      ...formatConfig
+    };
+
+    // Build timestamp string conditionally
+    let timestamp = '';
+    if (config.includeIsoTimestamp || config.includeLocalTime) {
+      const { isoTimestamp, timeString } = getTimestampComponents();
+
+      if (config.includeIsoTimestamp && config.includeLocalTime) {
+        // Both timestamps included
+        timestamp = formatTimestamp(isoTimestamp, timeString, colorScheme);
+      } else if (config.includeIsoTimestamp) {
+        // Only ISO timestamp
+        timestamp = `${colorScheme.timestamp}[${isoTimestamp}]${colors.reset}`;
+      } else if (config.includeLocalTime) {
+        // Only local time
+        timestamp = `${colorScheme.timeString}[${timeString}]${colors.reset}`;
+      }
+    }
 
     const levelName = MessageFormatter.getLevelName(level);
     const levelColor = MessageFormatter.getLevelColor(level);
     const coloredLevel = `${levelColor}[${levelName}]${colors.reset}`;
 
-    // Format the base message
+    // Format the base message (level is always included as per requirements)
     let formattedMessage = `${timestamp}${coloredLevel}: ${message}`;
 
     // Append data if provided
@@ -47,11 +69,33 @@ export class MessageFormatter {
      * Formats a Log Engine system message with [LOG ENGINE] prefix instead of log levels
      * Used for internal messages like deprecation warnings that should be distinguished from user logs
      * @param message - The system message content to format
+     * @param formatConfig - Optional format configuration to control element inclusion
      * @returns Formatted string with ANSI colors, timestamps, and LOG ENGINE prefix
      */
-  static formatSystemMessage(message: string): string {
-    const { isoTimestamp, timeString } = getTimestampComponents();
-    const timestamp = formatTimestamp(isoTimestamp, timeString, colorScheme);
+  static formatSystemMessage(message: string, formatConfig?: LogFormatConfig): string {
+    // Use default format configuration if not provided (backward compatibility)
+    const config: LogFormatConfig = {
+      includeIsoTimestamp: true,
+      includeLocalTime: true,
+      ...formatConfig
+    };
+
+    // Build timestamp string conditionally
+    let timestamp = '';
+    if (config.includeIsoTimestamp || config.includeLocalTime) {
+      const { isoTimestamp, timeString } = getTimestampComponents();
+
+      if (config.includeIsoTimestamp && config.includeLocalTime) {
+        // Both timestamps included
+        timestamp = formatTimestamp(isoTimestamp, timeString, colorScheme);
+      } else if (config.includeIsoTimestamp) {
+        // Only ISO timestamp
+        timestamp = `${colorScheme.timestamp}[${isoTimestamp}]${colors.reset}`;
+      } else if (config.includeLocalTime) {
+        // Only local time
+        timestamp = `${colorScheme.timeString}[${timeString}]${colors.reset}`;
+      }
+    }
 
     const coloredLogEngine = `${colorScheme.system}[LOG ENGINE]${colors.reset}`;
     const coloredMessage = `${colorScheme.system}${message}${colors.reset}`;

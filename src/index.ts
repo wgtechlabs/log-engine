@@ -214,6 +214,7 @@ export const LogEngine = {
 export { LogMode, LogLevel } from './types';
 export type {
   LoggerConfig,
+  LogFormatConfig,
   RedactionConfig,
   LogOutputHandler,
   BuiltInOutputHandler,
