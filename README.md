@@ -341,6 +341,72 @@ Log messages are beautifully formatted with colorized timestamps, levels, and sm
 - 🟢 **LOG**: Green - Critical messages that always display
 - ⚫ **Timestamps**: Gray (ISO) and Cyan (local time) for easy scanning
 
+### Customizing Log Elements
+
+**LogEngine v2.1+ introduces the ability to customize which elements are included in your log output** while keeping log levels mandatory for clarity and consistency.
+
+#### Available Customization Options
+
+You can control the inclusion of timestamp elements:
+
+- **ISO Timestamp**: `[2025-05-29T16:57:45.678Z]` - Precise UTC timestamp
+- **Local Time**: `[4:57PM]` - Human-readable local time
+- **Log Level**: `[INFO]` - Always included (non-customizable as per design)
+
+#### Format Configuration Examples
+
+```typescript
+import { LogEngine, LogMode } from '@wgtechlabs/log-engine';
+
+// Default format (backward compatible)
+LogEngine.configure({ mode: LogMode.DEBUG });
+LogEngine.info('Server started');
+// Output: [2025-05-29T16:57:45.678Z][4:57PM][INFO]: Server started
+
+// Only ISO timestamp
+LogEngine.configure({ 
+  mode: LogMode.DEBUG,
+  format: {
+    includeIsoTimestamp: true,
+    includeLocalTime: false
+  }
+});
+LogEngine.info('Database connected');
+// Output: [2025-05-29T16:57:45.678Z][INFO]: Database connected
+
+// Only local time
+LogEngine.configure({ 
+  mode: LogMode.DEBUG,
+  format: {
+    includeIsoTimestamp: false,
+    includeLocalTime: true
+  }
+});
+LogEngine.warn('Rate limit approaching');
+// Output: [4:57PM][WARN]: Rate limit approaching
+
+// Minimal format (no timestamps)
+LogEngine.configure({ 
+  mode: LogMode.DEBUG,
+  format: {
+    includeIsoTimestamp: false,
+    includeLocalTime: false
+  }
+});
+LogEngine.error('Connection failed');
+// Output: [ERROR]: Connection failed
+```
+
+#### Benefits of Log Element Customization
+
+- **🎯 Reduced Verbosity**: Remove unnecessary timestamp information in containerized environments where external logging systems add timestamps
+- **📱 Space Efficiency**: Minimize log line length for mobile or constrained display environments  
+- **🔧 Integration Ready**: Match existing log format requirements in your infrastructure
+- **⚡ Performance**: Slightly reduced formatting overhead when timestamps are disabled
+- **🔒 Backward Compatible**: Default behavior remains unchanged - existing code continues to work without modifications
+
+**Note**: Log levels (`[DEBUG]`, `[INFO]`, `[WARN]`, `[ERROR]`, `[LOG]`) are always included regardless of configuration to maintain log clarity and filtering capabilities.
+
 ## 🔒 Advanced Data Redaction
 
 **LogEngine features comprehensive built-in PII protection with advanced customization capabilities that automatically redacts sensitive information from your logs.** This security-first approach prevents accidental exposure of passwords, tokens, emails, and other sensitive data while maintaining full debugging capabilities with enterprise-grade flexibility.
