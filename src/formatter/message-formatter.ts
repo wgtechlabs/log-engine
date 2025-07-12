@@ -14,6 +14,14 @@ import { formatData, styleData } from './data-formatter';
  */
 export class MessageFormatter {
   /**
+   * Default format configuration to avoid object recreation on every call
+   */
+  private static readonly DEFAULT_FORMAT_CONFIG: LogFormatConfig = {
+    includeIsoTimestamp: true,
+    includeLocalTime: true
+  };
+
+  /**
      * Formats a log message with timestamp, level indicator, and appropriate coloring
      * Creates a structured log entry: [ISO_TIMESTAMP][LOCAL_TIME][LEVEL]: message [data]
      * @param level - The log level to format for
@@ -23,10 +31,9 @@ export class MessageFormatter {
      * @returns Formatted string with ANSI colors and timestamps
      */
   static format(level: LogLevel, message: string, data?: LogData, formatConfig?: LogFormatConfig): string {
-    // Use default format configuration if not provided (backward compatibility)
+    // Merge provided format configuration with the default configuration
     const config: LogFormatConfig = {
-      includeIsoTimestamp: true,
-      includeLocalTime: true,
+      ...MessageFormatter.DEFAULT_FORMAT_CONFIG,
       ...formatConfig
     };
 
@@ -73,10 +80,9 @@ export class MessageFormatter {
      * @returns Formatted string with ANSI colors, timestamps, and LOG ENGINE prefix
      */
   static formatSystemMessage(message: string, formatConfig?: LogFormatConfig): string {
-    // Use default format configuration if not provided (backward compatibility)
+    // Merge provided format configuration with the default configuration
     const config: LogFormatConfig = {
-      includeIsoTimestamp: true,
-      includeLocalTime: true,
+      ...MessageFormatter.DEFAULT_FORMAT_CONFIG,
       ...formatConfig
     };
 
