@@ -47,6 +47,19 @@ export class Logger {
   }
 
   /**
+   * Helper method to format log messages with cached configuration
+   * Reduces code duplication across all log methods
+   * @param level - The log level to format for
+   * @param message - The message content to format
+   * @param data - Optional data object to include in the log output
+   * @returns Formatted string with appropriate configuration applied
+   */
+  private formatMessage(level: LogLevel, message: string, data?: LogData): string {
+    const cachedConfig = this.getCachedConfig();
+    return LogFormatter.format(level, message, data, cachedConfig.format);
+  }
+
+  /**
      * Built-in output handlers for common use cases
      */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -278,8 +291,7 @@ export class Logger {
   debug(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.DEBUG)) {
       const processedData = DataRedactor.redactData(data);
-      const cachedConfig = this.getCachedConfig();
-      const formatted = LogFormatter.format(LogLevel.DEBUG, message, processedData, cachedConfig.format);
+      const formatted = this.formatMessage(LogLevel.DEBUG, message, processedData);
       this.writeToOutput('debug', message, formatted, processedData);
     }
   }
@@ -294,8 +306,7 @@ export class Logger {
   info(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.INFO)) {
       const processedData = DataRedactor.redactData(data);
-      const cachedConfig = this.getCachedConfig();
-      const formatted = LogFormatter.format(LogLevel.INFO, message, processedData, cachedConfig.format);
+      const formatted = this.formatMessage(LogLevel.INFO, message, processedData);
       this.writeToOutput('info', message, formatted, processedData);
     }
   }
@@ -310,8 +321,7 @@ export class Logger {
   warn(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.WARN)) {
       const processedData = DataRedactor.redactData(data);
-      const cachedConfig = this.getCachedConfig();
-      const formatted = LogFormatter.format(LogLevel.WARN, message, processedData, cachedConfig.format);
+      const formatted = this.formatMessage(LogLevel.WARN, message, processedData);
       this.writeToOutput('warn', message, formatted, processedData, false, true);
     }
   }
@@ -326,8 +336,7 @@ export class Logger {
   error(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.ERROR)) {
       const processedData = DataRedactor.redactData(data);
-      const cachedConfig = this.getCachedConfig();
-      const formatted = LogFormatter.format(LogLevel.ERROR, message, processedData, cachedConfig.format);
+      const formatted = this.formatMessage(LogLevel.ERROR, message, processedData);
       this.writeToOutput('error', message, formatted, processedData, true, false);
     }
   }
@@ -343,8 +352,7 @@ export class Logger {
   log(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.LOG)) {
       const processedData = DataRedactor.redactData(data);
-      const cachedConfig = this.getCachedConfig();
-      const formatted = LogFormatter.format(LogLevel.LOG, message, processedData, cachedConfig.format);
+      const formatted = this.formatMessage(LogLevel.LOG, message, processedData);
       this.writeToOutput('log', message, formatted, processedData);
     }
   }
@@ -357,8 +365,7 @@ export class Logger {
      */
   debugRaw(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.DEBUG)) {
-      const cachedConfig = this.getCachedConfig();
-      const formatted = LogFormatter.format(LogLevel.DEBUG, message, data, cachedConfig.format);
+      const formatted = this.formatMessage(LogLevel.DEBUG, message, data);
       this.writeToOutput('debug', message, formatted, data);
     }
   }
@@ -370,8 +377,7 @@ export class Logger {
      */
   infoRaw(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.INFO)) {
-      const cachedConfig = this.getCachedConfig();
-      const formatted = LogFormatter.format(LogLevel.INFO, message, data, cachedConfig.format);
+      const formatted = this.formatMessage(LogLevel.INFO, message, data);
       this.writeToOutput('info', message, formatted, data);
     }
   }
@@ -383,8 +389,7 @@ export class Logger {
      */
   warnRaw(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.WARN)) {
-      const cachedConfig = this.getCachedConfig();
-      const formatted = LogFormatter.format(LogLevel.WARN, message, data, cachedConfig.format);
+      const formatted = this.formatMessage(LogLevel.WARN, message, data);
       this.writeToOutput('warn', message, formatted, data, false, true);
     }
   }
@@ -396,8 +401,7 @@ export class Logger {
      */
   errorRaw(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.ERROR)) {
-      const cachedConfig = this.getCachedConfig();
-      const formatted = LogFormatter.format(LogLevel.ERROR, message, data, cachedConfig.format);
+      const formatted = this.formatMessage(LogLevel.ERROR, message, data);
       this.writeToOutput('error', message, formatted, data, true, false);
     }
   }
@@ -409,8 +413,7 @@ export class Logger {
      */
   logRaw(message: string, data?: LogData): void {
     if (this.shouldLog(LogLevel.LOG)) {
-      const cachedConfig = this.getCachedConfig();
-      const formatted = LogFormatter.format(LogLevel.LOG, message, data, cachedConfig.format);
+      const formatted = this.formatMessage(LogLevel.LOG, message, data);
       this.writeToOutput('log', message, formatted, data);
     }
   }
