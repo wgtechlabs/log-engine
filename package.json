@@ -5,24 +5,49 @@
   "type": "module",
   "keywords": [
     "logging",
+    "logger",
+    "log",
+    "winston-alternative",
     "security",
     "redaction",
     "pii-protection",
     "data-redaction",
     "typescript",
+    "javascript",
     "nodejs",
+    "express",
+    "fastify",
+    "koa",
+    "nestjs",
     "bot",
     "discord",
     "telegram",
     "privacy",
     "gdpr",
-    "compliance"
+    "compliance",
+    "opensource",
+    "mit-license",
+    "esm",
+    "cjs",
+    "zero-dependencies",
+    "structured-logging",
+    "json-logging"
   ],
   "packageManager": "yarn@4.9.2",
   "license": "MIT",
   "author": "WG Tech Labs <opensource@wgtechlabs.com> (https://wgtechlabs.com)",
   "contributors": [
     "Waren Gonzaga <opensource@warengonzaga.com> (https://warengonzaga.com)"
+  ],
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/wgtechlabs"
+    },
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/warengonzaga"
+    }
   ],
   "main": "./dist/cjs/index.cjs",
   "module": "./dist/esm/index.js",
@@ -40,13 +65,22 @@
     }
   },
   "files": [
-    "dist/**/*",
+    "dist/",
     "README.md",
     "LICENSE"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/wgtechlabs/log-engine.git"
+    "url": "git+https://github.com/wgtechlabs/log-engine.git"
+  },
+  "homepage": "https://github.com/wgtechlabs/log-engine#readme",
+  "bugs": {
+    "url": "https://github.com/wgtechlabs/log-engine/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/",
+    "tag": "latest"
   },
   "scripts": {
     "build": "node scripts/forklift-runner.js --clean",
@@ -71,7 +105,7 @@
     "validate": "run-s lint test build",
     "clean": "rm -rf dist coverage",
     "coverage:open": "open coverage/lcov-report/index.html",
-    "coverage:upload": "curl -Os https://uploader.codecov.io/latest/windows/codecov.exe && codecov.exe"
+    "coverage:upload": "npx codecov"
   },
   "devDependencies": {
     "@types/eslint-plugin-security": "^3",
@@ -89,6 +123,7 @@
     "typescript": "^5.8.3"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=16.0.0",
+    "npm": ">=7.0.0"
   }
 }

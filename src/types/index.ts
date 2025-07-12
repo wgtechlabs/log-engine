@@ -129,6 +129,17 @@ export type EnhancedOutputTarget = BuiltInOutputHandler | LogOutputHandler | {
 export type OutputTarget = BuiltInOutputHandler | LogOutputHandler;
 
 /**
+ * Configuration for log message formatting
+ * Controls which elements are included in the log output
+ */
+export interface LogFormatConfig {
+    /** Whether to include ISO timestamp (e.g., [2025-05-29T16:57:45.678Z]) */
+    includeIsoTimestamp?: boolean;
+    /** Whether to include local time (e.g., [4:57PM]) */
+    includeLocalTime?: boolean;
+}
+
+/**
  * Configuration options for the logger
  * Supports both legacy level-based and new mode-based configuration
  */
@@ -150,6 +161,8 @@ export interface LoggerConfig {
     suppressConsoleOutput?: boolean;
     /** Advanced configuration for built-in handlers */
     advancedOutputConfig?: AdvancedOutputConfig;
+    /** Format configuration for customizing log element inclusion */
+    format?: LogFormatConfig;
 }
 
 /**
