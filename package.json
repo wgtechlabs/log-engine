@@ -92,6 +92,7 @@
     "test:coverage": "jest --coverage",
     "test:coverage:watch": "jest --coverage --watch",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
+    "test:ci:debug": "jest --runInBand --detectOpenHandles --verbose",
     "test:unit": "jest --testNamePattern=\"^((?!integration).)*$\"",
     "test:integration": "jest integration.test.ts",
     "test:redaction": "jest --testPathPattern=\"redaction/\"",
