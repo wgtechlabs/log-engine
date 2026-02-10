@@ -40,7 +40,7 @@ jobs:
           pnpm --version
       
       - name: Build and Publish Package
-        uses: wgtechlabs/package-build-flow-action@v1.2.3
+        uses: wgtechlabs/package-build-flow-action@v1.2.4
         with:
           # Registry Configuration
           registry: 'both'
