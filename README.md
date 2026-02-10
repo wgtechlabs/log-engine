@@ -62,10 +62,10 @@ Open source development is resource-intensive. These **sponsored ads help keep L
 
 ## 📦 Installation
 
-Install the package using yarn (recommended):
+Install the package using pnpm (recommended):
 
 ```bash
-yarn add @wgtechlabs/log-engine
+pnpm add @wgtechlabs/log-engine
 ```
 
 Or using npm:
@@ -74,7 +74,13 @@ Or using npm:
 npm install @wgtechlabs/log-engine
 ```
 
-> **Note**: This project uses yarn as the primary package manager for development. If you're contributing to the project, please use yarn to ensure consistency with the development environment.
+Or using yarn:
+
+```bash
+yarn add @wgtechlabs/log-engine
+```
+
+> **Note**: This project uses pnpm as the primary package manager for development. If you're contributing to the project, please use pnpm to ensure consistency with the development environment.
 
 ## 🕹️ Usage
 
@@ -879,7 +885,7 @@ Contributions are welcome, create a pull request to this repo and I will review 
 **Development Environment:**
 
 - This project is configured for **local development workflows only** - no CI/CD setup required
-- Uses **yarn** as the primary package manager for consistency
+- Uses **pnpm** as the primary package manager for consistency
 - Simple, cross-platform development setup with TypeScript, Jest, and ESLint
 - Clean test output maintained using `jest.setup.js` to suppress console noise during testing
 - All error logging functionality remains intact in production code
@@ -887,15 +893,15 @@ Contributions are welcome, create a pull request to this repo and I will review 
 
 **Available Scripts:**
 
-- `yarn test` - Run all tests
-- `yarn test:watch` - Run tests in watch mode
-- `yarn test:coverage` - Run tests with coverage reporting
-- `yarn lint` - Run TypeScript and code quality checks
-- `yarn lint:fix` - Automatically fix linting issues
-- `yarn lint:security` - Run security-focused linting
-- `yarn secure` - Run comprehensive security checks
-- `yarn build` - Build the TypeScript project
-- `yarn validate` - Run full validation (lint + test + build)
+- `pnpm test` - Run all tests
+- `pnpm test:watch` - Run tests in watch mode
+- `pnpm test:coverage` - Run tests with coverage reporting
+- `pnpm lint` - Run TypeScript and code quality checks
+- `pnpm lint:fix` - Automatically fix linting issues
+- `pnpm lint:security` - Run security-focused linting
+- `pnpm secure` - Run comprehensive security checks
+- `pnpm build` - Build the TypeScript project
+- `pnpm validate` - Run full validation (lint + test + build)
 
 Read the project's [contributing guide](./CONTRIBUTING.md) for detailed development setup, testing guidelines, and contribution requirements.
 

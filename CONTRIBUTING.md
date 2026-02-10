@@ -44,22 +44,22 @@ To get started with development:
 2. **Install dependencies**
 
    ```bash
-   yarn install
+   pnpm install
    ```
 
 3. **Build the project**
 
    ```bash
-   yarn build
+   pnpm build
    ```
 
 4. **Run tests to verify setup**
 
    ```bash
-   yarn test
+   pnpm test
    ```
 
-> **Note**: This project uses Yarn for dependency management. Please use `yarn` for all development tasks to ensure consistency with our package manager configuration.
+> **Note**: This project uses pnpm for dependency management. Please use `pnpm` for all development tasks to ensure consistency with our package manager configuration.
 
 Please refer to the [README](./README.md) for more detailed setup instructions.
 
@@ -73,36 +73,36 @@ We use a **simplified local testing** approach optimized for developer productiv
 
 🚀 **Local Development Testing**
 
-- **Fast feedback** in ~3-5 seconds with `yarn test`
-- **Quick validation** without coverage generation using `yarn test --silent`
+- **Fast feedback** in ~3-5 seconds with `pnpm test`
+- **Quick validation** without coverage generation using `pnpm test -- --silent`
 - **Optimized for iteration** speed and developer productivity
 
 🛡️ **Comprehensive Local Testing**
 
-- **Full coverage** reporting with `yarn test:coverage`
-- **Security validation** with `yarn secure` (requires Snyk account)
-- **Complete validation** with `yarn validate` before creating PRs
+- **Full coverage** reporting with `pnpm test:coverage`
+- **Security validation** with `pnpm secure` (requires Snyk account)
+- **Complete validation** with `pnpm validate` before creating PRs
 
 #### Quick Start
 
 ```bash
 # Install dependencies
-yarn install
+pnpm install
 
 # 🚀 Fast local testing (recommended for development)
-yarn test
+pnpm test
 
 # 🛡️ Full testing with coverage (before creating PRs)
-yarn test:coverage
+pnpm test:coverage
 
 # 📊 Coverage only
-yarn test:coverage
+pnpm test:coverage
 
 # 👀 Watch mode for development
-yarn test:watch
+pnpm test:watch
 
 # 🐛 Debug test issues
-yarn test:debug
+pnpm test:debug
 ```
 
 #### Test Commands Reference
@@ -119,16 +119,16 @@ yarn test:debug
 **For Feature Development:**
 
 1. Work on feature branch from `main`
-2. Use `yarn test` for quick validation during development
-3. Use `yarn lint` to check code quality
+2. Use `pnpm test` for quick validation during development
+3. Use `pnpm lint` to check code quality
 4. Commit changes with descriptive messages
 5. Iterate quickly with fast local feedback
 
 **For Production Release:**
 
-1. Run full validation: `yarn validate` (lint + test + build)
-2. Ensure coverage requirements are met with `yarn test:coverage`
-3. Run security checks: `yarn secure` (if Snyk is configured)
+1. Run full validation: `pnpm validate` (lint + test + build)
+2. Ensure coverage requirements are met with `pnpm test:coverage`
+3. Run security checks: `pnpm secure` (if Snyk is configured)
 4. Create PR to `main` for review
 
 #### Test Architecture
@@ -155,28 +155,28 @@ This approach ensures that test logs remain readable while preserving all error 
 **Local Development:**
 
 1. Write your tests alongside feature development
-2. Run `yarn test` for quick validation (~3-5 seconds)
+2. Run `pnpm test` for quick validation (~3-5 seconds)
 3. Ensure tests follow established patterns and are isolated
-4. Use `yarn test:watch` for live development feedback
+4. Use `pnpm test:watch` for live development feedback
 
 **Pre-Pull Request:**
 
-1. Run full test suite: `yarn test:coverage`
+1. Run full test suite: `pnpm test:coverage`
 2. Verify coverage requirements are met (should be 80%+)
 3. Test across different scenarios and edge cases
-4. Run linting: `yarn lint`
-5. Run full validation: `yarn validate`
+4. Run linting: `pnpm lint`
+5. Run full validation: `pnpm validate`
 
 **Pull Request Checklist:**
 
-- [ ] All tests pass with `yarn test`
-- [ ] Coverage requirements met with `yarn test:coverage`  
+- [ ] All tests pass with `pnpm test`
+- [ ] Coverage requirements met with `pnpm test:coverage`  
 - [ ] New functionality has corresponding tests
 - [ ] Edge cases and error scenarios are covered
 - [ ] Test names are descriptive and follow conventions
 - [ ] No test pollution (tests are properly isolated)
 - [ ] Tests complete quickly (no arbitrary timeouts)
-- [ ] Code quality checks pass with `yarn lint`
+- [ ] Code quality checks pass with `pnpm lint`
 
 #### Test Best Practices
 
@@ -201,7 +201,7 @@ This approach ensures that test logs remain readable while preserving all error 
 **If tests are hanging:**
 
 ```bash
-yarn test:ci:debug  # Shows open handles and verbose output
+pnpm test:ci:debug  # Shows open handles and verbose output
 ```
 
 **If tests are flaky:**
@@ -246,7 +246,7 @@ Quality is maintained through:
 - **Security scanning** via Snyk integration
 - **TypeScript strict mode** for type safety
 - **ESLint with security rules** for code quality
-- **Pre-commit validation** via `yarn validate`
+- **Pre-commit validation** via `pnpm validate`
 - **Manual review process** for all contributions
 
 ---
