@@ -111,7 +111,7 @@ jobs:
       - name: Audit dependencies for vulnerabilities
         run: |
           echo "Running dependency audit..."
-          if pnpm audit --audit-level=high; then
+          if pnpm audit --audit-level high; then
             echo "✅ Dependency audit passed - no high/critical vulnerabilities found"
           fi
         
