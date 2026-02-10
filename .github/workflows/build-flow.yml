@@ -26,18 +26,18 @@ jobs:
         with:
           node-version: '20'
       
-      - name: Enable Corepack for Yarn v4
+      - name: Enable Corepack for pnpm
         run: |
           echo "Enabling Corepack..."
           corepack enable
-          echo "Preparing Yarn 4.9.2..."
-          corepack prepare yarn@4.9.2 --activate
-          echo "Yarn setup complete"
+          echo "Preparing pnpm 9.15.4..."
+          corepack prepare pnpm@9.15.4 --activate
+          echo "pnpm setup complete"
       
-      - name: Verify Yarn version
+      - name: Verify pnpm version
         run: |
-          echo "Yarn version:"
-          yarn --version
+          echo "pnpm version:"
+          pnpm --version
       
       - name: Build and Publish Package
         uses: wgtechlabs/package-build-flow-action@v1.2.3
@@ -52,7 +52,7 @@ jobs:
           dev-branch: 'dev'
           
           # Package Configuration
-          package-manager: 'yarn'
+          package-manager: 'pnpm'
           build-script: 'build'
           
           # Security Configuration

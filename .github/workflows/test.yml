@@ -40,31 +40,31 @@ jobs:
             }
           "
           
-      - name: Enable Corepack for Yarn v4
+      - name: Enable Corepack for pnpm
         run: |
           echo "Current Node.js version:"
           node --version
           echo "Enabling Corepack..."
           corepack enable
-          echo "Preparing Yarn 4.9.2..."
-          corepack prepare yarn@4.9.2 --activate
-          echo "Yarn setup complete"
+          echo "Preparing pnpm 9.15.4..."
+          corepack prepare pnpm@9.15.4 --activate
+          echo "pnpm setup complete"
           
-      - name: Verify Yarn version
+      - name: Verify pnpm version
         run: |
-          echo "Yarn version:"
-          yarn --version
+          echo "pnpm version:"
+          pnpm --version
           echo "Checking package manager field..."
           node -e "console.log('packageManager:', require('./package.json').packageManager)"
           
       - name: Install dependencies
         run: |
-          echo "Installing dependencies with Yarn v4..."
+          echo "Installing dependencies with pnpm..."
           echo "Current working directory: $(pwd)"
           echo "Files in directory:"
           ls -la
           echo "Installing..."
-          yarn install --immutable
+          pnpm install --frozen-lockfile
           echo "Dependencies installed successfully"
         
       - name: Verify installation
@@ -74,12 +74,12 @@ jobs:
           echo "Checking TypeScript and Jest installation..."
           
           # Check TypeScript
-          if yarn tsc --version > /dev/null 2>&1; then
-            echo "✅ TypeScript: $(yarn tsc --version)"
+          if pnpm tsc --version > /dev/null 2>&1; then
+            echo "✅ TypeScript: $(pnpm tsc --version)"
           elif npx tsc --version > /dev/null 2>&1; then
             echo "✅ TypeScript: $(npx tsc --version)"
           else
-            echo "⚠️  TypeScript: Not accessible via yarn/npx, checking package.json..."
+            echo "⚠️  TypeScript: Not accessible via pnpm/npx, checking package.json..."
             TS_VERSION=$(node -e "const pkg = require('./package.json'); console.log(pkg.devDependencies?.typescript || '')")
             if [ -n "$TS_VERSION" ] && [ "$TS_VERSION" != "undefined" ]; then
               echo "   ✅ TypeScript is listed in devDependencies: $TS_VERSION"
@@ -89,12 +89,12 @@ jobs:
           fi
           
           # Check Jest
-          if yarn jest --version > /dev/null 2>&1; then
-            echo "✅ Jest: $(yarn jest --version)"
+          if pnpm jest --version > /dev/null 2>&1; then
+            echo "✅ Jest: $(pnpm jest --version)"
           elif npx jest --version > /dev/null 2>&1; then
             echo "✅ Jest: $(npx jest --version)"
           else
-            echo "⚠️  Jest: Not accessible via yarn/npx, checking package.json..."
+            echo "⚠️  Jest: Not accessible via pnpm/npx, checking package.json..."
             JEST_VERSION=$(node -e "const pkg = require('./package.json'); console.log(pkg.devDependencies?.jest || '')")
             if [ -n "$JEST_VERSION" ] && [ "$JEST_VERSION" != "undefined" ]; then
               echo "   ✅ Jest is listed in devDependencies: $JEST_VERSION"
@@ -109,7 +109,7 @@ jobs:
         run: |
           echo "Running full test suite with coverage..."
           echo "Coverage threshold: 80% (configured in jest.config.cjs)"
-          yarn test --coverage --watchAll=false
+          pnpm test -- --coverage --watchAll=false
           echo "✅ Test suite passed with coverage requirements"
         
       - name: Validate coverage reports exist

@@ -33,7 +33,7 @@
     "structured-logging",
     "json-logging"
   ],
-  "packageManager": "yarn@4.9.2",
+  "packageManager": "pnpm@9.15.4",
   "license": "MIT",
   "author": "WG Tech Labs <opensource@wgtechlabs.com> (https://wgtechlabs.com)",
   "contributors": [
@@ -86,7 +86,7 @@
     "build": "node scripts/forklift-runner.js --clean",
     "build:watch": "node scripts/forklift-runner.js --watch",
     "start": "node dist/cjs/index.cjs",
-    "prepublishOnly": "yarn build",
+    "prepublishOnly": "pnpm build",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
