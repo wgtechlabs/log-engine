@@ -1,0 +1,67 @@
+name: Build & Publish Flow
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+  release:
+    types: [published]
+
+jobs:
+  build-and-publish:
+    name: Build & Publish Package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      pull-requests: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Enable Corepack for Yarn v4
+        run: |
+          echo "Enabling Corepack..."
+          corepack enable
+          echo "Preparing Yarn 4.9.2..."
+          corepack prepare yarn@4.9.2 --activate
+          echo "Yarn setup complete"
+      
+      - name: Verify Yarn version
+        run: |
+          echo "Yarn version:"
+          yarn --version
+      
+      - name: Build and Publish Package
+        uses: wgtechlabs/package-build-flow-action@v1.2.3
+        with:
+          # Registry Configuration
+          registry: 'both'
+          npm-token: ${{ secrets.NPM_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          
+          # Branch Configuration
+          main-branch: 'main'
+          dev-branch: 'dev'
+          
+          # Package Configuration
+          package-manager: 'yarn'
+          build-script: 'build'
+          
+          # Security Configuration
+          audit-enabled: 'true'
+          audit-level: 'high'
+          fail-on-audit: 'false'
+          
+          # PR Comment Configuration
+          pr-comment-enabled: 'true'
+          
+          # Publishing Configuration
+          publish-enabled: 'true'
