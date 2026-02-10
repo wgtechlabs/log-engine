@@ -40,31 +40,31 @@ jobs:
             }
           "
           
-      - name: Enable Corepack for Yarn v4
+      - name: Enable Corepack for pnpm
         run: |
           echo "Current Node.js version:"
           node --version
           echo "Enabling Corepack..."
           corepack enable
-          echo "Preparing Yarn 4.9.2..."
-          corepack prepare yarn@4.9.2 --activate
-          echo "Yarn setup complete"
+          echo "Preparing pnpm 9.15.4..."
+          corepack prepare pnpm@9.15.4 --activate
+          echo "pnpm setup complete"
           
-      - name: Verify Yarn version
+      - name: Verify pnpm version
         run: |
-          echo "Yarn version:"
-          yarn --version
+          echo "pnpm version:"
+          pnpm --version
           echo "Checking package manager field..."
           node -e "console.log('packageManager:', require('./package.json').packageManager)"
           
       - name: Install dependencies
         run: |
-          echo "Installing dependencies with Yarn v4..."
+          echo "Installing dependencies with pnpm..."
           echo "Current working directory: $(pwd)"
           echo "Files in directory:"
           ls -la
           echo "Installing..."
-          yarn install --immutable
+          pnpm install --frozen-lockfile
           echo "Dependencies installed successfully"
         
       - name: Verify installation
@@ -74,12 +74,12 @@ jobs:
           echo "Checking TypeScript installation..."
           
           # Check TypeScript
-          if yarn tsc --version > /dev/null 2>&1; then
-            echo "✅ TypeScript: $(yarn tsc --version)"
+          if pnpm tsc --version > /dev/null 2>&1; then
+            echo "✅ TypeScript: $(pnpm tsc --version)"
           elif npx tsc --version > /dev/null 2>&1; then
             echo "✅ TypeScript: $(npx tsc --version)"
           else
-            echo "⚠️  TypeScript: Not accessible via yarn/npx, checking package.json..."
+            echo "⚠️  TypeScript: Not accessible via pnpm/npx, checking package.json..."
             TS_VERSION=$(node -e "const pkg = require('./package.json'); console.log(pkg.devDependencies?.typescript || '')")
             if [ -n "$TS_VERSION" ] && [ "$TS_VERSION" != "undefined" ]; then
               echo "   ✅ TypeScript is listed in devDependencies: $TS_VERSION"
@@ -93,25 +93,25 @@ jobs:
       - name: TypeScript compilation check
         run: |
           echo "Running TypeScript compilation check..."
-          yarn tsc --noEmit
+          pnpm tsc --noEmit
           echo "✅ TypeScript compilation successful"
         
       - name: Run ESLint with security rules
         run: |
           echo "Running standard ESLint checks..."
-          yarn lint
+          pnpm lint
           echo "✅ Standard linting passed"
         
       - name: Run security-focused ESLint
         run: |
           echo "Running security-focused ESLint..."
-          yarn lint:security
+          pnpm lint:security
           echo "✅ Security linting passed"
         
       - name: Audit dependencies for vulnerabilities
         run: |
           echo "Running dependency audit..."
-          if yarn npm audit --severity high; then
+          if pnpm audit --audit-level high; then
             echo "✅ Dependency audit passed - no high/critical vulnerabilities found"
           fi
         
@@ -120,7 +120,7 @@ jobs:
           echo "Generating detailed security audit..."
           # Use || true here to ensure JSON output is captured even if vulnerabilities are found
           # This step is for reporting/analysis, not for failing the build
-          yarn npm audit --json --severity moderate > audit.json || true
+          pnpm audit --json > audit.json || true
           if [ -f audit.json ]; then
             vulnerabilities=$(cat audit.json | jq -r '.data.vulnerabilities // {} | length // 0' 2>/dev/null || echo "0")
             echo "Found $vulnerabilities vulnerabilities"
