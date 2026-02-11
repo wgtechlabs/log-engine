@@ -16,6 +16,7 @@ Log Engine transforms your development experience from chaotic debugging session
 
 ## ✨ Key Features
 
+- **🎨 Context-Aware Emoji (New!)**: Intelligent emoji support that enhances log readability by analyzing content and automatically selecting relevant visual indicators - based on the gitmoji set with 40+ curated mappings and fully customizable.
 - **🔒 Advanced Data Redaction (Enhanced!)**: Built-in PII protection with **custom regex patterns**, **dynamic field management**, and **environment-based configuration** - the first logging library with comprehensive security-first logging by default.
 - **🎯 Configurable Output Handlers (New!)**: Revolutionary output routing system supporting **custom destinations**, **multiple simultaneous outputs**, and **production-ready handlers** - redirect logs to files, HTTP endpoints, GUI applications, testing frameworks, or any custom destination with zero configuration complexity.
 - **⚡ Custom Redaction Patterns**: Add your own regex patterns for advanced field detection and enterprise-specific data protection requirements.
@@ -412,6 +413,211 @@ LogEngine.error('Connection failed');
 - **🔒 Backward Compatible**: Default behavior remains unchanged - existing code continues to work without modifications
 
 **Note**: Log levels (`[DEBUG]`, `[INFO]`, `[WARN]`, `[ERROR]`, `[LOG]`) are always included regardless of configuration to maintain log clarity and filtering capabilities.
+
+## 🎨 Context-Aware Emoji Support
+
+**LogEngine features intelligent emoji support that enhances log readability by adding visual context to each log message.** The emoji engine analyzes your log content (level + message + data) and automatically selects the most relevant emoji, making it easier to visually parse large logs and instantly identify the type of each log line.
+
+### Features
+
+- **🎯 Context-Aware Selection**: Automatically analyzes message content and data to select appropriate emoji
+- **📦 Rich Emoji Set**: Based on [gitmoji](https://gitmoji.dev) with 40+ curated emoji mappings
+- **🔄 Smart Fallback**: Uses level-specific emoji when no context match is found
+- **🛠️ Fully Customizable**: Extend or override emoji mappings and fallback behavior
+- **🔒 Disabled by Default**: Opt-in feature that maintains backward compatibility
+
+### Quick Start
+
+```typescript
+import { LogEngine } from '@wgtechlabs/log-engine';
+
+// Enable emoji support
+LogEngine.configure({
+  format: {
+    emoji: { enabled: true }
+  }
+});
+
+// Context-aware emoji automatically selected
+LogEngine.error('Database connection failed');
+// Output: [2026-02-11T14:00:00.000Z][2:00PM][ERROR][🗃️]: Database connection failed
+
+LogEngine.info('Deployed to production successfully');
+// Output: [2026-02-11T14:00:01.000Z][2:00PM][INFO][🚀]: Deployed to production successfully
+
+LogEngine.warn('Performance degradation detected');
+// Output: [2026-02-11T14:00:02.000Z][2:00PM][WARN][⚡️]: Performance degradation detected
+
+LogEngine.info('Unknown event happened');
+// Output: [2026-02-11T14:00:03.000Z][2:00PM][INFO][ℹ️]: Unknown event happened
+```
+
+### Context-Aware Emoji Mappings
+
+LogEngine intelligently matches keywords in your log messages to select appropriate emoji:
+
+| Context | Keywords | Emoji | Example |
+|---------|----------|-------|---------|
+| **Database** | database, db, sql, query, mongo, postgres | 🗃️ | "Database query failed" |
+| **Deployment** | deploy, release, launched, production | 🚀 | "Deployed to production" |
+| **Performance** | performance, speed, optimize, latency | ⚡️ | "Performance issues detected" |
+| **Security** | security, vulnerability, auth, permission | 🔒️ | "Security breach detected" |
+| **Critical** | critical, urgent, emergency, crash | 🚑️ | "Critical system failure" |
+| **Bugs** | bug, fix, defect, issue | 🐛 | "Fixed bug in login" |
+| **Network** | network, http, api, endpoint | 🌐 | "API request failed" |
+| **Testing** | tests, testing, validation | ✅ | "All tests passed" |
+
+### Fallback Emoji by Level
+
+When no context-specific emoji matches, LogEngine uses these fallback emoji:
+
+| Log Level | Emoji | Description |
+|-----------|-------|-------------|
+| `DEBUG` | 🐞 | Debugging information |
+| `INFO` | ℹ️ | General information |
+| `WARN` | ⚠️ | Warning messages |
+| `ERROR` | ❌ | Error messages |
+| `LOG` | ✅ | Critical log messages |
+
+### Custom Emoji Configuration
+
+#### Custom Context Mappings
+
+Add your own emoji mappings for custom contexts:
+
+```typescript
+LogEngine.configure({
+  format: {
+    emoji: {
+      enabled: true,
+      customMappings: [
+        {
+          emoji: '🎯',
+          code: ':dart:',
+          description: 'Goal achieved',
+          keywords: ['goal', 'target', 'achieved', 'milestone']
+        },
+        {
+          emoji: '💰',
+          code: ':moneybag:',
+          description: 'Payment operations',
+          keywords: ['payment', 'transaction', 'billing', 'invoice']
+        }
+      ]
+    }
+  }
+});
+
+LogEngine.info('Payment processed successfully');
+// Output: [INFO][💰]: Payment processed successfully
+
+LogEngine.info('Sales target achieved');
+// Output: [INFO][🎯]: Sales target achieved
+```
+
+#### Custom Fallback Emoji
+
+Override the default fallback emoji for each log level:
+
+```typescript
+LogEngine.configure({
+  format: {
+    emoji: {
+      enabled: true,
+      customFallbacks: {
+        DEBUG: '🔍',
+        INFO: '📢',
+        WARN: '🚨',
+        ERROR: '💀',
+        LOG: '🎉'
+      }
+    }
+  }
+});
+
+LogEngine.info('Generic info message');
+// Output: [INFO][📢]: Generic info message
+```
+
+#### Use Custom Mappings Exclusively
+
+Use only your custom mappings and ignore the built-in set:
+
+```typescript
+LogEngine.configure({
+  format: {
+    emoji: {
+      enabled: true,
+      useCustomOnly: true,
+      customMappings: [
+        // Your custom mappings only
+      ]
+    }
+  }
+});
+```
+
+### Data Context Analysis
+
+The emoji selector also analyzes data objects for context:
+
+```typescript
+LogEngine.info('Operation completed', {
+  database: 'postgres',
+  table: 'users',
+  rows: 1000
+});
+// Output: [INFO][🗃️]: Operation completed { database: 'postgres', ... }
+
+LogEngine.warn('Issue detected', {
+  performance: 'degraded',
+  latency: '500ms'
+});
+// Output: [WARN][⚡️]: Issue detected { performance: 'degraded', ... }
+```
+
+### Programmatic Access
+
+Access emoji utilities directly for advanced use cases:
+
+```typescript
+import { EmojiSelector, EMOJI_MAPPINGS, FALLBACK_EMOJI } from '@wgtechlabs/log-engine';
+
+// Check all available emoji mappings
+console.log(EMOJI_MAPPINGS);
+// [{ emoji: '🐛', code: ':bug:', description: 'Fix a bug', keywords: [...] }, ...]
+
+// Check fallback emoji
+console.log(FALLBACK_EMOJI);
+// { DEBUG: '🐞', INFO: 'ℹ️', WARN: '⚠️', ERROR: '❌', LOG: '✅' }
+
+// Configure emoji selector directly
+EmojiSelector.configure({
+  enabled: true,
+  customMappings: [...]
+});
+```
+
+### Output Format
+
+With emoji enabled, the log format becomes:
+
+```
+[ISO_TIMESTAMP][LOCAL_TIME][LEVEL][EMOJI]: message [data]
+```
+
+Example:
+```
+[2026-02-11T14:00:00.000Z][2:00PM][ERROR][🗃️]: Database connection failed
+```
+
+### Benefits
+
+- **👁️ Visual Clarity**: Instantly identify log context at a glance
+- **🎯 Better Debugging**: Quickly locate specific types of logs in large outputs
+- **🎨 Enhanced UX**: More engaging and pleasant logging experience
+- **🔧 Flexible**: Fully customizable to match your project's needs
+- **🔒 Backward Compatible**: Disabled by default, no impact on existing code
 
 ## 🔒 Advanced Data Redaction
 
