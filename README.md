@@ -424,21 +424,14 @@ LogEngine.error('Connection failed');
 - **📦 Rich Emoji Set**: Based on [gitmoji](https://gitmoji.dev) with 40+ curated emoji mappings
 - **🔄 Smart Fallback**: Uses level-specific emoji when no context match is found
 - **🛠️ Fully Customizable**: Extend or override emoji mappings and fallback behavior
-- **🔒 Disabled by Default**: Opt-in feature that maintains backward compatibility
+- **✅ Enabled by Default**: Emoji are automatically included in logs (can be disabled via `includeEmoji: false`)
 
 ### Quick Start
 
 ```typescript
 import { LogEngine } from '@wgtechlabs/log-engine';
 
-// Enable emoji support
-LogEngine.configure({
-  format: {
-    emoji: { enabled: true }
-  }
-});
-
-// Context-aware emoji automatically selected
+// Emoji are enabled by default - just start logging!
 LogEngine.error('Database connection failed');
 // Output: [2026-02-11T14:00:00.000Z][2:00PM][ERROR][🗃️]: Database connection failed
 
@@ -449,7 +442,14 @@ LogEngine.warn('Performance degradation detected');
 // Output: [2026-02-11T14:00:02.000Z][2:00PM][WARN][⚡️]: Performance degradation detected
 
 LogEngine.info('Unknown event happened');
-// Output: [2026-02-11T14:00:03.000Z][2:00PM][INFO][ℹ️]: Unknown event happened
+// Output: [2026-02-11T14:00:03.000Z][2:00PM][INFO][ℹ️]: Unknown event happened (fallback)
+
+// Disable emoji if needed
+LogEngine.configure({
+  format: {
+    includeEmoji: false
+  }
+});
 ```
 
 ### Context-Aware Emoji Mappings
@@ -489,7 +489,6 @@ Add your own emoji mappings for custom contexts:
 LogEngine.configure({
   format: {
     emoji: {
-      enabled: true,
       customMappings: [
         {
           emoji: '🎯',
@@ -523,7 +522,6 @@ Override the default fallback emoji for each log level:
 LogEngine.configure({
   format: {
     emoji: {
-      enabled: true,
       customFallbacks: {
         DEBUG: '🔍',
         INFO: '📢',
@@ -547,7 +545,6 @@ Use only your custom mappings and ignore the built-in set:
 LogEngine.configure({
   format: {
     emoji: {
-      enabled: true,
       useCustomOnly: true,
       customMappings: [
         // Your custom mappings only
@@ -591,16 +588,15 @@ console.log(EMOJI_MAPPINGS);
 console.log(FALLBACK_EMOJI);
 // { DEBUG: '🐞', INFO: 'ℹ️', WARN: '⚠️', ERROR: '❌', LOG: '✅' }
 
-// Configure emoji selector directly
+// Configure emoji selector directly (for customization)
 EmojiSelector.configure({
-  enabled: true,
   customMappings: [...]
 });
 ```
 
 ### Output Format
 
-With emoji enabled, the log format becomes:
+With emoji (enabled by default), the log format is:
 
 ```
 [ISO_TIMESTAMP][LOCAL_TIME][LEVEL][EMOJI]: message [data]
