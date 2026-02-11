@@ -31,9 +31,8 @@
  */
 
 import { stat, readdir } from 'fs/promises';
-import { join } from 'path';
+import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 import { existsSync } from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -103,7 +102,6 @@ function formatBytes(bytes) {
  * @returns {boolean} True if within limit
  */
 function checkSize(sizeBytes, limitKB, label) {
-  const sizeKB = sizeBytes / 1024;
   const limitBytes = limitKB * 1024;
   const percentage = (sizeBytes / limitBytes) * 100;
   

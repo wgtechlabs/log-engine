@@ -82,37 +82,29 @@ describe('Bundle Size Checker Script', () => {
   });
 
   describe('Size limits validation', () => {
-    it('should validate total dist size is under 1MB', () => {
-      const output = execSync(`node ${scriptPath}`, {
+    let scriptOutput: string;
+
+    beforeAll(() => {
+      scriptOutput = execSync(`node ${scriptPath}`, {
         cwd: projectRoot,
         encoding: 'utf-8',
         timeout: 10000
-      });
+      }) as unknown as string;
+    });
 
+    it('should validate total dist size is under 1MB', () => {
       // Should contain PASS for Total (dist)
-      expect(output).toMatch(/Total \(dist\).*\[PASS\]/);
+      expect(scriptOutput).toMatch(/Total \(dist\).*\[PASS\]/);
     });
 
     it('should validate ESM build size is under 512KB', () => {
-      const output = execSync(`node ${scriptPath}`, {
-        cwd: projectRoot,
-        encoding: 'utf-8',
-        timeout: 10000
-      });
-
       // Should contain PASS for ESM Build
-      expect(output).toMatch(/ESM Build.*\[PASS\]/);
+      expect(scriptOutput).toMatch(/ESM Build.*\[PASS\]/);
     });
 
     it('should validate CJS build size is under 512KB', () => {
-      const output = execSync(`node ${scriptPath}`, {
-        cwd: projectRoot,
-        encoding: 'utf-8',
-        timeout: 10000
-      });
-
       // Should contain PASS for CJS Build
-      expect(output).toMatch(/CJS Build.*\[PASS\]/);
+      expect(scriptOutput).toMatch(/CJS Build.*\[PASS\]/);
     });
   });
 
