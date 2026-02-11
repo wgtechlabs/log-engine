@@ -34,7 +34,13 @@ export class EmojiSelector {
    * @returns Current emoji configuration
    */
   static getConfig(): EmojiConfig {
-    return { ...EmojiSelector.config };
+    const { customMappings = [], customFallbacks = {}, ...rest } = EmojiSelector.config;
+
+    return {
+      ...rest,
+      customMappings: [...customMappings],
+      customFallbacks: { ...customFallbacks }
+    };
   }
 
   /**
@@ -139,9 +145,12 @@ export class EmojiSelector {
    */
   private static matchesKeywords(searchText: string, keywords: string[]): boolean {
     return keywords.some(keyword => {
+      // Escape regex metacharacters to prevent ReDoS and invalid patterns
+      const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       // Use word boundary matching for more accurate results
+      // Safe: escapedKeyword is sanitized by regex escape above
       // eslint-disable-next-line security/detect-non-literal-regexp
-      const regex = new RegExp(`\\b${keyword}\\b`, 'i');
+      const regex = new RegExp(`\\b${escapedKeyword}\\b`, 'i');
       return regex.test(searchText);
     });
   }
@@ -152,17 +161,19 @@ export class EmojiSelector {
    * @returns Fallback emoji for the level
    */
   private static getFallbackEmoji(level: LogLevel): string {
-    const levelName = EmojiSelector.getLevelName(level);
+    const levelName = EmojiSelector.getLevelName(level) as 'DEBUG' | 'INFO' | 'WARN' | 'ERROR' | 'LOG';
     const { customFallbacks = {} } = EmojiSelector.config;
 
     // Check custom fallbacks first
+    // Safe: levelName is constrained to specific log level strings
     // eslint-disable-next-line security/detect-object-injection
-    if (customFallbacks[levelName]) {
+    if (levelName in customFallbacks && customFallbacks[levelName]) {
       // eslint-disable-next-line security/detect-object-injection
-      return customFallbacks[levelName];
+      return customFallbacks[levelName] || '';
     }
 
     // Use default fallback
+    // Safe: levelName is constrained to specific log level strings
     // eslint-disable-next-line security/detect-object-injection
     return FALLBACK_EMOJI[levelName] || '';
   }
@@ -172,7 +183,7 @@ export class EmojiSelector {
    * @param level - Log level
    * @returns Level name as string
    */
-  private static getLevelName(level: LogLevel): string {
+  private static getLevelName(level: LogLevel): 'DEBUG' | 'INFO' | 'WARN' | 'ERROR' | 'LOG' | 'UNKNOWN' {
     switch (level) {
     case LogLevel.DEBUG: return 'DEBUG';
     case LogLevel.INFO: return 'INFO';

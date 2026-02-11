@@ -150,7 +150,7 @@ export interface EmojiMapping {
     /** The emoji code (e.g., :bug:) */
     code: string;
     /** Description of when to use this emoji */
-    description: string;
+    description?: string;
     /** Keywords that trigger this emoji selection */
     keywords: string[];
 }
@@ -164,7 +164,7 @@ export interface EmojiConfig {
     /** Custom emoji mappings to use instead of or in addition to defaults */
     customMappings?: EmojiMapping[];
     /** Custom fallback emoji for each level (DEBUG, INFO, WARN, ERROR, LOG) */
-    customFallbacks?: Record<string, string>;
+    customFallbacks?: Partial<Record<'DEBUG' | 'INFO' | 'WARN' | 'ERROR' | 'LOG', string>>;
     /** Whether to use custom mappings exclusively (ignore defaults) */
     useCustomOnly?: boolean;
 }
