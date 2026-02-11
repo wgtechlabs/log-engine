@@ -7,6 +7,7 @@ import { LogLevel, LogData, LogFormatConfig } from '../types';
 import { colors, colorScheme } from './colors';
 import { getTimestampComponents, formatTimestamp } from './timestamp';
 import { formatData, styleData } from './data-formatter';
+import { EmojiSelector } from './emoji-selector';
 
 /**
  * Core message formatter class
@@ -18,7 +19,10 @@ export class MessageFormatter {
    */
   private static readonly DEFAULT_FORMAT_CONFIG: LogFormatConfig = {
     includeIsoTimestamp: true,
-    includeLocalTime: true
+    includeLocalTime: true,
+    emoji: {
+      enabled: false
+    }
   };
 
   /**
@@ -34,8 +38,17 @@ export class MessageFormatter {
     // Merge provided format configuration with the default configuration
     const config: LogFormatConfig = {
       ...MessageFormatter.DEFAULT_FORMAT_CONFIG,
-      ...formatConfig
+      ...formatConfig,
+      emoji: {
+        ...MessageFormatter.DEFAULT_FORMAT_CONFIG.emoji,
+        ...formatConfig?.emoji
+      }
     };
+
+    // Configure emoji selector if emoji config is provided
+    if (config.emoji) {
+      EmojiSelector.configure(config.emoji);
+    }
 
     // Build timestamp string conditionally
     let timestamp = '';
@@ -58,8 +71,13 @@ export class MessageFormatter {
     const levelColor = MessageFormatter.getLevelColor(level);
     const coloredLevel = `${levelColor}[${levelName}]${colors.reset}`;
 
+    // Select emoji based on context
+    const emoji = EmojiSelector.selectEmoji(level, message, data);
+    const emojiPart = emoji ? `[${emoji}]` : '';
+
     // Format the base message (level is always included as per requirements)
-    let formattedMessage = `${timestamp}${coloredLevel}: ${message}`;
+    // Format: [TIMESTAMP][LEVEL][EMOJI]: message
+    let formattedMessage = `${timestamp}${coloredLevel}${emojiPart}: ${message}`;
 
     // Append data if provided
     if (data !== undefined) {

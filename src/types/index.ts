@@ -137,6 +137,36 @@ export interface LogFormatConfig {
     includeIsoTimestamp?: boolean;
     /** Whether to include local time (e.g., [4:57PM]) */
     includeLocalTime?: boolean;
+    /** Configuration for emoji support in log output */
+    emoji?: EmojiConfig;
+}
+
+/**
+ * Emoji mapping definition for context-aware logging
+ */
+export interface EmojiMapping {
+    /** The emoji character to display */
+    emoji: string;
+    /** The emoji code (e.g., :bug:) */
+    code: string;
+    /** Description of when to use this emoji */
+    description: string;
+    /** Keywords that trigger this emoji selection */
+    keywords: string[];
+}
+
+/**
+ * Configuration for emoji display in logs
+ */
+export interface EmojiConfig {
+    /** Whether emoji feature is enabled */
+    enabled?: boolean;
+    /** Custom emoji mappings to use instead of or in addition to defaults */
+    customMappings?: EmojiMapping[];
+    /** Custom fallback emoji for each level (DEBUG, INFO, WARN, ERROR, LOG) */
+    customFallbacks?: Record<string, string>;
+    /** Whether to use custom mappings exclusively (ignore defaults) */
+    useCustomOnly?: boolean;
 }
 
 /**

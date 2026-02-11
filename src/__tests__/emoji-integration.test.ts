@@ -1,0 +1,319 @@
+/**
+ * Integration tests for emoji feature in log formatting
+ * Verifies that emoji are correctly integrated into log output
+ */
+
+import { LogFormatter } from '../formatter';
+import { LogLevel } from '../types';
+import { EmojiSelector } from '../formatter/emoji-selector';
+
+describe('Emoji Integration with LogFormatter', () => {
+  beforeEach(() => {
+    // Reset emoji selector before each test
+    EmojiSelector.reset();
+  });
+
+  describe('Default Behavior (Emoji Disabled)', () => {
+    it('should not include emoji when disabled', () => {
+      const formatted = LogFormatter.format(LogLevel.INFO, 'Test message');
+      const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+      
+      // Should not contain emoji brackets
+      expect(cleanFormatted).not.toMatch(/\[🐛\]/);
+      expect(cleanFormatted).not.toMatch(/\[ℹ️\]/);
+      
+      // Should follow format: [ISO_TIMESTAMP][LOCAL_TIME][LEVEL]: message
+      expect(cleanFormatted).toMatch(/^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]\[\d{1,2}:\d{2}[AP]M\]\[INFO\]: Test message$/);
+    });
+  });
+
+  describe('Emoji Enabled with Context', () => {
+    it('should include context-aware emoji in formatted output', () => {
+      const formatted = LogFormatter.format(
+        LogLevel.ERROR,
+        'Database connection failed',
+        undefined,
+        { emoji: { enabled: true } }
+      );
+      const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+      
+      // Should include database emoji
+      expect(cleanFormatted).toContain('[🗃️]');
+      
+      // Should follow format: [ISO_TIMESTAMP][LOCAL_TIME][LEVEL][EMOJI]: message
+      expect(cleanFormatted).toMatch(/\[ERROR\]\[🗃️\]: Database connection failed$/);
+    });
+
+    it('should include bug emoji for bug-related messages', () => {
+      const formatted = LogFormatter.format(
+        LogLevel.ERROR,
+        'Fixed a bug in the system',
+        undefined,
+        { emoji: { enabled: true } }
+      );
+      const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+      
+      expect(cleanFormatted).toContain('[🐛]');
+      expect(cleanFormatted).toMatch(/\[ERROR\]\[🐛\]: Fixed a bug in the system$/);
+    });
+
+    it('should include deploy emoji for deployment messages', () => {
+      const formatted = LogFormatter.format(
+        LogLevel.INFO,
+        'Deployed to production',
+        undefined,
+        { emoji: { enabled: true } }
+      );
+      const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+      
+      expect(cleanFormatted).toContain('[🚀]');
+      expect(cleanFormatted).toMatch(/\[INFO\]\[🚀\]: Deployed to production$/);
+    });
+
+    it('should include performance emoji for performance messages', () => {
+      const formatted = LogFormatter.format(
+        LogLevel.WARN,
+        'Performance issues detected',
+        undefined,
+        { emoji: { enabled: true } }
+      );
+      const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+      
+      expect(cleanFormatted).toContain('[⚡️]');
+      expect(cleanFormatted).toMatch(/\[WARN\]\[⚡️\]: Performance issues detected$/);
+    });
+
+    it('should include security emoji for security messages', () => {
+      const formatted = LogFormatter.format(
+        LogLevel.ERROR,
+        'Security breach detected',
+        undefined,
+        { emoji: { enabled: true } }
+      );
+      const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+      
+      expect(cleanFormatted).toContain('[🔒️]');
+      expect(cleanFormatted).toMatch(/\[ERROR\]\[🔒️\]: Security breach detected$/);
+    });
+  });
+
+  describe('Emoji Enabled with Fallback', () => {
+    it('should use fallback emoji for DEBUG when no context match', () => {
+      const formatted = LogFormatter.format(
+        LogLevel.DEBUG,
+        'Random debug information',
+        undefined,
+        { emoji: { enabled: true } }
+      );
+      const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+      
+      expect(cleanFormatted).toContain('[🐞]');
+      expect(cleanFormatted).toMatch(/\[DEBUG\]\[🐞\]: Random debug information$/);
+    });
+
+    it('should use fallback emoji for INFO when no context match', () => {
+      const formatted = LogFormatter.format(
+        LogLevel.INFO,
+        'General information',
+        undefined,
+        { emoji: { enabled: true } }
+      );
+      const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+      
+      expect(cleanFormatted).toContain('[ℹ️]');
+      expect(cleanFormatted).toMatch(/\[INFO\]\[ℹ️\]: General information$/);
+    });
+
+    it('should use fallback emoji for WARN when no context match', () => {
+      const formatted = LogFormatter.format(
+        LogLevel.WARN,
+        'Generic warning',
+        undefined,
+        { emoji: { enabled: true } }
+      );
+      const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+      
+      expect(cleanFormatted).toContain('[⚠️]');
+      expect(cleanFormatted).toMatch(/\[WARN\]\[⚠️\]: Generic warning$/);
+    });
+
+    it('should use fallback emoji for ERROR when no context match', () => {
+      const formatted = LogFormatter.format(
+        LogLevel.ERROR,
+        'Unknown error occurred',
+        undefined,
+        { emoji: { enabled: true } }
+      );
+      const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+      
+      expect(cleanFormatted).toContain('[❌]');
+      expect(cleanFormatted).toMatch(/\[ERROR\]\[❌\]: Unknown error occurred$/);
+    });
+
+    it('should use fallback emoji for LOG when no context match', () => {
+      const formatted = LogFormatter.format(
+        LogLevel.LOG,
+        'Application started',
+        undefined,
+        { emoji: { enabled: true } }
+      );
+      const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+      
+      expect(cleanFormatted).toContain('[✅]');
+      expect(cleanFormatted).toMatch(/\[LOG\]\[✅\]: Application started$/);
+    });
+  });
+
+  describe('Emoji with Data', () => {
+    it('should include emoji when data is present', () => {
+      const formatted = LogFormatter.format(
+        LogLevel.INFO,
+        'User logged in',
+        { username: 'john', timestamp: Date.now() },
+        { emoji: { enabled: true } }
+      );
+      const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+      
+      // Should include fallback INFO emoji
+      expect(cleanFormatted).toContain('[ℹ️]');
+      
+      // Should include data
+      expect(cleanFormatted).toContain('username');
+      expect(cleanFormatted).toContain('john');
+    });
+
+    it('should analyze data for context-aware emoji selection', () => {
+      const formatted = LogFormatter.format(
+        LogLevel.INFO,
+        'Operation completed',
+        { database: 'postgres', query: 'SELECT * FROM users' },
+        { emoji: { enabled: true } }
+      );
+      const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+      
+      // Should detect database context from data
+      expect(cleanFormatted).toContain('[🗃️]');
+    });
+  });
+
+  describe('Custom Emoji Configuration', () => {
+    it('should use custom emoji mappings', () => {
+      const formatted = LogFormatter.format(
+        LogLevel.INFO,
+        'Custom target achieved',
+        undefined,
+        {
+          emoji: {
+            enabled: true,
+            customMappings: [
+              { emoji: '🎯', code: ':dart:', description: 'Target', keywords: ['target'] }
+            ]
+          }
+        }
+      );
+      const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+      
+      expect(cleanFormatted).toContain('[🎯]');
+    });
+
+    it('should use custom fallback emojis', () => {
+      const formatted = LogFormatter.format(
+        LogLevel.INFO,
+        'Unknown event',
+        undefined,
+        {
+          emoji: {
+            enabled: true,
+            customFallbacks: { INFO: '📢' }
+          }
+        }
+      );
+      const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+      
+      expect(cleanFormatted).toContain('[📢]');
+    });
+  });
+
+  describe('Emoji Position in Output Format', () => {
+    it('should place emoji between level and message', () => {
+      const formatted = LogFormatter.format(
+        LogLevel.INFO,
+        'Deploy started',
+        undefined,
+        { emoji: { enabled: true } }
+      );
+      const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+      
+      // Verify exact format: [TIMESTAMP][LEVEL][EMOJI]: message
+      const pattern = /\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]\[\d{1,2}:\d{2}[AP]M\]\[INFO\]\[🚀\]: Deploy started$/;
+      expect(cleanFormatted).toMatch(pattern);
+    });
+
+    it('should maintain correct spacing with emoji', () => {
+      const formatted = LogFormatter.format(
+        LogLevel.ERROR,
+        'Database error',
+        undefined,
+        { emoji: { enabled: true } }
+      );
+      const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+      
+      // Should have colon and space after emoji bracket
+      expect(cleanFormatted).toContain('[🗃️]: Database error');
+      expect(cleanFormatted).not.toContain('[🗃️]:Database error'); // No missing space
+    });
+  });
+
+  describe('Emoji with Timestamp Configuration', () => {
+    it('should work with ISO timestamp only', () => {
+      const formatted = LogFormatter.format(
+        LogLevel.INFO,
+        'Test message',
+        undefined,
+        {
+          includeIsoTimestamp: true,
+          includeLocalTime: false,
+          emoji: { enabled: true }
+        }
+      );
+      const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+      
+      expect(cleanFormatted).toContain('[ℹ️]');
+      expect(cleanFormatted).toMatch(/^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]\[INFO\]\[ℹ️\]: Test message$/);
+    });
+
+    it('should work with local time only', () => {
+      const formatted = LogFormatter.format(
+        LogLevel.INFO,
+        'Test message',
+        undefined,
+        {
+          includeIsoTimestamp: false,
+          includeLocalTime: true,
+          emoji: { enabled: true }
+        }
+      );
+      const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+      
+      expect(cleanFormatted).toContain('[ℹ️]');
+      expect(cleanFormatted).toMatch(/^\[\d{1,2}:\d{2}[AP]M\]\[INFO\]\[ℹ️\]: Test message$/);
+    });
+
+    it('should work with no timestamps', () => {
+      const formatted = LogFormatter.format(
+        LogLevel.INFO,
+        'Test message',
+        undefined,
+        {
+          includeIsoTimestamp: false,
+          includeLocalTime: false,
+          emoji: { enabled: true }
+        }
+      );
+      const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+      
+      expect(cleanFormatted).toContain('[ℹ️]');
+      expect(cleanFormatted).toMatch(/^\[INFO\]\[ℹ️\]: Test message$/);
+    });
+  });
+});
