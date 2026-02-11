@@ -16,10 +16,10 @@ describe('Bundle Size Checker Script', () => {
     // Ensure dist directory exists before running tests
     if (!existsSync(distPath)) {
       try {
-        execSync('pnpm build', { 
-          cwd: projectRoot, 
+        execSync('pnpm build', {
+          cwd: projectRoot,
           stdio: 'ignore',
-          timeout: 60000 
+          timeout: 60000
         });
       } catch (error) {
         console.warn('Could not build project for size check tests');
@@ -35,8 +35,8 @@ describe('Bundle Size Checker Script', () => {
     it('should be executable', () => {
       // Check if script can be executed
       expect(() => {
-        execSync(`node ${scriptPath}`, { 
-          cwd: projectRoot, 
+        execSync(`node ${scriptPath}`, {
+          cwd: projectRoot,
           encoding: 'utf-8',
           timeout: 10000
         });
@@ -44,8 +44,8 @@ describe('Bundle Size Checker Script', () => {
     });
 
     it('should output size report when run', () => {
-      const output = execSync(`node ${scriptPath}`, { 
-        cwd: projectRoot, 
+      const output = execSync(`node ${scriptPath}`, {
+        cwd: projectRoot,
         encoding: 'utf-8',
         timeout: 10000
       });
@@ -62,8 +62,8 @@ describe('Bundle Size Checker Script', () => {
       // execSync will throw if the command exits with non-zero status
       // If it doesn't throw, the test passes
       expect(() => {
-        execSync(`node ${scriptPath}`, { 
-          cwd: projectRoot, 
+        execSync(`node ${scriptPath}`, {
+          cwd: projectRoot,
           stdio: 'ignore',
           timeout: 10000
         });
@@ -71,8 +71,8 @@ describe('Bundle Size Checker Script', () => {
     });
 
     it('should report all checks pass for current bundle size', () => {
-      const output = execSync(`node ${scriptPath}`, { 
-        cwd: projectRoot, 
+      const output = execSync(`node ${scriptPath}`, {
+        cwd: projectRoot,
         encoding: 'utf-8',
         timeout: 10000
       });
@@ -83,8 +83,8 @@ describe('Bundle Size Checker Script', () => {
 
   describe('Size limits validation', () => {
     it('should validate total dist size is under 1MB', () => {
-      const output = execSync(`node ${scriptPath}`, { 
-        cwd: projectRoot, 
+      const output = execSync(`node ${scriptPath}`, {
+        cwd: projectRoot,
         encoding: 'utf-8',
         timeout: 10000
       });
@@ -94,8 +94,8 @@ describe('Bundle Size Checker Script', () => {
     });
 
     it('should validate ESM build size is under 512KB', () => {
-      const output = execSync(`node ${scriptPath}`, { 
-        cwd: projectRoot, 
+      const output = execSync(`node ${scriptPath}`, {
+        cwd: projectRoot,
         encoding: 'utf-8',
         timeout: 10000
       });
@@ -105,8 +105,8 @@ describe('Bundle Size Checker Script', () => {
     });
 
     it('should validate CJS build size is under 512KB', () => {
-      const output = execSync(`node ${scriptPath}`, { 
-        cwd: projectRoot, 
+      const output = execSync(`node ${scriptPath}`, {
+        cwd: projectRoot,
         encoding: 'utf-8',
         timeout: 10000
       });
@@ -119,8 +119,8 @@ describe('Bundle Size Checker Script', () => {
   describe('Package.json script integration', () => {
     it('should be accessible via pnpm run size:check', () => {
       expect(() => {
-        execSync('pnpm run size:check', { 
-          cwd: projectRoot, 
+        execSync('pnpm run size:check', {
+          cwd: projectRoot,
           stdio: 'ignore',
           timeout: 15000
         });
@@ -129,11 +129,11 @@ describe('Bundle Size Checker Script', () => {
 
     it('should be part of the validate script', () => {
       const packageJson = require(join(projectRoot, 'package.json'));
-      
+
       // Check if size:check script exists
       expect(packageJson.scripts['size:check']).toBeDefined();
       expect(packageJson.scripts['size:check']).toContain('check-size.js');
-      
+
       // Check if validate script includes size:check
       expect(packageJson.scripts.validate).toContain('size:check');
     });
