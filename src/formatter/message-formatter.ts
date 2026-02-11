@@ -20,9 +20,7 @@ export class MessageFormatter {
   private static readonly DEFAULT_FORMAT_CONFIG: LogFormatConfig = {
     includeIsoTimestamp: true,
     includeLocalTime: true,
-    emoji: {
-      enabled: false
-    }
+    includeEmoji: true
   };
 
   /**
@@ -38,14 +36,10 @@ export class MessageFormatter {
     // Merge provided format configuration with the default configuration
     const config: LogFormatConfig = {
       ...MessageFormatter.DEFAULT_FORMAT_CONFIG,
-      ...formatConfig,
-      emoji: {
-        ...MessageFormatter.DEFAULT_FORMAT_CONFIG.emoji,
-        ...formatConfig?.emoji
-      }
+      ...formatConfig
     };
 
-    // Configure emoji selector if emoji config is provided
+    // Configure emoji selector if emoji customization config is provided
     if (config.emoji) {
       EmojiSelector.configure(config.emoji);
     }
@@ -71,8 +65,8 @@ export class MessageFormatter {
     const levelColor = MessageFormatter.getLevelColor(level);
     const coloredLevel = `${levelColor}[${levelName}]${colors.reset}`;
 
-    // Select emoji based on context
-    const emoji = EmojiSelector.selectEmoji(level, message, data);
+    // Select emoji based on context if includeEmoji is true (default)
+    const emoji = config.includeEmoji !== false ? EmojiSelector.selectEmoji(level, message, data) : '';
     const emojiPart = emoji ? `[${emoji}]` : '';
 
     // Format the base message (level is always included as per requirements)

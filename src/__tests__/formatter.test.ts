@@ -9,8 +9,8 @@ import { styleData } from '../formatter/data-formatter';
 
 describe('LogFormatter', () => {
   it('should format messages with timestamp and level', () => {
-    // Test complete message formatting with all components
-    const formatted = LogFormatter.format(LogLevel.INFO, 'Test message');
+    // Test complete message formatting with all components (emoji disabled for this test)
+    const formatted = LogFormatter.format(LogLevel.INFO, 'Test message', undefined, { includeEmoji: false });
 
     // Remove ANSI color codes for pattern matching
     const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
@@ -21,11 +21,11 @@ describe('LogFormatter', () => {
 
   it('should format different log levels correctly', () => {
     // Test that each log level gets properly formatted with correct level name
-    const debugFormatted = LogFormatter.format(LogLevel.DEBUG, 'Debug test');
-    const infoFormatted = LogFormatter.format(LogLevel.INFO, 'Info test');
-    const warnFormatted = LogFormatter.format(LogLevel.WARN, 'Warn test');
-    const errorFormatted = LogFormatter.format(LogLevel.ERROR, 'Error test');
-    const logFormatted = LogFormatter.format(LogLevel.LOG, 'LOG test');
+    const debugFormatted = LogFormatter.format(LogLevel.DEBUG, 'Debug test', undefined, { includeEmoji: false });
+    const infoFormatted = LogFormatter.format(LogLevel.INFO, 'Info test', undefined, { includeEmoji: false });
+    const warnFormatted = LogFormatter.format(LogLevel.WARN, 'Warn test', undefined, { includeEmoji: false });
+    const errorFormatted = LogFormatter.format(LogLevel.ERROR, 'Error test', undefined, { includeEmoji: false });
+    const logFormatted = LogFormatter.format(LogLevel.LOG, 'LOG test', undefined, { includeEmoji: false });
 
     // Remove ANSI color codes and verify each level appears correctly
     expect(debugFormatted.replace(/\x1b\[[0-9;]*m/g, '')).toContain('[DEBUG]');
@@ -38,14 +38,14 @@ describe('LogFormatter', () => {
   it('should include the message in the formatted output', () => {
     // Test that custom messages are preserved in formatted output
     const message = 'Custom test message';
-    const formatted = LogFormatter.format(LogLevel.INFO, message);
+    const formatted = LogFormatter.format(LogLevel.INFO, message, undefined, { includeEmoji: false });
 
     expect(formatted).toContain(message);
   });
 
   it('should handle empty messages', () => {
     // Test edge case: empty message should still produce valid format
-    const formatted = LogFormatter.format(LogLevel.INFO, '');
+    const formatted = LogFormatter.format(LogLevel.INFO, '', undefined, { includeEmoji: false });
 
     // Remove ANSI color codes for pattern matching
     const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
@@ -57,14 +57,14 @@ describe('LogFormatter', () => {
   it('should handle special characters in messages', () => {
     // Test that special characters don't break formatting
     const message = 'Test with special chars: !@#$%^&*()';
-    const formatted = LogFormatter.format(LogLevel.INFO, message);
+    const formatted = LogFormatter.format(LogLevel.INFO, message, undefined, { includeEmoji: false });
 
     expect(formatted).toContain(message);
   });
 
   it('should format LOG level correctly with green color', () => {
     // Test LOG level formatting with specific color
-    const formatted = LogFormatter.format(LogLevel.LOG, 'LOG level message');
+    const formatted = LogFormatter.format(LogLevel.LOG, 'LOG level message', undefined, { includeEmoji: false });
     const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
     expect(cleanFormatted).toContain('[LOG]');
@@ -76,7 +76,7 @@ describe('LogFormatter', () => {
   it('should handle unknown log levels with default case', () => {
     // Test default case for unknown log levels (covers missing branch)
     // @ts-ignore - intentionally passing invalid enum value for testing
-    const formatted = LogFormatter.format(999 as LogLevel, 'Unknown level message');
+    const formatted = LogFormatter.format(999 as LogLevel, 'Unknown level message', undefined, { includeEmoji: false });
     const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
     expect(cleanFormatted).toContain('[UNKNOWN]');
@@ -128,13 +128,13 @@ describe('LogFormatter', () => {
   describe('formatData edge cases', () => {
     it('should handle null values', () => {
       // Test null handling (covers line 98)
-      const formatted = LogFormatter.format(LogLevel.INFO, 'Message', null);
+      const formatted = LogFormatter.format(LogLevel.INFO, 'Message', null, { includeEmoji: false });
       expect(formatted).toContain('null');
     });
 
     it('should handle undefined values', () => {
       // Test undefined handling (covers line 102)
-      const formatted = LogFormatter.format(LogLevel.INFO, 'Message', undefined);
+      const formatted = LogFormatter.format(LogLevel.INFO, 'Message', undefined, { includeEmoji: false });
       expect(formatted).toContain('Message');
       // The formatted message should not contain 'undefined'
       // Remove ANSI color codes before pattern matching
@@ -144,16 +144,16 @@ describe('LogFormatter', () => {
 
     it('should handle number values', () => {
       // Test number handling (covers line 106)
-      const formatted = LogFormatter.format(LogLevel.INFO, 'Message', 42);
+      const formatted = LogFormatter.format(LogLevel.INFO, 'Message', 42, { includeEmoji: false });
       expect(formatted).toContain('42');
     });
 
     it('should handle boolean values', () => {
       // Test boolean handling (covers line 110)
-      const formatted = LogFormatter.format(LogLevel.INFO, 'Message', true);
+      const formatted = LogFormatter.format(LogLevel.INFO, 'Message', true, { includeEmoji: false });
       expect(formatted).toContain('true');
 
-      const formatted2 = LogFormatter.format(LogLevel.INFO, 'Message', false);
+      const formatted2 = LogFormatter.format(LogLevel.INFO, 'Message', false, { includeEmoji: false });
       expect(formatted2).toContain('false');
     });
 
@@ -162,7 +162,7 @@ describe('LogFormatter', () => {
       const circularObj: any = {};
       circularObj.self = circularObj; // Create circular reference
 
-      const formatted = LogFormatter.format(LogLevel.INFO, 'Message', circularObj);
+      const formatted = LogFormatter.format(LogLevel.INFO, 'Message', circularObj, { includeEmoji: false });
       expect(formatted).toContain('[Object]');
     });
 

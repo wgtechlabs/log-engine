@@ -137,7 +137,9 @@ export interface LogFormatConfig {
     includeIsoTimestamp?: boolean;
     /** Whether to include local time (e.g., [4:57PM]) */
     includeLocalTime?: boolean;
-    /** Configuration for emoji support in log output */
+    /** Whether to include emoji in log output (enabled by default) */
+    includeEmoji?: boolean;
+    /** Configuration for customizing emoji mappings and fallbacks */
     emoji?: EmojiConfig;
 }
 
@@ -156,11 +158,10 @@ export interface EmojiMapping {
 }
 
 /**
- * Configuration for emoji display in logs
+ * Configuration for customizing emoji mappings and fallbacks
+ * Note: To enable/disable emoji, use LogFormatConfig.includeEmoji
  */
 export interface EmojiConfig {
-    /** Whether emoji feature is enabled */
-    enabled?: boolean;
     /** Custom emoji mappings to use instead of or in addition to defaults */
     customMappings?: EmojiMapping[];
     /** Custom fallback emoji for each level (DEBUG, INFO, WARN, ERROR, LOG) */

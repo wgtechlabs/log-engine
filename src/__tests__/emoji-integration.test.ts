@@ -13,9 +13,25 @@ describe('Emoji Integration with LogFormatter', () => {
     EmojiSelector.reset();
   });
 
-  describe('Default Behavior (Emoji Disabled)', () => {
-    it('should not include emoji when disabled', () => {
-      const formatted = LogFormatter.format(LogLevel.INFO, 'Test message');
+  describe('Default Behavior (Emoji Enabled)', () => {
+    it('should include emoji by default', () => {
+      const formatted = LogFormatter.format(LogLevel.INFO, 'General information');
+      const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
+
+      // Should contain fallback INFO emoji
+      expect(cleanFormatted).toContain('[ℹ️]');
+
+      // Should follow format: [ISO_TIMESTAMP][LOCAL_TIME][LEVEL][EMOJI]: message
+      expect(cleanFormatted).toMatch(/^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]\[\d{1,2}:\d{2}[AP]M\]\[INFO\]\[ℹ️\]: General information$/);
+    });
+
+    it('should not include emoji when explicitly disabled', () => {
+      const formatted = LogFormatter.format(
+        LogLevel.INFO,
+        'Test message',
+        undefined,
+        { includeEmoji: false }
+      );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
       // Should not contain emoji brackets
@@ -31,9 +47,7 @@ describe('Emoji Integration with LogFormatter', () => {
     it('should include context-aware emoji in formatted output', () => {
       const formatted = LogFormatter.format(
         LogLevel.ERROR,
-        'Database connection failed',
-        undefined,
-        { emoji: { enabled: true } }
+        'Database connection failed'
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
@@ -47,9 +61,7 @@ describe('Emoji Integration with LogFormatter', () => {
     it('should include bug emoji for bug-related messages', () => {
       const formatted = LogFormatter.format(
         LogLevel.ERROR,
-        'Fixed a bug in the system',
-        undefined,
-        { emoji: { enabled: true } }
+        'Fixed a bug in the system'
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
@@ -62,7 +74,7 @@ describe('Emoji Integration with LogFormatter', () => {
         LogLevel.INFO,
         'Deployed to production',
         undefined,
-        { emoji: { enabled: true } }
+        
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
@@ -75,7 +87,7 @@ describe('Emoji Integration with LogFormatter', () => {
         LogLevel.WARN,
         'Performance issues detected',
         undefined,
-        { emoji: { enabled: true } }
+        
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
@@ -88,7 +100,7 @@ describe('Emoji Integration with LogFormatter', () => {
         LogLevel.ERROR,
         'Security breach detected',
         undefined,
-        { emoji: { enabled: true } }
+        
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
@@ -103,7 +115,7 @@ describe('Emoji Integration with LogFormatter', () => {
         LogLevel.DEBUG,
         'Random debug information',
         undefined,
-        { emoji: { enabled: true } }
+        
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
@@ -116,7 +128,7 @@ describe('Emoji Integration with LogFormatter', () => {
         LogLevel.INFO,
         'General information',
         undefined,
-        { emoji: { enabled: true } }
+        
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
@@ -129,7 +141,7 @@ describe('Emoji Integration with LogFormatter', () => {
         LogLevel.WARN,
         'Generic warning',
         undefined,
-        { emoji: { enabled: true } }
+        
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
@@ -142,7 +154,7 @@ describe('Emoji Integration with LogFormatter', () => {
         LogLevel.ERROR,
         'Unknown error occurred',
         undefined,
-        { emoji: { enabled: true } }
+        
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
@@ -155,7 +167,7 @@ describe('Emoji Integration with LogFormatter', () => {
         LogLevel.LOG,
         'Application started',
         undefined,
-        { emoji: { enabled: true } }
+        
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
@@ -170,7 +182,7 @@ describe('Emoji Integration with LogFormatter', () => {
         LogLevel.INFO,
         'User logged in',
         { username: 'john', timestamp: Date.now() },
-        { emoji: { enabled: true } }
+        
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
@@ -187,7 +199,7 @@ describe('Emoji Integration with LogFormatter', () => {
         LogLevel.INFO,
         'Operation completed',
         { database: 'postgres', query: 'SELECT * FROM users' },
-        { emoji: { enabled: true } }
+        
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
@@ -204,7 +216,7 @@ describe('Emoji Integration with LogFormatter', () => {
         undefined,
         {
           emoji: {
-            enabled: true,
+            
             customMappings: [
               { emoji: '🎯', code: ':dart:', description: 'Target', keywords: ['target'] }
             ]
@@ -223,7 +235,7 @@ describe('Emoji Integration with LogFormatter', () => {
         undefined,
         {
           emoji: {
-            enabled: true,
+            
             customFallbacks: { INFO: '📢' }
           }
         }
@@ -240,7 +252,7 @@ describe('Emoji Integration with LogFormatter', () => {
         LogLevel.INFO,
         'Deploy started',
         undefined,
-        { emoji: { enabled: true } }
+        
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
@@ -254,7 +266,7 @@ describe('Emoji Integration with LogFormatter', () => {
         LogLevel.ERROR,
         'Database error',
         undefined,
-        { emoji: { enabled: true } }
+        
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
@@ -273,7 +285,7 @@ describe('Emoji Integration with LogFormatter', () => {
         {
           includeIsoTimestamp: true,
           includeLocalTime: false,
-          emoji: { enabled: true }
+          
         }
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
@@ -290,7 +302,7 @@ describe('Emoji Integration with LogFormatter', () => {
         {
           includeIsoTimestamp: false,
           includeLocalTime: true,
-          emoji: { enabled: true }
+          
         }
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
@@ -307,7 +319,7 @@ describe('Emoji Integration with LogFormatter', () => {
         {
           includeIsoTimestamp: false,
           includeLocalTime: false,
-          emoji: { enabled: true }
+          
         }
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');

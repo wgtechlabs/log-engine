@@ -14,54 +14,47 @@ describe('EmojiSelector', () => {
   });
 
   describe('Configuration', () => {
-    it('should be disabled by default', () => {
+    it('should have default configuration', () => {
       const config = EmojiSelector.getConfig();
-      expect(config.enabled).toBe(false);
+      expect(config.customMappings).toEqual([]);
+      expect(config.customFallbacks).toEqual({});
+      expect(config.useCustomOnly).toBe(false);
     });
 
     it('should configure emoji selector with custom settings', () => {
-      EmojiSelector.configure({ enabled: true });
+      const customMappings = [
+        { emoji: '🎯', code: ':dart:', description: 'Target', keywords: ['target', 'goal'] }
+      ];
+      EmojiSelector.configure({ customMappings });
       const config = EmojiSelector.getConfig();
-      expect(config.enabled).toBe(true);
+      expect(config.customMappings).toEqual(customMappings);
     });
 
     it('should support custom mappings', () => {
       const customMappings = [
         { emoji: '🎯', code: ':dart:', description: 'Target', keywords: ['target', 'goal'] }
       ];
-      EmojiSelector.configure({ enabled: true, customMappings });
+      EmojiSelector.configure({ customMappings });
       const config = EmojiSelector.getConfig();
       expect(config.customMappings).toEqual(customMappings);
     });
 
     it('should support custom fallbacks', () => {
       const customFallbacks = { DEBUG: '🔍', INFO: '📢' };
-      EmojiSelector.configure({ enabled: true, customFallbacks });
+      EmojiSelector.configure({ customFallbacks });
       const config = EmojiSelector.getConfig();
       expect(config.customFallbacks).toEqual(customFallbacks);
     });
 
     it('should reset configuration', () => {
-      EmojiSelector.configure({ enabled: true, useCustomOnly: true });
+      EmojiSelector.configure({ useCustomOnly: true });
       EmojiSelector.reset();
       const config = EmojiSelector.getConfig();
-      expect(config.enabled).toBe(false);
       expect(config.useCustomOnly).toBe(false);
     });
   });
 
-  describe('Emoji Selection - Disabled', () => {
-    it('should return empty string when disabled', () => {
-      const emoji = EmojiSelector.selectEmoji(LogLevel.INFO, 'Database error');
-      expect(emoji).toBe('');
-    });
-  });
-
   describe('Emoji Selection - Context-Aware', () => {
-    beforeEach(() => {
-      EmojiSelector.configure({ enabled: true });
-    });
-
     it('should select bug emoji for bug-related messages', () => {
       const emoji = EmojiSelector.selectEmoji(LogLevel.ERROR, 'Fixed a bug in login system');
       expect(emoji).toBe('🐛');
@@ -120,10 +113,6 @@ describe('EmojiSelector', () => {
   });
 
   describe('Emoji Selection - Fallback', () => {
-    beforeEach(() => {
-      EmojiSelector.configure({ enabled: true });
-    });
-
     it('should use fallback emoji for DEBUG level when no context match', () => {
       const emoji = EmojiSelector.selectEmoji(LogLevel.DEBUG, 'Random debug message');
       expect(emoji).toBe(FALLBACK_EMOJI.DEBUG);
@@ -160,7 +149,7 @@ describe('EmojiSelector', () => {
       const customMappings = [
         { emoji: '🎯', code: ':dart:', description: 'Custom bug', keywords: ['bug'] }
       ];
-      EmojiSelector.configure({ enabled: true, customMappings });
+      EmojiSelector.configure({ customMappings });
       const emoji = EmojiSelector.selectEmoji(LogLevel.ERROR, 'Bug found');
       expect(emoji).toBe('🎯'); // Custom mapping takes precedence
     });
@@ -169,7 +158,7 @@ describe('EmojiSelector', () => {
       const customMappings = [
         { emoji: '🎯', code: ':dart:', description: 'Target', keywords: ['target'] }
       ];
-      EmojiSelector.configure({ enabled: true, customMappings, useCustomOnly: true });
+      EmojiSelector.configure({ customMappings, useCustomOnly: true });
 
       const emoji1 = EmojiSelector.selectEmoji(LogLevel.INFO, 'Target acquired');
       const emoji2 = EmojiSelector.selectEmoji(LogLevel.ERROR, 'Bug found'); // "bug" not in custom
@@ -180,7 +169,7 @@ describe('EmojiSelector', () => {
 
     it('should use custom fallback emojis', () => {
       const customFallbacks = { INFO: '📢', ERROR: '💀' };
-      EmojiSelector.configure({ enabled: true, customFallbacks });
+      EmojiSelector.configure({ customFallbacks });
 
       const emoji1 = EmojiSelector.selectEmoji(LogLevel.INFO, 'Random event happened');
       const emoji2 = EmojiSelector.selectEmoji(LogLevel.ERROR, 'Something went wrong');
@@ -191,10 +180,6 @@ describe('EmojiSelector', () => {
   });
 
   describe('Edge Cases', () => {
-    beforeEach(() => {
-      EmojiSelector.configure({ enabled: true });
-    });
-
     it('should handle empty messages', () => {
       const emoji = EmojiSelector.selectEmoji(LogLevel.INFO, '');
       expect(emoji).toBe(FALLBACK_EMOJI.INFO);
@@ -227,10 +212,6 @@ describe('EmojiSelector', () => {
   });
 
   describe('Multiple Keyword Matches', () => {
-    beforeEach(() => {
-      EmojiSelector.configure({ enabled: true });
-    });
-
     it('should return first matching emoji when multiple keywords match', () => {
       // Message contains both "bug" and "database" keywords
       // Should return the first match found in the mappings array

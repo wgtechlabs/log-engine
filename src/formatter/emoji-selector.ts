@@ -12,7 +12,6 @@ import { EMOJI_MAPPINGS, FALLBACK_EMOJI } from './emoji-data';
  */
 export class EmojiSelector {
   private static config: EmojiConfig = {
-    enabled: false, // Disabled by default to maintain backwards compatibility
     customMappings: [],
     customFallbacks: {},
     useCustomOnly: false
@@ -48,7 +47,6 @@ export class EmojiSelector {
    */
   static reset(): void {
     EmojiSelector.config = {
-      enabled: false,
       customMappings: [],
       customFallbacks: {},
       useCustomOnly: false
@@ -60,14 +58,9 @@ export class EmojiSelector {
    * @param level - Log level
    * @param message - Log message
    * @param data - Optional log data
-   * @returns Selected emoji or empty string if disabled
+   * @returns Selected emoji or empty string
    */
   static selectEmoji(level: LogLevel, message: string, data?: LogData): string {
-    // Return empty string if emoji feature is disabled
-    if (!EmojiSelector.config.enabled) {
-      return '';
-    }
-
     // Try to find context-aware emoji
     const contextEmoji = EmojiSelector.findContextEmoji(message, data);
     if (contextEmoji) {
