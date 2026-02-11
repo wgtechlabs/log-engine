@@ -170,10 +170,10 @@ describe('EmojiSelector', () => {
         { emoji: '🎯', code: ':dart:', description: 'Target', keywords: ['target'] }
       ];
       EmojiSelector.configure({ enabled: true, customMappings, useCustomOnly: true });
-      
+
       const emoji1 = EmojiSelector.selectEmoji(LogLevel.INFO, 'Target acquired');
       const emoji2 = EmojiSelector.selectEmoji(LogLevel.ERROR, 'Bug found'); // "bug" not in custom
-      
+
       expect(emoji1).toBe('🎯');
       expect(emoji2).toBe('❌'); // Falls back to level emoji
     });
@@ -181,10 +181,10 @@ describe('EmojiSelector', () => {
     it('should use custom fallback emojis', () => {
       const customFallbacks = { INFO: '📢', ERROR: '💀' };
       EmojiSelector.configure({ enabled: true, customFallbacks });
-      
+
       const emoji1 = EmojiSelector.selectEmoji(LogLevel.INFO, 'Random event happened');
       const emoji2 = EmojiSelector.selectEmoji(LogLevel.ERROR, 'Something went wrong');
-      
+
       expect(emoji1).toBe('📢');
       expect(emoji2).toBe('💀');
     });
@@ -208,7 +208,7 @@ describe('EmojiSelector', () => {
     it('should handle circular references in data without crashing', () => {
       const circularData: any = { name: 'test' };
       circularData.self = circularData;
-      
+
       // Should not throw
       expect(() => {
         EmojiSelector.selectEmoji(LogLevel.INFO, 'Test message', circularData);
@@ -235,7 +235,7 @@ describe('EmojiSelector', () => {
       // Message contains both "bug" and "database" keywords
       // Should return the first match found in the mappings array
       const emoji = EmojiSelector.selectEmoji(LogLevel.ERROR, 'Fixed bug in database query');
-      
+
       // The emoji should be one of the valid matches (order depends on EMOJI_MAPPINGS)
       const validEmojis = ['🐛', '🗃️'];
       expect(validEmojis).toContain(emoji);
@@ -246,7 +246,7 @@ describe('EmojiSelector', () => {
     it('should have valid EMOJI_MAPPINGS structure', () => {
       expect(Array.isArray(EMOJI_MAPPINGS)).toBe(true);
       expect(EMOJI_MAPPINGS.length).toBeGreaterThan(0);
-      
+
       EMOJI_MAPPINGS.forEach(mapping => {
         expect(mapping).toHaveProperty('emoji');
         expect(mapping).toHaveProperty('code');
@@ -265,7 +265,7 @@ describe('EmojiSelector', () => {
       expect(FALLBACK_EMOJI).toHaveProperty('WARN');
       expect(FALLBACK_EMOJI).toHaveProperty('ERROR');
       expect(FALLBACK_EMOJI).toHaveProperty('LOG');
-      
+
       expect(FALLBACK_EMOJI.DEBUG).toBe('🐞');
       expect(FALLBACK_EMOJI.INFO).toBe('ℹ️');
       expect(FALLBACK_EMOJI.WARN).toBe('⚠️');

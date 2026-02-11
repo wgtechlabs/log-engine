@@ -17,11 +17,11 @@ describe('Emoji Integration with LogFormatter', () => {
     it('should not include emoji when disabled', () => {
       const formatted = LogFormatter.format(LogLevel.INFO, 'Test message');
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
-      
+
       // Should not contain emoji brackets
       expect(cleanFormatted).not.toMatch(/\[🐛\]/);
       expect(cleanFormatted).not.toMatch(/\[ℹ️\]/);
-      
+
       // Should follow format: [ISO_TIMESTAMP][LOCAL_TIME][LEVEL]: message
       expect(cleanFormatted).toMatch(/^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]\[\d{1,2}:\d{2}[AP]M\]\[INFO\]: Test message$/);
     });
@@ -36,10 +36,10 @@ describe('Emoji Integration with LogFormatter', () => {
         { emoji: { enabled: true } }
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
-      
+
       // Should include database emoji
       expect(cleanFormatted).toContain('[🗃️]');
-      
+
       // Should follow format: [ISO_TIMESTAMP][LOCAL_TIME][LEVEL][EMOJI]: message
       expect(cleanFormatted).toMatch(/\[ERROR\]\[🗃️\]: Database connection failed$/);
     });
@@ -52,7 +52,7 @@ describe('Emoji Integration with LogFormatter', () => {
         { emoji: { enabled: true } }
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
-      
+
       expect(cleanFormatted).toContain('[🐛]');
       expect(cleanFormatted).toMatch(/\[ERROR\]\[🐛\]: Fixed a bug in the system$/);
     });
@@ -65,7 +65,7 @@ describe('Emoji Integration with LogFormatter', () => {
         { emoji: { enabled: true } }
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
-      
+
       expect(cleanFormatted).toContain('[🚀]');
       expect(cleanFormatted).toMatch(/\[INFO\]\[🚀\]: Deployed to production$/);
     });
@@ -78,7 +78,7 @@ describe('Emoji Integration with LogFormatter', () => {
         { emoji: { enabled: true } }
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
-      
+
       expect(cleanFormatted).toContain('[⚡️]');
       expect(cleanFormatted).toMatch(/\[WARN\]\[⚡️\]: Performance issues detected$/);
     });
@@ -91,7 +91,7 @@ describe('Emoji Integration with LogFormatter', () => {
         { emoji: { enabled: true } }
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
-      
+
       expect(cleanFormatted).toContain('[🔒️]');
       expect(cleanFormatted).toMatch(/\[ERROR\]\[🔒️\]: Security breach detected$/);
     });
@@ -106,7 +106,7 @@ describe('Emoji Integration with LogFormatter', () => {
         { emoji: { enabled: true } }
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
-      
+
       expect(cleanFormatted).toContain('[🐞]');
       expect(cleanFormatted).toMatch(/\[DEBUG\]\[🐞\]: Random debug information$/);
     });
@@ -119,7 +119,7 @@ describe('Emoji Integration with LogFormatter', () => {
         { emoji: { enabled: true } }
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
-      
+
       expect(cleanFormatted).toContain('[ℹ️]');
       expect(cleanFormatted).toMatch(/\[INFO\]\[ℹ️\]: General information$/);
     });
@@ -132,7 +132,7 @@ describe('Emoji Integration with LogFormatter', () => {
         { emoji: { enabled: true } }
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
-      
+
       expect(cleanFormatted).toContain('[⚠️]');
       expect(cleanFormatted).toMatch(/\[WARN\]\[⚠️\]: Generic warning$/);
     });
@@ -145,7 +145,7 @@ describe('Emoji Integration with LogFormatter', () => {
         { emoji: { enabled: true } }
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
-      
+
       expect(cleanFormatted).toContain('[❌]');
       expect(cleanFormatted).toMatch(/\[ERROR\]\[❌\]: Unknown error occurred$/);
     });
@@ -158,7 +158,7 @@ describe('Emoji Integration with LogFormatter', () => {
         { emoji: { enabled: true } }
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
-      
+
       expect(cleanFormatted).toContain('[✅]');
       expect(cleanFormatted).toMatch(/\[LOG\]\[✅\]: Application started$/);
     });
@@ -173,10 +173,10 @@ describe('Emoji Integration with LogFormatter', () => {
         { emoji: { enabled: true } }
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
-      
+
       // Should include fallback INFO emoji
       expect(cleanFormatted).toContain('[ℹ️]');
-      
+
       // Should include data
       expect(cleanFormatted).toContain('username');
       expect(cleanFormatted).toContain('john');
@@ -190,7 +190,7 @@ describe('Emoji Integration with LogFormatter', () => {
         { emoji: { enabled: true } }
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
-      
+
       // Should detect database context from data
       expect(cleanFormatted).toContain('[🗃️]');
     });
@@ -212,7 +212,7 @@ describe('Emoji Integration with LogFormatter', () => {
         }
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
-      
+
       expect(cleanFormatted).toContain('[🎯]');
     });
 
@@ -229,7 +229,7 @@ describe('Emoji Integration with LogFormatter', () => {
         }
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
-      
+
       expect(cleanFormatted).toContain('[📢]');
     });
   });
@@ -243,7 +243,7 @@ describe('Emoji Integration with LogFormatter', () => {
         { emoji: { enabled: true } }
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
-      
+
       // Verify exact format: [TIMESTAMP][LEVEL][EMOJI]: message
       const pattern = /\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]\[\d{1,2}:\d{2}[AP]M\]\[INFO\]\[🚀\]: Deploy started$/;
       expect(cleanFormatted).toMatch(pattern);
@@ -257,7 +257,7 @@ describe('Emoji Integration with LogFormatter', () => {
         { emoji: { enabled: true } }
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
-      
+
       // Should have colon and space after emoji bracket
       expect(cleanFormatted).toContain('[🗃️]: Database error');
       expect(cleanFormatted).not.toContain('[🗃️]:Database error'); // No missing space
@@ -277,7 +277,7 @@ describe('Emoji Integration with LogFormatter', () => {
         }
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
-      
+
       expect(cleanFormatted).toContain('[ℹ️]');
       expect(cleanFormatted).toMatch(/^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]\[INFO\]\[ℹ️\]: Test message$/);
     });
@@ -294,7 +294,7 @@ describe('Emoji Integration with LogFormatter', () => {
         }
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
-      
+
       expect(cleanFormatted).toContain('[ℹ️]');
       expect(cleanFormatted).toMatch(/^\[\d{1,2}:\d{2}[AP]M\]\[INFO\]\[ℹ️\]: Test message$/);
     });
@@ -311,7 +311,7 @@ describe('Emoji Integration with LogFormatter', () => {
         }
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
-      
+
       expect(cleanFormatted).toContain('[ℹ️]');
       expect(cleanFormatted).toMatch(/^\[INFO\]\[ℹ️\]: Test message$/);
     });
