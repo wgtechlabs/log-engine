@@ -59,18 +59,15 @@ describe('Bundle Size Checker Script', () => {
     });
 
     it('should exit with code 0 when all checks pass', () => {
-      try {
+      // execSync will throw if the command exits with non-zero status
+      // If it doesn't throw, the test passes
+      expect(() => {
         execSync(`node ${scriptPath}`, { 
           cwd: projectRoot, 
           stdio: 'ignore',
           timeout: 10000
         });
-      } catch (error) {
-        // If it throws, check if it's because size exceeded
-        // For now, we expect it to pass
-        const err = error as { status?: number };
-        expect(err.status).toBe(0);
-      }
+      }).not.toThrow();
     });
 
     it('should report all checks pass for current bundle size', () => {
