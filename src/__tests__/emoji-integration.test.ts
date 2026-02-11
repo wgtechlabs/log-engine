@@ -74,7 +74,7 @@ describe('Emoji Integration with LogFormatter', () => {
         LogLevel.INFO,
         'Deployed to production',
         undefined,
-        
+
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
@@ -87,7 +87,7 @@ describe('Emoji Integration with LogFormatter', () => {
         LogLevel.WARN,
         'Performance issues detected',
         undefined,
-        
+
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
@@ -100,7 +100,7 @@ describe('Emoji Integration with LogFormatter', () => {
         LogLevel.ERROR,
         'Security breach detected',
         undefined,
-        
+
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
@@ -115,7 +115,7 @@ describe('Emoji Integration with LogFormatter', () => {
         LogLevel.DEBUG,
         'Random debug information',
         undefined,
-        
+
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
@@ -128,7 +128,7 @@ describe('Emoji Integration with LogFormatter', () => {
         LogLevel.INFO,
         'General information',
         undefined,
-        
+
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
@@ -141,7 +141,7 @@ describe('Emoji Integration with LogFormatter', () => {
         LogLevel.WARN,
         'Generic warning',
         undefined,
-        
+
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
@@ -154,7 +154,7 @@ describe('Emoji Integration with LogFormatter', () => {
         LogLevel.ERROR,
         'Unknown error occurred',
         undefined,
-        
+
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
@@ -167,7 +167,7 @@ describe('Emoji Integration with LogFormatter', () => {
         LogLevel.LOG,
         'Application started',
         undefined,
-        
+
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
@@ -182,7 +182,7 @@ describe('Emoji Integration with LogFormatter', () => {
         LogLevel.INFO,
         'User logged in',
         { username: 'john', timestamp: Date.now() },
-        
+
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
@@ -199,7 +199,7 @@ describe('Emoji Integration with LogFormatter', () => {
         LogLevel.INFO,
         'Operation completed',
         { database: 'postgres', query: 'SELECT * FROM users' },
-        
+
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
@@ -216,7 +216,7 @@ describe('Emoji Integration with LogFormatter', () => {
         undefined,
         {
           emoji: {
-            
+
             customMappings: [
               { emoji: '🎯', code: ':dart:', description: 'Target', keywords: ['target'] }
             ]
@@ -235,7 +235,7 @@ describe('Emoji Integration with LogFormatter', () => {
         undefined,
         {
           emoji: {
-            
+
             customFallbacks: { INFO: '📢' }
           }
         }
@@ -252,7 +252,7 @@ describe('Emoji Integration with LogFormatter', () => {
         LogLevel.INFO,
         'Deploy started',
         undefined,
-        
+
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
@@ -266,7 +266,7 @@ describe('Emoji Integration with LogFormatter', () => {
         LogLevel.ERROR,
         'Database error',
         undefined,
-        
+
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
@@ -285,7 +285,7 @@ describe('Emoji Integration with LogFormatter', () => {
         {
           includeIsoTimestamp: true,
           includeLocalTime: false,
-          
+
         }
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
@@ -302,7 +302,7 @@ describe('Emoji Integration with LogFormatter', () => {
         {
           includeIsoTimestamp: false,
           includeLocalTime: true,
-          
+
         }
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
@@ -319,7 +319,7 @@ describe('Emoji Integration with LogFormatter', () => {
         {
           includeIsoTimestamp: false,
           includeLocalTime: false,
-          
+
         }
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
