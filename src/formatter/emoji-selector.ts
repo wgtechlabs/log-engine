@@ -197,7 +197,6 @@ export class EmojiSelector {
       const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       // Use word boundary matching for more accurate results
       // Safe: escapedKeyword is sanitized by regex escape above
-      // eslint-disable-next-line security/detect-non-literal-regexp
       const regex = new RegExp(`\\b${escapedKeyword}\\b`, 'i');
       return regex.test(searchText);
     });
@@ -210,7 +209,7 @@ export class EmojiSelector {
    */
   private static getFallbackEmoji(level: LogLevel): string {
     const levelName = EmojiSelector.getLevelName(level);
-    
+
     // Explicitly handle unknown levels: no emoji by default
     if (levelName === 'UNKNOWN') {
       return '';
@@ -220,15 +219,12 @@ export class EmojiSelector {
 
     // Check custom fallbacks first
     // Safe: levelName is constrained to specific log level strings
-    // eslint-disable-next-line security/detect-object-injection
     if (levelName in customFallbacks && customFallbacks[levelName]) {
-      // eslint-disable-next-line security/detect-object-injection
       return customFallbacks[levelName] || '';
     }
 
     // Use default fallback
     // Safe: levelName is constrained to specific log level strings
-    // eslint-disable-next-line security/detect-object-injection
     return FALLBACK_EMOJI[levelName] || '';
   }
 
