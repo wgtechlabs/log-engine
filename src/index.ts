@@ -223,9 +223,13 @@ export type {
   FileOutputConfig,
   HttpOutputConfig,
   AdvancedOutputConfig,
-  EnhancedOutputTarget
+  EnhancedOutputTarget,
+  // Emoji types
+  EmojiConfig,
+  EmojiMapping
 } from './types';
 export { DataRedactor, defaultRedactionConfig, RedactionController } from './redaction';
+export { EmojiSelector, EMOJI_MAPPINGS, FALLBACK_EMOJI } from './formatter';
 
 // Default export for convenience
 export default LogEngine;
