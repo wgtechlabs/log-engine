@@ -4,7 +4,7 @@
  */
 
 import { execSync, execFileSync } from 'child_process';
-import { existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 
 describe('Bundle Size Checker Script', () => {
@@ -131,7 +131,8 @@ describe('Bundle Size Checker Script', () => {
     });
 
     it('should be part of the validate script', () => {
-      const packageJson = require(join(projectRoot, 'package.json'));
+      const packageJsonPath = join(projectRoot, 'package.json');
+      const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
 
       // Check if size:check script exists
       expect(packageJson.scripts['size:check']).toBeDefined();
