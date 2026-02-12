@@ -144,11 +144,12 @@ export class EmojiSelector {
   private static prepareSearchText(message: string, data?: LogData): string {
     let text = message.toLowerCase();
 
-    // If data is provided and is an object, include its keys and string values
+    // If data is provided and is an object, include only keys for analysis
+    // Avoid expensive JSON.stringify on full object to optimize performance
     if (data && typeof data === 'object') {
       try {
-        const dataStr = JSON.stringify(data).toLowerCase();
-        text += ' ' + dataStr;
+        const keys = Object.keys(data).join(' ').toLowerCase();
+        text += ' ' + keys;
       } catch {
         // Ignore circular references or stringify errors
       }
@@ -184,16 +185,40 @@ export class EmojiSelector {
 
     const { customFallbacks = {} } = EmojiSelector.config;
 
-    // Check custom fallbacks first
-    // eslint-disable-next-line security/detect-object-injection -- Safe: levelName is type-constrained to log level strings
-    if (levelName in customFallbacks && customFallbacks[levelName]) {
-      // eslint-disable-next-line security/detect-object-injection -- Safe: levelName is type-constrained to log level strings
-      return customFallbacks[levelName] || '';
+    // Check custom fallbacks first using safe property access
+    if (Object.prototype.hasOwnProperty.call(customFallbacks, levelName)) {
+      switch (levelName) {
+      case 'DEBUG':
+        return customFallbacks.DEBUG || '';
+      case 'INFO':
+        return customFallbacks.INFO || '';
+      case 'WARN':
+        return customFallbacks.WARN || '';
+      case 'ERROR':
+        return customFallbacks.ERROR || '';
+      case 'LOG':
+        return customFallbacks.LOG || '';
+      default:
+        // levelName is type-constrained, but default defensively returns empty
+        return '';
+      }
     }
 
-    // Use default fallback
-    // eslint-disable-next-line security/detect-object-injection -- Safe: levelName is type-constrained to log level strings
-    return FALLBACK_EMOJI[levelName] || '';
+    // Use default fallback with explicit switch
+    switch (levelName) {
+    case 'DEBUG':
+      return FALLBACK_EMOJI.DEBUG;
+    case 'INFO':
+      return FALLBACK_EMOJI.INFO;
+    case 'WARN':
+      return FALLBACK_EMOJI.WARN;
+    case 'ERROR':
+      return FALLBACK_EMOJI.ERROR;
+    case 'LOG':
+      return FALLBACK_EMOJI.LOG;
+    default:
+      return '';
+    }
   }
 
   /**

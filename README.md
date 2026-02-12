@@ -16,7 +16,7 @@ Log Engine transforms your development experience from chaotic debugging session
 
 ## ✨ Key Features
 
-- **🎨 Context-Aware Emoji (New!)**: Intelligent emoji support that enhances log readability by analyzing content and automatically selecting relevant visual indicators - based on the gitmoji set with 40+ curated mappings and fully customizable.
+- **🎨 Context-Aware Emoji (New!)**: Intelligent emoji support that enhances log readability by analyzing content and automatically selecting relevant visual indicators - based on the gitmoji set with 37 curated mappings and fully customizable.
 - **🔒 Advanced Data Redaction (Enhanced!)**: Built-in PII protection with **custom regex patterns**, **dynamic field management**, and **environment-based configuration** - the first logging library with comprehensive security-first logging by default.
 - **🎯 Configurable Output Handlers (New!)**: Revolutionary output routing system supporting **custom destinations**, **multiple simultaneous outputs**, and **production-ready handlers** - redirect logs to files, HTTP endpoints, GUI applications, testing frameworks, or any custom destination with zero configuration complexity.
 - **⚡ Custom Redaction Patterns**: Add your own regex patterns for advanced field detection and enterprise-specific data protection requirements.

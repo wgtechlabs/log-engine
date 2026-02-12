@@ -220,13 +220,12 @@ describe('EmojiSelector', () => {
 
   describe('Multiple Keyword Matches', () => {
     it('should return first matching emoji when multiple keywords match', () => {
-      // Message contains both "bug" and "database" keywords
-      // Should return the first match found in the mappings array
+      // Message contains both "database" and "bug" keywords
+      // Should return the first match found in EMOJI_MAPPINGS array
+      // Database (🗃️) appears before bug (🐛) in the mappings
       const emoji = EmojiSelector.selectEmoji(LogLevel.ERROR, 'Fixed bug in database query');
 
-      // The emoji should be one of the valid matches (order depends on EMOJI_MAPPINGS)
-      const validEmojis = ['🐛', '🗃️'];
-      expect(validEmojis).toContain(emoji);
+      expect(emoji).toBe('🗃️');
     });
   });
 
