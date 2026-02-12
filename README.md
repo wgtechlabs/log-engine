@@ -592,12 +592,12 @@ EmojiSelector.configure({
 
 With emoji (enabled by default), the log format is:
 
-```
+```text
 [ISO_TIMESTAMP][LOCAL_TIME][LEVEL][EMOJI]: message [data]
 ```
 
 Example:
-```
+```text
 [2026-02-11T14:00:00.000Z][2:00PM][ERROR][🗃️]: Database connection failed
 ```
 
