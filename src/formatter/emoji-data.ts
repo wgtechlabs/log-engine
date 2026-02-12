@@ -103,7 +103,7 @@ export const EMOJI_MAPPINGS: EmojiMapping[] = [
  * Default fallback emoji for each log level
  * These are used when no context-specific emoji matches
  */
-export const FALLBACK_EMOJI: Record<string, string> = {
+export const FALLBACK_EMOJI: Record<'DEBUG' | 'INFO' | 'WARN' | 'ERROR' | 'LOG', string> = {
   DEBUG: '🐞',
   INFO: 'ℹ️',
   WARN: '⚠️',

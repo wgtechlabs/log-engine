@@ -210,39 +210,45 @@ describe('Emoji Integration with LogFormatter', () => {
 
   describe('Custom Emoji Configuration', () => {
     it('should use custom emoji mappings', () => {
+      // Configure EmojiSelector with custom mappings
+      EmojiSelector.configure({
+        customMappings: [
+          { emoji: '🎯', code: ':dart:', description: 'Target', keywords: ['target'] }
+        ]
+      });
+
       const formatted = LogFormatter.format(
         LogLevel.INFO,
         'Custom target achieved',
         undefined,
-        {
-          emoji: {
-
-            customMappings: [
-              { emoji: '🎯', code: ':dart:', description: 'Target', keywords: ['target'] }
-            ]
-          }
-        }
+        { includeEmoji: true }
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
       expect(cleanFormatted).toContain('[🎯]');
+
+      // Reset after test
+      EmojiSelector.reset();
     });
 
     it('should use custom fallback emojis', () => {
+      // Configure EmojiSelector with custom fallbacks
+      EmojiSelector.configure({
+        customFallbacks: { INFO: '📢' }
+      });
+
       const formatted = LogFormatter.format(
         LogLevel.INFO,
         'Unknown event',
         undefined,
-        {
-          emoji: {
-
-            customFallbacks: { INFO: '📢' }
-          }
-        }
+        { includeEmoji: true }
       );
       const cleanFormatted = formatted.replace(/\x1b\[[0-9;]*m/g, '');
 
       expect(cleanFormatted).toContain('[📢]');
+
+      // Reset after test
+      EmojiSelector.reset();
     });
   });
 

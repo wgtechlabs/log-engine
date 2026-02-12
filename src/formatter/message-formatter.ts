@@ -39,15 +39,9 @@ export class MessageFormatter {
       ...formatConfig
     };
 
-    // Configure emoji selector deterministically based on current config
-    // When no custom emoji configuration is provided, reset to defaults
-    // so that previous global emoji state does not leak into this call
-    if (config.emoji) {
-      EmojiSelector.configure(config.emoji);
-    } else {
-      // Reset to defaults when no emoji config is provided
-      EmojiSelector.reset();
-    }
+    // Note: EmojiSelector configuration is handled at the Logger.configure() level
+    // to avoid invalidating the compiled regex cache on every log call.
+    // This preserves the performance optimization of regex precompilation.
 
     // Build timestamp string conditionally
     let timestamp = '';

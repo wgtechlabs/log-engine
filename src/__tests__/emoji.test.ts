@@ -30,15 +30,6 @@ describe('EmojiSelector', () => {
       expect(config.customMappings).toEqual(customMappings);
     });
 
-    it('should support custom mappings', () => {
-      const customMappings = [
-        { emoji: '🎯', code: ':dart:', description: 'Target', keywords: ['target', 'goal'] }
-      ];
-      EmojiSelector.configure({ customMappings });
-      const config = EmojiSelector.getConfig();
-      expect(config.customMappings).toEqual(customMappings);
-    });
-
     it('should support custom fallbacks', () => {
       const customFallbacks = { DEBUG: '🔍', INFO: '📢' };
       EmojiSelector.configure({ customFallbacks });
