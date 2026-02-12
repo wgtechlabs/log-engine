@@ -89,6 +89,7 @@ export class EmojiSelector {
         // Escape regex metacharacters to prevent ReDoS and invalid patterns
         const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         // Precompile regex for performance
+        // eslint-disable-next-line security/detect-non-literal-regexp -- Safe: keyword is escaped above to prevent ReDoS
         return new RegExp(`\\b${escapedKeyword}\\b`, 'i');
       })
     }));
@@ -196,7 +197,7 @@ export class EmojiSelector {
       // Escape regex metacharacters to prevent ReDoS and invalid patterns
       const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       // Use word boundary matching for more accurate results
-      // Safe: escapedKeyword is sanitized by regex escape above
+      // eslint-disable-next-line security/detect-non-literal-regexp -- Safe: keyword is escaped above to prevent ReDoS
       const regex = new RegExp(`\\b${escapedKeyword}\\b`, 'i');
       return regex.test(searchText);
     });
@@ -218,13 +219,14 @@ export class EmojiSelector {
     const { customFallbacks = {} } = EmojiSelector.config;
 
     // Check custom fallbacks first
-    // Safe: levelName is constrained to specific log level strings
+    // eslint-disable-next-line security/detect-object-injection -- Safe: levelName is type-constrained to log level strings
     if (levelName in customFallbacks && customFallbacks[levelName]) {
+      // eslint-disable-next-line security/detect-object-injection -- Safe: levelName is type-constrained to log level strings
       return customFallbacks[levelName] || '';
     }
 
     // Use default fallback
-    // Safe: levelName is constrained to specific log level strings
+    // eslint-disable-next-line security/detect-object-injection -- Safe: levelName is type-constrained to log level strings
     return FALLBACK_EMOJI[levelName] || '';
   }
 
