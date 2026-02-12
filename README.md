@@ -29,6 +29,7 @@ Log Engine transforms your development experience from chaotic debugging session
 - **⚙️ Auto-Configuration**: Intelligent environment-based setup using NODE_ENV variables. No config files, initialization scripts, or manual setup - Log Engine works perfectly out of the box.
 - **✨ Enhanced Formatting**: Structured log entries with dual timestamps (ISO + human-readable) and colored level indicators for maximum readability.
 - **🔗 Zero Dependencies**: No external dependencies for maximum compatibility and security - keeps your bundle clean and your project simple.
+- **📏 Size Monitoring**: Automated bundle size checking ensures the package stays under 1MB to maintain its lightweight promise.
 - **🔌 Easy Integration**: Simple API that works seamlessly with existing Node.js applications. Just `import` and start logging - no middleware, plugins, or configuration required.
 
 ## ⚠️ Breaking Changes Notice
@@ -901,7 +902,8 @@ Contributions are welcome, create a pull request to this repo and I will review 
 - `pnpm lint:security` - Run security-focused linting
 - `pnpm secure` - Run comprehensive security checks
 - `pnpm build` - Build the TypeScript project
-- `pnpm validate` - Run full validation (lint + test + build)
+- `pnpm size:check` - Check bundle size to maintain lightweight feature
+- `pnpm validate` - Run full validation (lint + test + build + size check)
 
 Read the project's [contributing guide](./CONTRIBUTING.md) for detailed development setup, testing guidelines, and contribution requirements.
 

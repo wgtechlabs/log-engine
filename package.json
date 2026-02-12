@@ -103,7 +103,8 @@
     "secure:test": "snyk test --org=wgtechlabs",
     "secure:code": "snyk code test --org=wgtechlabs",
     "secure": "run-s lint:security secure:test secure:code",
-    "validate": "run-s lint test build",
+    "size:check": "node scripts/check-size.js",
+    "validate": "run-s lint test build size:check",
     "clean": "rm -rf dist coverage",
     "coverage:open": "open coverage/lcov-report/index.html",
     "coverage:upload": "npx codecov"

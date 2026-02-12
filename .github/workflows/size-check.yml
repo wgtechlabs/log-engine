@@ -1,0 +1,62 @@
+name: Bundle Size Check
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  size-check:
+    name: Check Bundle Size
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Enable Corepack for pnpm
+        run: |
+          echo "Enabling Corepack..."
+          corepack enable
+          echo "Preparing pnpm 9.15.4..."
+          corepack prepare pnpm@9.15.4 --activate
+          echo "pnpm setup complete"
+          
+      - name: Verify pnpm version
+        run: |
+          echo "pnpm version:"
+          pnpm --version
+          
+      - name: Install dependencies
+        run: |
+          echo "Installing dependencies with pnpm..."
+          pnpm install --frozen-lockfile
+          echo "Dependencies installed successfully"
+        
+      - name: Build package
+        run: |
+          echo "Building package..."
+          pnpm build
+          echo "Build completed successfully"
+          
+      - name: Check bundle size
+        run: |
+          echo "Running bundle size checker..."
+          pnpm run size:check
+          echo "Size check completed"
+          
+      - name: Display dist contents
+        run: |
+          echo "Dist directory structure:"
+          find dist -type f -exec ls -lh {} \; | awk '{print $5, $9}'
+          echo ""
+          echo "Total dist size:"
+          du -sh dist
