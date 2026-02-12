@@ -3,7 +3,7 @@
  * Verifies that the size checker correctly validates bundle sizes
  */
 
-import { execSync } from 'child_process';
+import { execSync, execFileSync } from 'child_process';
 import { existsSync } from 'fs';
 import { join } from 'path';
 
@@ -26,12 +26,12 @@ describe('Bundle Size Checker Script', () => {
         const execError = error as { stdout?: Buffer | string; stderr?: Buffer | string; message?: string };
         const stdout = execError.stdout !== undefined ? execError.stdout.toString() : '';
         const stderr = execError.stderr !== undefined ? execError.stderr.toString() : '';
-        console.error('Failed to build project for size check tests.');
+        process.stderr.write('Failed to build project for size check tests.\n');
         if (stdout) {
-          console.error('Build stdout:\n', stdout);
+          process.stderr.write(`Build stdout:\n${stdout}\n`);
         }
         if (stderr) {
-          console.error('Build stderr:\n', stderr);
+          process.stderr.write(`Build stderr:\n${stderr}\n`);
         }
         throw error;
       }
@@ -46,7 +46,7 @@ describe('Bundle Size Checker Script', () => {
     it('should be executable', () => {
       // Check if script can be executed
       expect(() => {
-        execSync(`node ${scriptPath}`, {
+        execFileSync('node', [scriptPath], {
           cwd: projectRoot,
           encoding: 'utf8',
           timeout: 10000
@@ -55,7 +55,7 @@ describe('Bundle Size Checker Script', () => {
     });
 
     it('should output size report when run', () => {
-      const output = execSync(`node ${scriptPath}`, {
+      const output = execFileSync('node', [scriptPath], {
         cwd: projectRoot,
         encoding: 'utf8',
         timeout: 10000
@@ -70,10 +70,10 @@ describe('Bundle Size Checker Script', () => {
     });
 
     it('should exit with code 0 when all checks pass', () => {
-      // execSync will throw if the command exits with non-zero status
+      // execFileSync will throw if the command exits with non-zero status
       // If it doesn't throw, the test passes
       expect(() => {
-        execSync(`node ${scriptPath}`, {
+        execFileSync('node', [scriptPath], {
           cwd: projectRoot,
           stdio: 'ignore',
           timeout: 10000
@@ -82,7 +82,7 @@ describe('Bundle Size Checker Script', () => {
     });
 
     it('should report all checks pass for current bundle size', () => {
-      const output = execSync(`node ${scriptPath}`, {
+      const output = execFileSync('node', [scriptPath], {
         cwd: projectRoot,
         encoding: 'utf8',
         timeout: 10000
@@ -96,7 +96,7 @@ describe('Bundle Size Checker Script', () => {
     let scriptOutput: string;
 
     beforeAll(() => {
-      scriptOutput = execSync(`node ${scriptPath}`, {
+      scriptOutput = execFileSync('node', [scriptPath], {
         cwd: projectRoot,
         encoding: 'utf8',
         timeout: 10000
