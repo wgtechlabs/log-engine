@@ -1,6 +1,6 @@
 {
   "name": "@wgtechlabs/log-engine",
-  "version": "2.2.2",
+  "version": "2.3.0",
   "description": "A lightweight, security-first logging utility with automatic data redaction for Node.js applications - the first logging library with built-in PII protection.",
   "type": "module",
   "keywords": [
