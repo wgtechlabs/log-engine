@@ -4,8 +4,9 @@
  */
 
 import { LogFormatter } from '../formatter';
-import { LogLevel } from '../types';
+import { LogLevel, LogMode } from '../types';
 import { EmojiSelector } from '../formatter/emoji-selector';
+import { Logger } from '../logger/core';
 
 describe('Emoji Integration with LogFormatter', () => {
   beforeEach(() => {
@@ -332,6 +333,76 @@ describe('Emoji Integration with LogFormatter', () => {
 
       expect(cleanFormatted).toContain('[ℹ️]');
       expect(cleanFormatted).toMatch(/^\[INFO\]\[ℹ️\]: Test message$/);
+    });
+  });
+
+  describe('Logger.configure Emoji Configuration', () => {
+    let logger: Logger;
+    let consoleOutput: string[];
+
+    beforeEach(() => {
+      logger = new Logger();
+      consoleOutput = [];
+      jest.spyOn(console, 'log').mockImplementation((...args: any[]) => {
+        consoleOutput.push(args.map(String).join(' '));
+      });
+      jest.spyOn(console, 'error').mockImplementation((...args: any[]) => {
+        consoleOutput.push(args.map(String).join(' '));
+      });
+      jest.spyOn(console, 'warn').mockImplementation((...args: any[]) => {
+        consoleOutput.push(args.map(String).join(' '));
+      });
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+      EmojiSelector.reset();
+    });
+
+    it('should configure emoji selector when format.emoji is provided', () => {
+      logger.configure({
+        mode: LogMode.DEBUG,
+        format: {
+          emoji: {
+            customMappings: [
+              { emoji: '💰', code: ':moneybag:', description: 'Payment', keywords: ['payment'] }
+            ]
+          }
+        }
+      });
+
+      logger.info('Payment processed');
+      expect(consoleOutput).toHaveLength(1);
+
+      const clean = consoleOutput[0].replace(/\x1b\[[0-9;]*m/g, '');
+      expect(clean).toContain('[💰]');
+    });
+
+    it('should reset emoji selector when no format.emoji config is provided', () => {
+      // First configure with custom emoji
+      logger.configure({
+        mode: LogMode.DEBUG,
+        format: {
+          emoji: {
+            customFallbacks: { INFO: '📢' }
+          }
+        }
+      });
+
+      // Then reconfigure with format but without emoji config - should reset to defaults
+      logger.configure({
+        mode: LogMode.DEBUG,
+        format: {
+          includeEmoji: true
+        }
+      });
+
+      logger.info('Generic message');
+      expect(consoleOutput).toHaveLength(1);
+
+      const clean = consoleOutput[0].replace(/\x1b\[[0-9;]*m/g, '');
+      // Should use default fallback, not custom
+      expect(clean).toContain('[ℹ️]');
     });
   });
 });

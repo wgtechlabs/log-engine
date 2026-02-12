@@ -200,6 +200,22 @@ describe('EmojiSelector', () => {
       const emoji = EmojiSelector.selectEmoji(LogLevel.INFO, 'Test message', undefined);
       expect(emoji).toBe(FALLBACK_EMOJI.INFO);
     });
+
+    it('should return empty string for unknown log levels', () => {
+      // @ts-ignore - intentionally passing invalid enum value for testing
+      const emoji = EmojiSelector.selectEmoji(999 as LogLevel, 'Random message');
+      expect(emoji).toBe('');
+    });
+
+    it('should handle numeric data gracefully', () => {
+      const emoji = EmojiSelector.selectEmoji(LogLevel.INFO, 'Test message', 42 as any);
+      expect(emoji).toBe(FALLBACK_EMOJI.INFO);
+    });
+
+    it('should handle boolean data gracefully', () => {
+      const emoji = EmojiSelector.selectEmoji(LogLevel.INFO, 'Test message', true as any);
+      expect(emoji).toBe(FALLBACK_EMOJI.INFO);
+    });
   });
 
   describe('Multiple Keyword Matches', () => {
