@@ -68,8 +68,16 @@ async function getDirectorySize(dirPath) {
       }
     }
   } catch (error) {
-    // Directory might not exist, return 0
-    return 0;
+    // Only treat missing directories as empty; surface other errors
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
+      return 0;
+    }
+
+    console.error(
+      `Failed to calculate directory size for "${dirPath}":`,
+      error
+    );
+    throw error;
   }
 
   return totalSize;
@@ -133,6 +141,17 @@ async function main() {
 
   const esmPath = join(distPath, 'esm');
   const cjsPath = join(distPath, 'cjs');
+
+  // Check if expected build outputs exist
+  if (!existsSync(esmPath)) {
+    console.error('❌ Error: dist/esm directory not found. Build may be incomplete.\n');
+    process.exit(1);
+  }
+
+  if (!existsSync(cjsPath)) {
+    console.error('❌ Error: dist/cjs directory not found. Build may be incomplete.\n');
+    process.exit(1);
+  }
 
   // Get directory sizes
   const totalSize = await getDirectorySize(distPath);

@@ -126,7 +126,7 @@ pnpm test:debug
 
 **For Production Release:**
 
-1. Run full validation: `pnpm validate` (lint + test + build)
+1. Run full validation: `pnpm validate` (lint + test + build + size check)
 2. Ensure coverage requirements are met with `pnpm test:coverage`
 3. Run security checks: `pnpm secure` (if Snyk is configured)
 4. Create PR to `main` for review

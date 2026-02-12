@@ -18,11 +18,22 @@ describe('Bundle Size Checker Script', () => {
       try {
         execSync('pnpm build', {
           cwd: projectRoot,
-          stdio: 'ignore',
+          encoding: 'utf8',
+          stdio: 'pipe',
           timeout: 60000
         });
-      } catch (error) {
-        console.warn('Could not build project for size check tests');
+      } catch (error: unknown) {
+        const execError = error as { stdout?: Buffer | string; stderr?: Buffer | string; message?: string };
+        const stdout = execError.stdout !== undefined ? execError.stdout.toString() : '';
+        const stderr = execError.stderr !== undefined ? execError.stderr.toString() : '';
+        console.error('Failed to build project for size check tests.');
+        if (stdout) {
+          console.error('Build stdout:\n', stdout);
+        }
+        if (stderr) {
+          console.error('Build stderr:\n', stderr);
+        }
+        throw error;
       }
     }
   });
@@ -37,7 +48,7 @@ describe('Bundle Size Checker Script', () => {
       expect(() => {
         execSync(`node ${scriptPath}`, {
           cwd: projectRoot,
-          encoding: 'utf-8',
+          encoding: 'utf8',
           timeout: 10000
         });
       }).not.toThrow();
@@ -46,7 +57,7 @@ describe('Bundle Size Checker Script', () => {
     it('should output size report when run', () => {
       const output = execSync(`node ${scriptPath}`, {
         cwd: projectRoot,
-        encoding: 'utf-8',
+        encoding: 'utf8',
         timeout: 10000
       });
 
@@ -73,7 +84,7 @@ describe('Bundle Size Checker Script', () => {
     it('should report all checks pass for current bundle size', () => {
       const output = execSync(`node ${scriptPath}`, {
         cwd: projectRoot,
-        encoding: 'utf-8',
+        encoding: 'utf8',
         timeout: 10000
       });
 
@@ -87,9 +98,9 @@ describe('Bundle Size Checker Script', () => {
     beforeAll(() => {
       scriptOutput = execSync(`node ${scriptPath}`, {
         cwd: projectRoot,
-        encoding: 'utf-8',
+        encoding: 'utf8',
         timeout: 10000
-      }) as unknown as string;
+      });
     });
 
     it('should validate total dist size is under 1MB', () => {
