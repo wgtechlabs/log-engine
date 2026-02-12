@@ -7,7 +7,7 @@
  */
 
 import { LogLevel, LogMode, LoggerConfig, LogOutputHandler, OutputTarget, EnhancedOutputTarget, LogData } from '../types';
-import { LogFormatter } from '../formatter';
+import { LogFormatter, EmojiSelector } from '../formatter';
 import { DataRedactor, RedactionController, defaultRedactionConfig } from '../redaction';
 import { LoggerConfigManager } from './config';
 import { LogFilter } from './filtering';
@@ -199,6 +199,16 @@ export class Logger {
       ...defaultRedactionConfig,
       ...RedactionController.getEnvironmentConfig()
     });
+
+    // Configure emoji selector once when logger config changes
+    // This allows the compiled regex cache to persist across log calls
+    const currentConfig = this.configManager.getConfig();
+    if (currentConfig.format?.emoji) {
+      EmojiSelector.configure(currentConfig.format.emoji);
+    } else {
+      // Reset to defaults when no emoji config is provided
+      EmojiSelector.reset();
+    }
   }
 
   /**

@@ -21,7 +21,7 @@ describe('Log Format Customization', () => {
 
   describe('MessageFormatter.format with format configuration', () => {
     it('should include both timestamps by default (backward compatibility)', () => {
-      const formatted = MessageFormatter.format(LogLevel.INFO, 'Test message');
+      const formatted = MessageFormatter.format(LogLevel.INFO, 'Test message', undefined, { includeEmoji: false });
       const clean = cleanAnsiCodes(formatted);
 
       // Should match the pattern: [ISO_TIMESTAMP][LOCAL_TIME][INFO]: Test message
@@ -31,7 +31,8 @@ describe('Log Format Customization', () => {
     it('should include both timestamps when explicitly configured', () => {
       const formatConfig = {
         includeIsoTimestamp: true,
-        includeLocalTime: true
+        includeLocalTime: true,
+        includeEmoji: false
       };
       const formatted = MessageFormatter.format(LogLevel.INFO, 'Test message', undefined, formatConfig);
       const clean = cleanAnsiCodes(formatted);
@@ -42,7 +43,8 @@ describe('Log Format Customization', () => {
     it('should exclude ISO timestamp when configured', () => {
       const formatConfig = {
         includeIsoTimestamp: false,
-        includeLocalTime: true
+        includeLocalTime: true,
+        includeEmoji: false
       };
       const formatted = MessageFormatter.format(LogLevel.INFO, 'Test message', undefined, formatConfig);
       const clean = cleanAnsiCodes(formatted);
@@ -55,7 +57,8 @@ describe('Log Format Customization', () => {
     it('should exclude local time when configured', () => {
       const formatConfig = {
         includeIsoTimestamp: true,
-        includeLocalTime: false
+        includeLocalTime: false,
+        includeEmoji: false
       };
       const formatted = MessageFormatter.format(LogLevel.INFO, 'Test message', undefined, formatConfig);
       const clean = cleanAnsiCodes(formatted);
@@ -68,7 +71,8 @@ describe('Log Format Customization', () => {
     it('should exclude both timestamps when configured', () => {
       const formatConfig = {
         includeIsoTimestamp: false,
-        includeLocalTime: false
+        includeLocalTime: false,
+        includeEmoji: false
       };
       const formatted = MessageFormatter.format(LogLevel.INFO, 'Test message', undefined, formatConfig);
       const clean = cleanAnsiCodes(formatted);
@@ -83,7 +87,8 @@ describe('Log Format Customization', () => {
       // Test with different log levels
       const formatConfig = {
         includeIsoTimestamp: false,
-        includeLocalTime: false
+        includeLocalTime: false,
+        includeEmoji: false
       };
 
       const levels = [
@@ -105,7 +110,8 @@ describe('Log Format Customization', () => {
     it('should handle data parameter with format configuration', () => {
       const formatConfig = {
         includeIsoTimestamp: false,
-        includeLocalTime: false
+        includeLocalTime: false,
+        includeEmoji: false
       };
       const data = { key: 'value' };
       const formatted = MessageFormatter.format(LogLevel.INFO, 'Test message', data, formatConfig);
@@ -119,7 +125,8 @@ describe('Log Format Customization', () => {
     it('should support format configuration for system messages', () => {
       const formatConfig = {
         includeIsoTimestamp: false,
-        includeLocalTime: true
+        includeLocalTime: true,
+        includeEmoji: false
       };
       const formatted = MessageFormatter.formatSystemMessage('System message', formatConfig);
       const clean = cleanAnsiCodes(formatted);
@@ -172,7 +179,8 @@ describe('Log Format Customization', () => {
         mode: LogMode.DEBUG,
         format: {
           includeIsoTimestamp: false,
-          includeLocalTime: true
+          includeLocalTime: true,
+          includeEmoji: false
         }
       });
 
@@ -189,7 +197,8 @@ describe('Log Format Customization', () => {
         mode: LogMode.DEBUG,
         format: {
           includeIsoTimestamp: false,
-          includeLocalTime: false
+          includeLocalTime: false,
+          includeEmoji: false
         }
       });
 
@@ -214,7 +223,8 @@ describe('Log Format Customization', () => {
         mode: LogMode.DEBUG,
         format: {
           includeIsoTimestamp: true,
-          includeLocalTime: false
+          includeLocalTime: false,
+          includeEmoji: false
         }
       });
 
@@ -231,22 +241,24 @@ describe('Log Format Customization', () => {
     it('should maintain backward compatibility when no format configuration is provided', () => {
       LogEngine.configure({
         mode: LogMode.DEBUG
-        // No format configuration provided
+        // No format configuration provided - emoji now enabled by default
       });
 
       LogEngine.info('Test message');
 
       expect(consoleOutput).toHaveLength(1);
       const clean = cleanAnsiCodes(consoleOutput[0]);
-      expect(clean).toMatch(/^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]\[\d{1,2}:\d{2}[AP]M\]\[INFO\]: Test message$/);
+      // Emoji is now enabled by default, so expect it in the output
+      expect(clean).toMatch(/^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]\[\d{1,2}:\d{2}[AP]M\]\[INFO\]\[ℹ️\]: Test message$/);
     });
 
     it('should handle partial format configuration', () => {
       LogEngine.configure({
         mode: LogMode.DEBUG,
         format: {
-          includeIsoTimestamp: false
+          includeIsoTimestamp: false,
           // includeLocalTime not specified - should default to true
+          includeEmoji: false
         }
       });
 
@@ -264,22 +276,23 @@ describe('Log Format Customization', () => {
       const formatted = MessageFormatter.format(LogLevel.INFO, 'Test message', undefined, undefined);
       const clean = cleanAnsiCodes(formatted);
 
-      // Should use defaults when undefined is passed
-      expect(clean).toMatch(/^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]\[\d{1,2}:\d{2}[AP]M\]\[INFO\]: Test message$/);
+      // Should use defaults when undefined is passed (emoji now enabled by default)
+      expect(clean).toMatch(/^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]\[\d{1,2}:\d{2}[AP]M\]\[INFO\]\[ℹ️\]: Test message$/);
     });
 
     it('should handle empty format configuration object', () => {
       const formatted = MessageFormatter.format(LogLevel.INFO, 'Test message', undefined, {});
       const clean = cleanAnsiCodes(formatted);
 
-      // Should use defaults when empty object is passed
-      expect(clean).toMatch(/^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]\[\d{1,2}:\d{2}[AP]M\]\[INFO\]: Test message$/);
+      // Should use defaults when empty object is passed (emoji now enabled by default)
+      expect(clean).toMatch(/^\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\]\[\d{1,2}:\d{2}[AP]M\]\[INFO\]\[ℹ️\]: Test message$/);
     });
 
     it('should preserve ANSI color codes when timestamps are excluded', () => {
       const formatConfig = {
         includeIsoTimestamp: false,
-        includeLocalTime: false
+        includeLocalTime: false,
+        includeEmoji: false
       };
       const formatted = MessageFormatter.format(LogLevel.ERROR, 'Error message', undefined, formatConfig);
 

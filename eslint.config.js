@@ -1,5 +1,6 @@
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
+import securityPlugin from 'eslint-plugin-security';
 
 export default [
   {
@@ -15,6 +16,7 @@ export default [
     },
     plugins: {
       '@typescript-eslint': tsPlugin,
+      'security': securityPlugin,
     },
     rules: {
       // TypeScript specific rules
@@ -42,6 +44,22 @@ export default [
       'no-implied-eval': 'error',
       'no-new-func': 'error',
       'no-script-url': 'error',
+      
+      // Security plugin rules - disabled here (run separately in lint:security)
+      // but included so eslint-disable comments are recognized
+      'security/detect-object-injection': 'off',
+      'security/detect-non-literal-regexp': 'off',
+      'security/detect-unsafe-regex': 'off',
+      'security/detect-buffer-noassert': 'off',
+      'security/detect-child-process': 'off',
+      'security/detect-disable-mustache-escape': 'off',
+      'security/detect-eval-with-expression': 'off',
+      'security/detect-no-csrf-before-method-override': 'off',
+      'security/detect-non-literal-fs-filename': 'off',
+      'security/detect-non-literal-require': 'off',
+      'security/detect-possible-timing-attacks': 'off',
+      'security/detect-pseudoRandomBytes': 'off',
+      'security/detect-bidi-characters': 'off',
     },
   },
   {
@@ -56,6 +74,7 @@ export default [
     },
     plugins: {
       '@typescript-eslint': tsPlugin,
+      'security': securityPlugin,
     },
     rules: {
       // Relax some rules for test files

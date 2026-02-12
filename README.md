@@ -1,35 +1,27 @@
-# Log Engine 📜🚂 [![made by](https://img.shields.io/badge/made%20by-WG%20Tech%20Labs-0060a0.svg?logo=github&longCache=true&labelColor=181717&style=flat-square)](https://github.com/wgtechlabs)
+# @wgtechlabs/log-engine
+
+![GitHub Repo Banner](https://ghrb.waren.build/banner?header=log-engine+%F0%9F%93%9C%F0%9F%9A%82&subheader=ultimate+logging+solution&bg=016EEA&color=FFFFFF&headerfont=Google+Sans+Code&subheaderfont=Kinewave&watermarkpos=bottom-right)
+<!-- Created with GitHub Repo Banner by Waren Gonzaga: https://ghrb.waren.build -->
 
 [![codecov](https://img.shields.io/codecov/c/github/wgtechlabs/log-engine?token=PWRJTBVKQ9&style=flat-square&logo=codecov&labelColor=181717)](https://codecov.io/gh/wgtechlabs/log-engine) [![npm downloads](https://img.shields.io/npm/dm/%40wgtechlabs%2Flog-engine?style=flat-square&logo=npm&label=installs&labelColor=181717&color=%23CD0000)](https://www.npmjs.com/package/@wgtechlabs/log-engine) [![sponsors](https://img.shields.io/badge/sponsor-%E2%9D%A4-%23db61a2.svg?&logo=github&logoColor=white&labelColor=181717&style=flat-square)](https://github.com/sponsors/wgtechlabs) [![release](https://img.shields.io/github/release/wgtechlabs/log-engine.svg?logo=github&labelColor=181717&color=green&style=flat-square)](https://github.com/wgtechlabs/log-engine/releases) [![star](https://img.shields.io/github/stars/wgtechlabs/log-engine.svg?&logo=github&labelColor=181717&color=yellow&style=flat-square)](https://github.com/wgtechlabs/log-engine/stargazers) [![license](https://img.shields.io/github/license/wgtechlabs/log-engine.svg?&logo=github&labelColor=181717&style=flat-square)](https://github.com/wgtechlabs/log-engine/blob/main/license)
 
-[![banner](https://raw.githubusercontent.com/wgtechlabs/log-engine/main/.github/assets/repo_banner.jpg)](https://github.com/wgtechlabs/log-engine)
-
-WG's Log Engine is the **ultimate logging solution for Node.js developers** - a lightweight, battle-tested utility specifically engineered for Discord bots, Telegram bots, web servers, APIs, and server-side applications. Born from real-world development challenges and proven in production environments like the [Unthread Discord Bot](https://github.com/wgtechlabs/unthread-discord-bot/), Log Engine delivers enterprise-grade logging with zero complexity, beautiful color-coded console output, **revolutionary configurable output routing**, and **advanced automatic data redaction with comprehensive PII protection**.
-
-**The first logging library with built-in advanced PII protection, configurable output handlers, and comprehensive TypeScript support.** Stop wrestling with logging configurations and start building amazing applications safely. Whether you're creating the next viral Discord community bot, building high-performance APIs, developing microservices, or deploying production servers, Log Engine provides intelligent logging with vibrant colors, flexible output routing to any destination, advanced customizable redaction patterns, and automatic sensitive data protection that scales with your application's growth - from your first "Hello World" to handling millions of requests across distributed systems.
+Log Engine is a lightweight, zero-dependency logging library for Node.js, built because logging should protect sensitive data and just work, without complex configs or security afterthoughts. Through automatic environment detection, **built-in PII redaction**, **configurable output routing**, color-coded console output, and full TypeScript support, it delivers enterprise-grade logging for Discord bots, web servers, APIs, and any server-side application. Proven in production environments like the [Unthread Discord Bot](https://github.com/wgtechlabs/unthread-discord-bot/).
 
 ## ❣️ Motivation
 
-Picture this: It's 2 AM, your server is crashing in production, and you're staring at a terminal filled with thousands of debug messages mixed with critical errors. Sound familiar? I've been there too many times. I created Log Engine because every developer deserves to sleep peacefully, knowing their logs are working intelligently in the background.
-
-Log Engine transforms your development experience from chaotic debugging sessions into confident, data-driven problem solving. No more guessing what went wrong, no more drowning in irrelevant logs, no more manual configuration headaches. Just clear, contextual information exactly when and where you need it. Because great applications deserve great logging, and great developers deserve tools that just work.
+I created Log Engine after too many 2 AM debugging sessions, staring at terminals flooded with noise while hunting for the one error that matters. Every developer deserves clear, contextual logs that just work, no guessing, no configuration headaches, no drowning in irrelevant output. Great applications deserve great logging.
 
 ## ✨ Key Features
 
-- **🔒 Advanced Data Redaction (Enhanced!)**: Built-in PII protection with **custom regex patterns**, **dynamic field management**, and **environment-based configuration** - the first logging library with comprehensive security-first logging by default.
-- **🎯 Configurable Output Handlers (New!)**: Revolutionary output routing system supporting **custom destinations**, **multiple simultaneous outputs**, and **production-ready handlers** - redirect logs to files, HTTP endpoints, GUI applications, testing frameworks, or any custom destination with zero configuration complexity.
-- **⚡ Custom Redaction Patterns**: Add your own regex patterns for advanced field detection and enterprise-specific data protection requirements.
-- **🎯 Dynamic Field Management**: Runtime configuration of sensitive fields with case-insensitive matching and partial field name detection.
-- **🛠️ Developer-Friendly API**: Advanced redaction methods including `testFieldRedaction()`, `withoutRedaction()`, and comprehensive configuration management.
-- **📊 Comprehensive TypeScript Support**: Full type definitions with 15+ interfaces covering all functionality for maximum developer experience and IDE support.
-- **🚀 Lightweight & Fast**: Minimal overhead with maximum performance - designed to enhance your application, not slow it down.
-- **📚 No Learning Curve**: Dead simple API that you can master in seconds. No extensive documentation, complex configurations, or setup required - Log Engine works instantly.
-- **🌈 Colorized Console Output**: Beautiful ANSI color-coded log levels with intelligent terminal formatting - instantly identify message severity at a glance with color-coded output.
-- **🎛️ Multiple Log Modes**: Support for DEBUG, INFO, WARN, ERROR, SILENT, OFF, and special LOG levels with smart filtering - just set your mode and let it handle the rest.
-- **⚙️ Auto-Configuration**: Intelligent environment-based setup using NODE_ENV variables. No config files, initialization scripts, or manual setup - Log Engine works perfectly out of the box.
-- **✨ Enhanced Formatting**: Structured log entries with dual timestamps (ISO + human-readable) and colored level indicators for maximum readability.
-- **🔗 Zero Dependencies**: No external dependencies for maximum compatibility and security - keeps your bundle clean and your project simple.
-- **🔌 Easy Integration**: Simple API that works seamlessly with existing Node.js applications. Just `import` and start logging - no middleware, plugins, or configuration required.
+- **🔒 Advanced Data Redaction** — Built-in PII protection with custom regex patterns, dynamic field management, and environment-based configuration. Security-first logging by default.
+- **🎯 Configurable Output Handlers** — Route logs to any destination: files, HTTP endpoints, databases, or multiple outputs simultaneously.
+- **🎨 Context-Aware Emoji** — Intelligent emoji selection based on log content with 37 curated gitmoji mappings, fully customizable.
+- **🌈 Color-Coded Console Output** — ANSI color-coded levels and timestamps for instant severity recognition.
+- **🎛️ Multiple Log Modes** — DEBUG, INFO, WARN, ERROR, SILENT, OFF, and a special always-visible LOG level.
+- **⚙️ Auto-Configuration** — Detects `NODE_ENV` and sets appropriate log levels automatically. No setup required.
+- **📊 Full TypeScript Support** — 15+ type definitions and interfaces for complete IDE support.
+- **🔗 Zero Dependencies** — No external dependencies. Lightweight with automated bundle size monitoring under 1MB.
+- **🔌 Simple API** — Just `import` and start logging. No middleware, plugins, or configuration files needed.
 
 ## ⚠️ Breaking Changes Notice
 
@@ -327,15 +319,15 @@ LogEngine.log('Critical message'); // ❌ Hidden with OFF - complete silence!
 
 ### Log Format
 
-Log messages are beautifully formatted with colorized timestamps, levels, and smart terminal output:
+Log messages are formatted with colorized timestamps, levels, context-aware emoji, and smart terminal output:
 
 ```bash
 # Example colorized output (colors visible in terminal)
-[2025-05-29T16:57:45.678Z][4:57PM][DEBUG]: Debugging application flow
-[2025-05-29T16:57:46.123Z][4:57PM][INFO]: Server started successfully  
-[2025-05-29T16:57:47.456Z][4:57PM][WARN]: API rate limit approaching
-[2025-05-29T16:57:48.789Z][4:57PM][ERROR]: Database connection failed
-[2025-05-29T16:57:49.012Z][4:57PM][LOG]: Application startup complete
+[2025-05-29T16:57:45.678Z][4:57PM][DEBUG][🐞]: Debugging application flow
+[2025-05-29T16:57:46.123Z][4:57PM][INFO][🚀]: Server started successfully  
+[2025-05-29T16:57:47.456Z][4:57PM][WARN][⚡️]: API rate limit approaching
+[2025-05-29T16:57:48.789Z][4:57PM][ERROR][🗃️]: Database connection failed
+[2025-05-29T16:57:49.012Z][4:57PM][LOG][✅]: Application startup complete
 ```
 
 **Color Scheme:**
@@ -346,6 +338,7 @@ Log messages are beautifully formatted with colorized timestamps, levels, and sm
 - 🔴 **ERROR**: Red - Error messages requiring immediate action
 - 🟢 **LOG**: Green - Critical messages that always display
 - ⚫ **Timestamps**: Gray (ISO) and Cyan (local time) for easy scanning
+- 🎨 **Emoji**: Context-aware emoji selected based on log content (can be disabled via `includeEmoji: false`)
 
 ### Customizing Log Elements
 
@@ -353,10 +346,11 @@ Log messages are beautifully formatted with colorized timestamps, levels, and sm
 
 #### Available Customization Options
 
-You can control the inclusion of timestamp elements:
+You can control the inclusion of these elements:
 
 - **ISO Timestamp**: `[2025-05-29T16:57:45.678Z]` - Precise UTC timestamp
 - **Local Time**: `[4:57PM]` - Human-readable local time
+- **Emoji**: `[🚀]` - Context-aware emoji indicator (enabled by default)
 - **Log Level**: `[INFO]` - Always included (non-customizable as per design)
 
 #### Format Configuration Examples
@@ -364,10 +358,10 @@ You can control the inclusion of timestamp elements:
 ```typescript
 import { LogEngine, LogMode } from '@wgtechlabs/log-engine';
 
-// Default format (backward compatible)
+// Default format (backward compatible - emoji enabled by default)
 LogEngine.configure({ mode: LogMode.DEBUG });
 LogEngine.info('Server started');
-// Output: [2025-05-29T16:57:45.678Z][4:57PM][INFO]: Server started
+// Output: [2025-05-29T16:57:45.678Z][4:57PM][INFO][🚀]: Server started
 
 // Only ISO timestamp
 LogEngine.configure({ 
@@ -378,7 +372,7 @@ LogEngine.configure({
   }
 });
 LogEngine.info('Database connected');
-// Output: [2025-05-29T16:57:45.678Z][INFO]: Database connected
+// Output: [2025-05-29T16:57:45.678Z][INFO][🗃️]: Database connected
 
 // Only local time
 LogEngine.configure({ 
@@ -389,14 +383,15 @@ LogEngine.configure({
   }
 });
 LogEngine.warn('Rate limit approaching');
-// Output: [4:57PM][WARN]: Rate limit approaching
+// Output: [4:57PM][WARN][⚡️]: Rate limit approaching
 
-// Minimal format (no timestamps)
+// Minimal format (no timestamps, no emoji)
 LogEngine.configure({ 
   mode: LogMode.DEBUG,
   format: {
     includeIsoTimestamp: false,
-    includeLocalTime: false
+    includeLocalTime: false,
+    includeEmoji: false
   }
 });
 LogEngine.error('Connection failed');
@@ -412,6 +407,207 @@ LogEngine.error('Connection failed');
 - **🔒 Backward Compatible**: Default behavior remains unchanged - existing code continues to work without modifications
 
 **Note**: Log levels (`[DEBUG]`, `[INFO]`, `[WARN]`, `[ERROR]`, `[LOG]`) are always included regardless of configuration to maintain log clarity and filtering capabilities.
+
+## 🎨 Context-Aware Emoji Support
+
+**LogEngine features intelligent emoji support that enhances log readability by adding visual context to each log message.** The emoji engine analyzes your log content (level + message + data) and automatically selects the most relevant emoji, making it easier to visually parse large logs and instantly identify the type of each log line.
+
+### Features
+
+- **🎯 Context-Aware Selection**: Automatically analyzes message content and data to select appropriate emoji
+- **📦 Rich Emoji Set**: Based on [gitmoji](https://gitmoji.dev) with 40+ curated emoji mappings
+- **🔄 Smart Fallback**: Uses level-specific emoji when no context match is found
+- **🛠️ Fully Customizable**: Extend or override emoji mappings and fallback behavior
+- **✅ Enabled by Default**: Emoji are automatically included in logs (can be disabled via `includeEmoji: false`)
+
+### Quick Start
+
+```typescript
+import { LogEngine } from '@wgtechlabs/log-engine';
+
+// Emoji are enabled by default - just start logging!
+LogEngine.error('Database connection failed');
+// Output: [2026-02-11T14:00:00.000Z][2:00PM][ERROR][🗃️]: Database connection failed
+
+LogEngine.info('Deployed to production successfully');
+// Output: [2026-02-11T14:00:01.000Z][2:00PM][INFO][🚀]: Deployed to production successfully
+
+LogEngine.warn('Performance degradation detected');
+// Output: [2026-02-11T14:00:02.000Z][2:00PM][WARN][⚡️]: Performance degradation detected
+
+LogEngine.info('Unknown event happened');
+// Output: [2026-02-11T14:00:03.000Z][2:00PM][INFO][ℹ️]: Unknown event happened (fallback)
+
+// Disable emoji if needed
+LogEngine.configure({
+  format: {
+    includeEmoji: false
+  }
+});
+```
+
+### Context-Aware Emoji Mappings
+
+LogEngine intelligently matches keywords in your log messages to select appropriate emoji:
+
+| Context | Keywords | Emoji | Example |
+|---------|----------|-------|---------|
+| **Database** | database, db, sql, query, mongo, postgres | 🗃️ | "Database query failed" |
+| **Deployment** | deploy, release, launched, production | 🚀 | "Deployed to production" |
+| **Performance** | performance, speed, optimize, latency | ⚡️ | "Performance issues detected" |
+| **Security** | security, vulnerability, auth, permission | 🔒️ | "Security breach detected" |
+| **Critical** | critical, urgent, emergency, crash | 🚑️ | "Critical system failure" |
+| **Bugs** | bug, fix, defect, issue | 🐛 | "Fixed bug in login" |
+| **Network** | network, http, api, endpoint | 🌐 | "API request failed" |
+| **Testing** | tests, testing, validation | ✅ | "All tests passed" |
+
+### Fallback Emoji by Level
+
+When no context-specific emoji matches, LogEngine uses these fallback emoji:
+
+| Log Level | Emoji | Description |
+|-----------|-------|-------------|
+| `DEBUG` | 🐞 | Debugging information |
+| `INFO` | ℹ️ | General information |
+| `WARN` | ⚠️ | Warning messages |
+| `ERROR` | ❌ | Error messages |
+| `LOG` | ✅ | Critical log messages |
+
+### Custom Emoji Configuration
+
+#### Custom Context Mappings
+
+Add your own emoji mappings for custom contexts:
+
+```typescript
+LogEngine.configure({
+  format: {
+    emoji: {
+      customMappings: [
+        {
+          emoji: '🎯',
+          code: ':dart:',
+          description: 'Goal achieved',
+          keywords: ['goal', 'target', 'achieved', 'milestone']
+        },
+        {
+          emoji: '💰',
+          code: ':moneybag:',
+          description: 'Payment operations',
+          keywords: ['payment', 'transaction', 'billing', 'invoice']
+        }
+      ]
+    }
+  }
+});
+
+LogEngine.info('Payment processed successfully');
+// Output: [INFO][💰]: Payment processed successfully
+
+LogEngine.info('Sales target achieved');
+// Output: [INFO][🎯]: Sales target achieved
+```
+
+#### Custom Fallback Emoji
+
+Override the default fallback emoji for each log level:
+
+```typescript
+LogEngine.configure({
+  format: {
+    emoji: {
+      customFallbacks: {
+        DEBUG: '🔍',
+        INFO: '📢',
+        WARN: '🚨',
+        ERROR: '💀',
+        LOG: '🎉'
+      }
+    }
+  }
+});
+
+LogEngine.info('Generic info message');
+// Output: [INFO][📢]: Generic info message
+```
+
+#### Use Custom Mappings Exclusively
+
+Use only your custom mappings and ignore the built-in set:
+
+```typescript
+LogEngine.configure({
+  format: {
+    emoji: {
+      useCustomOnly: true,
+      customMappings: [
+        // Your custom mappings only
+      ]
+    }
+  }
+});
+```
+
+### Data Context Analysis
+
+The emoji selector also analyzes data objects for context:
+
+```typescript
+LogEngine.info('Operation completed', {
+  database: 'postgres',
+  table: 'users',
+  rows: 1000
+});
+// Output: [INFO][🗃️]: Operation completed { database: 'postgres', ... }
+
+LogEngine.warn('Issue detected', {
+  performance: 'degraded',
+  latency: '500ms'
+});
+// Output: [WARN][⚡️]: Issue detected { performance: 'degraded', ... }
+```
+
+### Programmatic Access
+
+Access emoji utilities directly for advanced use cases:
+
+```typescript
+import { EmojiSelector, EMOJI_MAPPINGS, FALLBACK_EMOJI } from '@wgtechlabs/log-engine';
+
+// Check all available emoji mappings
+console.log(EMOJI_MAPPINGS);
+// [{ emoji: '🐛', code: ':bug:', description: 'Fix a bug', keywords: [...] }, ...]
+
+// Check fallback emoji
+console.log(FALLBACK_EMOJI);
+// { DEBUG: '🐞', INFO: 'ℹ️', WARN: '⚠️', ERROR: '❌', LOG: '✅' }
+
+// Configure emoji selector directly (for customization)
+EmojiSelector.configure({
+  customMappings: [...]
+});
+```
+
+### Output Format
+
+With emoji (enabled by default), the log format is:
+
+```text
+[ISO_TIMESTAMP][LOCAL_TIME][LEVEL][EMOJI]: message [data]
+```
+
+Example:
+```text
+[2026-02-11T14:00:00.000Z][2:00PM][ERROR][🗃️]: Database connection failed
+```
+
+### Benefits
+
+- **👁️ Visual Clarity**: Instantly identify log context at a glance
+- **🎯 Better Debugging**: Quickly locate specific types of logs in large outputs
+- **🎨 Enhanced UX**: More engaging and pleasant logging experience
+- **🔧 Flexible**: Fully customizable to match your project's needs
+- **🔒 Compatibility Note**: Enabled by default – existing log output will include emojis; disable or customize emoji behavior via configuration to preserve prior formats
 
 ## 🔒 Advanced Data Redaction
 
@@ -901,7 +1097,8 @@ Contributions are welcome, create a pull request to this repo and I will review 
 - `pnpm lint:security` - Run security-focused linting
 - `pnpm secure` - Run comprehensive security checks
 - `pnpm build` - Build the TypeScript project
-- `pnpm validate` - Run full validation (lint + test + build)
+- `pnpm size:check` - Check bundle size to maintain lightweight feature
+- `pnpm validate` - Run full validation (lint + test + build + size check)
 
 Read the project's [contributing guide](./CONTRIBUTING.md) for detailed development setup, testing guidelines, and contribution requirements.
 
