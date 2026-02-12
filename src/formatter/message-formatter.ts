@@ -39,9 +39,14 @@ export class MessageFormatter {
       ...formatConfig
     };
 
-    // Configure emoji selector if emoji customization config is provided
+    // Configure emoji selector deterministically based on current config
+    // When no custom emoji configuration is provided, reset to defaults
+    // so that previous global emoji state does not leak into this call
     if (config.emoji) {
       EmojiSelector.configure(config.emoji);
+    } else {
+      // Reset to defaults when no emoji config is provided
+      EmojiSelector.reset();
     }
 
     // Build timestamp string conditionally

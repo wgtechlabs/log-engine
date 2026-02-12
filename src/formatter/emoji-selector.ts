@@ -7,6 +7,17 @@ import { LogLevel, LogData, EmojiConfig, EmojiMapping } from '../types';
 import { EMOJI_MAPPINGS, FALLBACK_EMOJI } from './emoji-data';
 
 /**
+ * Compiled emoji mapping with precompiled regex for performance
+ */
+interface CompiledEmojiMapping {
+  emoji: string;
+  code: string;
+  description?: string;
+  keywords: string[];
+  regexes: RegExp[];
+}
+
+/**
  * Emoji selector class
  * Provides context-aware emoji selection for log messages
  */
@@ -17,6 +28,9 @@ export class EmojiSelector {
     useCustomOnly: false
   };
 
+  // Cache for precompiled regex patterns
+  private static compiledMappings: CompiledEmojiMapping[] | null = null;
+
   /**
    * Configure the emoji selector
    * @param config - Configuration options
@@ -26,6 +40,8 @@ export class EmojiSelector {
       ...EmojiSelector.config,
       ...config
     };
+    // Invalidate compiled cache when config changes
+    EmojiSelector.compiledMappings = null;
   }
 
   /**
@@ -51,6 +67,33 @@ export class EmojiSelector {
       customFallbacks: {},
       useCustomOnly: false
     };
+    // Clear compiled cache
+    EmojiSelector.compiledMappings = null;
+  }
+
+  /**
+   * Get compiled emoji mappings with precompiled regex patterns
+   * This is cached to avoid recompiling regex on every log line
+   */
+  private static getCompiledMappings(): CompiledEmojiMapping[] {
+    if (EmojiSelector.compiledMappings) {
+      return EmojiSelector.compiledMappings;
+    }
+
+    const { customMappings = [], useCustomOnly } = EmojiSelector.config;
+    const mappings = useCustomOnly ? customMappings : [...customMappings, ...EMOJI_MAPPINGS];
+
+    EmojiSelector.compiledMappings = mappings.map(mapping => ({
+      ...mapping,
+      regexes: mapping.keywords.map(keyword => {
+        // Escape regex metacharacters to prevent ReDoS and invalid patterns
+        const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        // Precompile regex for performance
+        return new RegExp(`\\b${escapedKeyword}\\b`, 'i');
+      })
+    }));
+
+    return EmojiSelector.compiledMappings;
   }
 
   /**
@@ -79,11 +122,11 @@ export class EmojiSelector {
    */
   private static findContextEmoji(message: string, data?: LogData): string | null {
     const searchText = EmojiSelector.prepareSearchText(message, data);
-    const mappings = EmojiSelector.getMappings();
+    const compiledMappings = EmojiSelector.getCompiledMappings();
 
-    // Search through mappings for keyword matches
-    for (const mapping of mappings) {
-      if (EmojiSelector.matchesKeywords(searchText, mapping.keywords)) {
+    // Search through compiled mappings for keyword matches
+    for (const mapping of compiledMappings) {
+      if (EmojiSelector.matchesWithCompiledRegexes(searchText, mapping.regexes)) {
         return mapping.emoji;
       }
     }
@@ -94,6 +137,7 @@ export class EmojiSelector {
   /**
    * Get combined mappings (custom + default or custom only)
    * @returns Array of emoji mappings
+   * @deprecated Use getCompiledMappings() for better performance
    */
   private static getMappings(): EmojiMapping[] {
     const { customMappings = [], useCustomOnly = false } = EmojiSelector.config;
@@ -131,10 +175,21 @@ export class EmojiSelector {
   }
 
   /**
+   * Check if search text matches any of the precompiled regexes
+   * @param searchText - Lowercase text to search in
+   * @param regexes - Precompiled regex patterns
+   * @returns true if any regex matches
+   */
+  private static matchesWithCompiledRegexes(searchText: string, regexes: RegExp[]): boolean {
+    return regexes.some(regex => regex.test(searchText));
+  }
+
+  /**
    * Check if search text matches any of the keywords
    * @param searchText - Lowercase text to search in
    * @param keywords - Keywords to look for
    * @returns true if any keyword matches
+   * @deprecated Use matchesWithCompiledRegexes() for better performance
    */
   private static matchesKeywords(searchText: string, keywords: string[]): boolean {
     return keywords.some(keyword => {
@@ -154,7 +209,13 @@ export class EmojiSelector {
    * @returns Fallback emoji for the level
    */
   private static getFallbackEmoji(level: LogLevel): string {
-    const levelName = EmojiSelector.getLevelName(level) as 'DEBUG' | 'INFO' | 'WARN' | 'ERROR' | 'LOG';
+    const levelName = EmojiSelector.getLevelName(level);
+    
+    // Explicitly handle unknown levels: no emoji by default
+    if (levelName === 'UNKNOWN') {
+      return '';
+    }
+
     const { customFallbacks = {} } = EmojiSelector.config;
 
     // Check custom fallbacks first

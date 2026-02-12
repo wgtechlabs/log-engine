@@ -613,7 +613,7 @@ Example:
 - **🎯 Better Debugging**: Quickly locate specific types of logs in large outputs
 - **🎨 Enhanced UX**: More engaging and pleasant logging experience
 - **🔧 Flexible**: Fully customizable to match your project's needs
-- **🔒 Backward Compatible**: Disabled by default, no impact on existing code
+- **🔒 Compatibility Note**: Enabled by default – existing log output will include emojis; disable or customize emoji behavior via configuration to preserve prior formats
 
 ## 🔒 Advanced Data Redaction
 
