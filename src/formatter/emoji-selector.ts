@@ -3,7 +3,7 @@
  * Analyzes log messages to select appropriate emoji based on context
  */
 
-import { LogLevel, LogData, EmojiConfig, EmojiMapping } from '../types';
+import { LogLevel, LogData, EmojiConfig } from '../types';
 import { EMOJI_MAPPINGS, FALLBACK_EMOJI } from './emoji-data';
 
 /**
@@ -136,22 +136,6 @@ export class EmojiSelector {
   }
 
   /**
-   * Get combined mappings (custom + default or custom only)
-   * @returns Array of emoji mappings
-   * @deprecated Use getCompiledMappings() for better performance
-   */
-  private static getMappings(): EmojiMapping[] {
-    const { customMappings = [], useCustomOnly = false } = EmojiSelector.config;
-
-    if (useCustomOnly) {
-      return customMappings;
-    }
-
-    // Merge custom mappings first (higher priority) with defaults
-    return [...customMappings, ...EMOJI_MAPPINGS];
-  }
-
-  /**
    * Prepare text for searching by combining message and data
    * @param message - Log message
    * @param data - Optional log data
@@ -183,24 +167,6 @@ export class EmojiSelector {
    */
   private static matchesWithCompiledRegexes(searchText: string, regexes: RegExp[]): boolean {
     return regexes.some(regex => regex.test(searchText));
-  }
-
-  /**
-   * Check if search text matches any of the keywords
-   * @param searchText - Lowercase text to search in
-   * @param keywords - Keywords to look for
-   * @returns true if any keyword matches
-   * @deprecated Use matchesWithCompiledRegexes() for better performance
-   */
-  private static matchesKeywords(searchText: string, keywords: string[]): boolean {
-    return keywords.some(keyword => {
-      // Escape regex metacharacters to prevent ReDoS and invalid patterns
-      const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      // Use word boundary matching for more accurate results
-      // eslint-disable-next-line security/detect-non-literal-regexp -- Safe: keyword is escaped above to prevent ReDoS
-      const regex = new RegExp(`\\b${escapedKeyword}\\b`, 'i');
-      return regex.test(searchText);
-    });
   }
 
   /**
