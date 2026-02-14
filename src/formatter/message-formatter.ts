@@ -66,10 +66,17 @@ export class MessageFormatter {
     const coloredLevel = `${levelColor}[${levelName}]${colors.reset}`;
 
     // Select emoji based on context if includeEmoji is true (default)
-    // Use override emoji from options if provided, otherwise use EmojiSelector
-    const emoji = config.includeEmoji !== false 
-      ? (options?.emoji || EmojiSelector.selectEmoji(level, message, data))
-      : '';
+    // Use override emoji from options if provided (including empty string to suppress), otherwise use EmojiSelector
+    let emoji = '';
+    if (config.includeEmoji !== false) {
+      if (options !== undefined && 'emoji' in options) {
+        // Use override emoji (even if empty string)
+        emoji = options.emoji || '';
+      } else {
+        // Auto-select emoji
+        emoji = EmojiSelector.selectEmoji(level, message, data);
+      }
+    }
     const emojiPart = emoji ? `[${emoji}]` : '';
 
     // Format the base message (level is always included as per requirements)
