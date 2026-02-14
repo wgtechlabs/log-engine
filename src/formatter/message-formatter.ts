@@ -69,9 +69,9 @@ export class MessageFormatter {
     // Use override emoji from options if provided (including empty string to suppress), otherwise use EmojiSelector
     let emoji = '';
     if (config.includeEmoji !== false) {
-      if (options !== undefined && 'emoji' in options) {
+      if (options?.emoji !== undefined) {
         // Use override emoji (even if empty string)
-        emoji = options.emoji || '';
+        emoji = options.emoji;
       } else {
         // Auto-select emoji
         emoji = EmojiSelector.selectEmoji(level, message, data);
