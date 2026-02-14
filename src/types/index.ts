@@ -11,6 +11,15 @@
 export type LogData = any;
 
 /**
+ * Options for individual log method calls
+ * Allows per-call customization of log behavior
+ */
+export interface LogCallOptions {
+    /** Override the auto-detected emoji for this specific log call */
+    emoji?: string;
+}
+
+/**
  * Log levels representing message severity (lowest to highest)
  * Used for filtering messages based on importance
  */
@@ -230,27 +239,27 @@ export interface ILogEngine {
 
     // Standard logging methods with automatic redaction
     /** Log a debug message with automatic data redaction */
-    debug(message: string, data?: LogData): void;
+    debug(message: string, data?: LogData, options?: LogCallOptions): void;
     /** Log an info message with automatic data redaction */
-    info(message: string, data?: LogData): void;
+    info(message: string, data?: LogData, options?: LogCallOptions): void;
     /** Log a warn message with automatic data redaction */
-    warn(message: string, data?: LogData): void;
+    warn(message: string, data?: LogData, options?: LogCallOptions): void;
     /** Log an error message with automatic data redaction */
-    error(message: string, data?: LogData): void;
+    error(message: string, data?: LogData, options?: LogCallOptions): void;
     /** Log a message with automatic data redaction */
-    log(message: string, data?: LogData): void;
+    log(message: string, data?: LogData, options?: LogCallOptions): void;
 
     // Raw logging methods (bypass redaction)
     /** Log a debug message without redaction */
-    debugRaw(message: string, data?: LogData): void;
+    debugRaw(message: string, data?: LogData, options?: LogCallOptions): void;
     /** Log an info message without redaction */
-    infoRaw(message: string, data?: LogData): void;
+    infoRaw(message: string, data?: LogData, options?: LogCallOptions): void;
     /** Log a warn message without redaction */
-    warnRaw(message: string, data?: LogData): void;
+    warnRaw(message: string, data?: LogData, options?: LogCallOptions): void;
     /** Log an error message without redaction */
-    errorRaw(message: string, data?: LogData): void;
+    errorRaw(message: string, data?: LogData, options?: LogCallOptions): void;
     /** Log a message without redaction */
-    logRaw(message: string, data?: LogData): void;
+    logRaw(message: string, data?: LogData, options?: LogCallOptions): void;
 
     // Redaction configuration methods
     /** Configure redaction settings */
@@ -283,15 +292,15 @@ export interface ILogEngine {
  */
 export interface ILogEngineWithoutRedaction {
     /** Log a debug message without redaction */
-    debug(message: string, data?: LogData): void;
+    debug(message: string, data?: LogData, options?: LogCallOptions): void;
     /** Log an info message without redaction */
-    info(message: string, data?: LogData): void;
+    info(message: string, data?: LogData, options?: LogCallOptions): void;
     /** Log a warn message without redaction */
-    warn(message: string, data?: LogData): void;
+    warn(message: string, data?: LogData, options?: LogCallOptions): void;
     /** Log an error message without redaction */
-    error(message: string, data?: LogData): void;
+    error(message: string, data?: LogData, options?: LogCallOptions): void;
     /** Log a message without redaction */
-    log(message: string, data?: LogData): void;
+    log(message: string, data?: LogData, options?: LogCallOptions): void;
 }
 
 /**
