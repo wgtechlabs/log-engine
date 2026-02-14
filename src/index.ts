@@ -21,7 +21,7 @@
  */
 
 import { Logger } from './logger';
-import type { LoggerConfig, RedactionConfig, ILogEngineWithoutRedaction, LogData } from './types';
+import type { LoggerConfig, RedactionConfig, ILogEngineWithoutRedaction, LogData, LogCallOptions } from './types';
 import { DataRedactor, defaultRedactionConfig } from './redaction';
 
 // Create a singleton logger instance
@@ -48,60 +48,70 @@ export const LogEngine = {
      * Only shown in DEVELOPMENT mode
      * @param message - The debug message to log
      * @param data - Optional data object to log (sensitive data will be redacted)
+     * @param options - Optional per-call options (e.g., emoji override)
      * @example
      * ```typescript
      * LogEngine.debug('Processing user data', { userId: 123, email: 'user@example.com' });
+     * LogEngine.debug('Starting process', undefined, { emoji: '🔍' });
      * ```
      */
-  debug: (message: string, data?: LogData): void => logger.debug(message, data),
+  debug: (message: string, data?: LogData, options?: LogCallOptions): void => logger.debug(message, data, options),
 
   /**
      * Log an info message with automatic data redaction
      * Shown in DEVELOPMENT and PRODUCTION modes
      * @param message - The info message to log
      * @param data - Optional data object to log (sensitive data will be redacted)
+     * @param options - Optional per-call options (e.g., emoji override)
      * @example
      * ```typescript
      * LogEngine.info('User login successful', { username: 'john' });
+     * LogEngine.info('Database initialized', undefined, { emoji: '✅' });
      * ```
      */
-  info: (message: string, data?: LogData): void => logger.info(message, data),
+  info: (message: string, data?: LogData, options?: LogCallOptions): void => logger.info(message, data, options),
 
   /**
      * Log a warning message with automatic data redaction
      * Shown in DEVELOPMENT and PRODUCTION modes
      * @param message - The warning message to log
      * @param data - Optional data object to log (sensitive data will be redacted)
+     * @param options - Optional per-call options (e.g., emoji override)
      * @example
      * ```typescript
      * LogEngine.warn('API rate limit approaching', { requestsRemaining: 10 });
+     * LogEngine.warn('Low disk space', undefined, { emoji: '💾' });
      * ```
      */
-  warn: (message: string, data?: LogData): void => logger.warn(message, data),
+  warn: (message: string, data?: LogData, options?: LogCallOptions): void => logger.warn(message, data, options),
 
   /**
      * Log an error message with automatic data redaction
      * Shown in DEVELOPMENT and PRODUCTION modes
      * @param message - The error message to log
      * @param data - Optional data object to log (sensitive data will be redacted)
+     * @param options - Optional per-call options (e.g., emoji override)
      * @example
      * ```typescript
      * LogEngine.error('Database connection failed', { host: 'localhost', port: 5432 });
+     * LogEngine.error('Critical failure', undefined, { emoji: '💥' });
      * ```
      */
-  error: (message: string, data?: LogData): void => logger.error(message, data),
+  error: (message: string, data?: LogData, options?: LogCallOptions): void => logger.error(message, data, options),
 
   /**
      * Log a critical message with automatic data redaction
      * Always shown regardless of mode (except OFF)
      * @param message - The critical log message to log
      * @param data - Optional data object to log (sensitive data will be redacted)
+     * @param options - Optional per-call options (e.g., emoji override)
      * @example
      * ```typescript
      * LogEngine.log('Application starting', { version: '1.0.0' });
+     * LogEngine.log('System ready', undefined, { emoji: '🚀' });
      * ```
      */
-  log: (message: string, data?: LogData): void => logger.log(message, data),
+  log: (message: string, data?: LogData, options?: LogCallOptions): void => logger.log(message, data, options),
 
   // Raw methods that bypass redaction (use with caution)
   /**
@@ -109,40 +119,45 @@ export const LogEngine = {
      * Bypasses automatic data redaction for debugging purposes
      * @param message - The debug message to log
      * @param data - Optional data object to log (no redaction applied)
+     * @param options - Optional per-call options (e.g., emoji override)
      */
-  debugRaw: (message: string, data?: LogData): void => logger.debugRaw(message, data),
+  debugRaw: (message: string, data?: LogData, options?: LogCallOptions): void => logger.debugRaw(message, data, options),
 
   /**
      * Log an info message without redaction (use with caution)
      * Bypasses automatic data redaction for debugging purposes
      * @param message - The info message to log
      * @param data - Optional data object to log (no redaction applied)
+     * @param options - Optional per-call options (e.g., emoji override)
      */
-  infoRaw: (message: string, data?: LogData): void => logger.infoRaw(message, data),
+  infoRaw: (message: string, data?: LogData, options?: LogCallOptions): void => logger.infoRaw(message, data, options),
 
   /**
      * Log a warning message without redaction (use with caution)
      * Bypasses automatic data redaction for debugging purposes
      * @param message - The warning message to log
      * @param data - Optional data object to log (no redaction applied)
+     * @param options - Optional per-call options (e.g., emoji override)
      */
-  warnRaw: (message: string, data?: LogData): void => logger.warnRaw(message, data),
+  warnRaw: (message: string, data?: LogData, options?: LogCallOptions): void => logger.warnRaw(message, data, options),
 
   /**
      * Log an error message without redaction (use with caution)
      * Bypasses automatic data redaction for debugging purposes
      * @param message - The error message to log
      * @param data - Optional data object to log (no redaction applied)
+     * @param options - Optional per-call options (e.g., emoji override)
      */
-  errorRaw: (message: string, data?: LogData): void => logger.errorRaw(message, data),
+  errorRaw: (message: string, data?: LogData, options?: LogCallOptions): void => logger.errorRaw(message, data, options),
 
   /**
      * Log a critical message without redaction (use with caution)
      * Bypasses automatic data redaction for debugging purposes
      * @param message - The critical log message to log
      * @param data - Optional data object to log (no redaction applied)
+     * @param options - Optional per-call options (e.g., emoji override)
      */
-  logRaw: (message: string, data?: LogData): void => logger.logRaw(message, data),
+  logRaw: (message: string, data?: LogData, options?: LogCallOptions): void => logger.logRaw(message, data, options),
 
   // Redaction configuration methods
   /**
@@ -199,14 +214,15 @@ export const LogEngine = {
      * @example
      * ```typescript
      * LogEngine.withoutRedaction().info('Debug data', sensitiveObject);
+     * LogEngine.withoutRedaction().info('Custom emoji', undefined, { emoji: '🔍' });
      * ```
      */
   withoutRedaction: (): ILogEngineWithoutRedaction => ({
-    debug: (message: string, data?: LogData): void => logger.debugRaw(message, data),
-    info: (message: string, data?: LogData): void => logger.infoRaw(message, data),
-    warn: (message: string, data?: LogData): void => logger.warnRaw(message, data),
-    error: (message: string, data?: LogData): void => logger.errorRaw(message, data),
-    log: (message: string, data?: LogData): void => logger.logRaw(message, data)
+    debug: (message: string, data?: LogData, options?: LogCallOptions): void => logger.debugRaw(message, data, options),
+    info: (message: string, data?: LogData, options?: LogCallOptions): void => logger.infoRaw(message, data, options),
+    warn: (message: string, data?: LogData, options?: LogCallOptions): void => logger.warnRaw(message, data, options),
+    error: (message: string, data?: LogData, options?: LogCallOptions): void => logger.errorRaw(message, data, options),
+    log: (message: string, data?: LogData, options?: LogCallOptions): void => logger.logRaw(message, data, options)
   })
 };
 
@@ -219,6 +235,7 @@ export type {
   LogOutputHandler,
   BuiltInOutputHandler,
   OutputTarget,
+  LogCallOptions,
   // Advanced types
   FileOutputConfig,
   HttpOutputConfig,
