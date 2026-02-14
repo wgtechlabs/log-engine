@@ -3,7 +3,7 @@
  * Handles the main log message formatting with colors, timestamps, and levels
  */
 
-import { LogLevel, LogData, LogFormatConfig } from '../types';
+import { LogLevel, LogData, LogFormatConfig, LogCallOptions } from '../types';
 import { colors, colorScheme } from './colors';
 import { getTimestampComponents, formatTimestamp } from './timestamp';
 import { formatData, styleData } from './data-formatter';
@@ -30,9 +30,10 @@ export class MessageFormatter {
      * @param message - The message content to format
      * @param data - Optional data object to include in the log output
      * @param formatConfig - Optional format configuration to control element inclusion
+     * @param options - Optional per-call options (e.g., emoji override)
      * @returns Formatted string with ANSI colors and timestamps
      */
-  static format(level: LogLevel, message: string, data?: LogData, formatConfig?: LogFormatConfig): string {
+  static format(level: LogLevel, message: string, data?: LogData, formatConfig?: LogFormatConfig, options?: LogCallOptions): string {
     // Merge provided format configuration with the default configuration
     const config: LogFormatConfig = {
       ...MessageFormatter.DEFAULT_FORMAT_CONFIG,
@@ -65,7 +66,17 @@ export class MessageFormatter {
     const coloredLevel = `${levelColor}[${levelName}]${colors.reset}`;
 
     // Select emoji based on context if includeEmoji is true (default)
-    const emoji = config.includeEmoji !== false ? EmojiSelector.selectEmoji(level, message, data) : '';
+    // Use override emoji from options if provided (including empty string to suppress), otherwise use EmojiSelector
+    let emoji = '';
+    if (config.includeEmoji !== false) {
+      if (options?.emoji !== undefined) {
+        // Use override emoji (even if empty string)
+        emoji = options.emoji;
+      } else {
+        // Auto-select emoji
+        emoji = EmojiSelector.selectEmoji(level, message, data);
+      }
+    }
     const emojiPart = emoji ? `[${emoji}]` : '';
 
     // Format the base message (level is always included as per requirements)
