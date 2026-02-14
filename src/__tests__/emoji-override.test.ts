@@ -4,7 +4,7 @@
  */
 
 import { LogFormatter } from '../formatter';
-import { LogLevel } from '../types';
+import { LogLevel, LogMode } from '../types';
 import { EmojiSelector } from '../formatter/emoji-selector';
 import { Logger } from '../logger/core';
 
@@ -101,9 +101,9 @@ describe('Per-Call Emoji Override', () => {
       logger = new Logger();
       capturedOutput = [];
 
-      // Configure logger to capture output with INFO mode to see all log levels
+      // Configure logger to capture output with INFO mode
       logger.configure({
-        mode: 1, // LogMode.INFO
+        mode: LogMode.INFO,
         outputs: [(level: string, message: string) => {
           capturedOutput.push({ level, message });
         }]
@@ -129,7 +129,7 @@ describe('Per-Call Emoji Override', () => {
     });
 
     it('should override emoji in logger.debug() with options', () => {
-      logger.configure({ mode: 0 }); // Enable DEBUG mode
+      logger.configure({ mode: LogMode.DEBUG }); // Enable DEBUG mode
       logger.debug('Debugging info', undefined, { emoji: '🔍' });
 
       expect(capturedOutput).toHaveLength(1);
@@ -185,7 +185,7 @@ describe('Per-Call Emoji Override', () => {
       capturedOutput = [];
 
       logger.configure({
-        mode: 1, // LogMode.INFO
+        mode: LogMode.INFO,
         outputs: [(level: string, message: string) => {
           capturedOutput.push({ level, message });
         }]
@@ -193,7 +193,7 @@ describe('Per-Call Emoji Override', () => {
     });
 
     it('should override emoji in debugRaw() with options', () => {
-      logger.configure({ mode: 0 }); // Enable DEBUG mode
+      logger.configure({ mode: LogMode.DEBUG }); // Enable DEBUG mode
       logger.debugRaw('Debug output', { secret: 'password123' }, { emoji: '🔐' });
 
       expect(capturedOutput).toHaveLength(1);
@@ -250,7 +250,7 @@ describe('Per-Call Emoji Override', () => {
       capturedOutput = [];
 
       logger.configure({
-        mode: 1, // LogMode.INFO
+        mode: LogMode.INFO,
         outputs: [(level: string, message: string) => {
           capturedOutput.push({ level, message });
         }]
@@ -307,10 +307,10 @@ describe('Per-Call Emoji Override', () => {
     });
 
     it('should pass emoji override through LogEngine.info()', async () => {
-      const { LogEngine } = await import('../index');
+      const { LogEngine, LogMode } = await import('../index');
 
       LogEngine.configure({
-        mode: 1, // LogMode.INFO
+        mode: LogMode.INFO,
         outputs: [(level: string, message: string) => {
           capturedOutput.push({ level, message });
         }]
@@ -325,10 +325,10 @@ describe('Per-Call Emoji Override', () => {
     });
 
     it('should pass emoji override through LogEngine.error()', async () => {
-      const { LogEngine } = await import('../index');
+      const { LogEngine, LogMode } = await import('../index');
 
       LogEngine.configure({
-        mode: 1, // LogMode.INFO
+        mode: LogMode.INFO,
         outputs: [(level: string, message: string) => {
           capturedOutput.push({ level, message });
         }]
@@ -343,10 +343,10 @@ describe('Per-Call Emoji Override', () => {
     });
 
     it('should pass emoji override through LogEngine.debug()', async () => {
-      const { LogEngine } = await import('../index');
+      const { LogEngine, LogMode } = await import('../index');
 
       LogEngine.configure({
-        mode: 0, // LogMode.DEBUG
+        mode: LogMode.DEBUG,
         outputs: [(level: string, message: string) => {
           capturedOutput.push({ level, message });
         }]
@@ -361,10 +361,10 @@ describe('Per-Call Emoji Override', () => {
     });
 
     it('should pass emoji override through LogEngine.warn()', async () => {
-      const { LogEngine } = await import('../index');
+      const { LogEngine, LogMode } = await import('../index');
 
       LogEngine.configure({
-        mode: 1, // LogMode.INFO
+        mode: LogMode.INFO,
         outputs: [(level: string, message: string) => {
           capturedOutput.push({ level, message });
         }]
@@ -379,10 +379,10 @@ describe('Per-Call Emoji Override', () => {
     });
 
     it('should pass emoji override through LogEngine.log()', async () => {
-      const { LogEngine } = await import('../index');
+      const { LogEngine, LogMode } = await import('../index');
 
       LogEngine.configure({
-        mode: 1, // LogMode.INFO
+        mode: LogMode.INFO,
         outputs: [(level: string, message: string) => {
           capturedOutput.push({ level, message });
         }]
@@ -397,10 +397,10 @@ describe('Per-Call Emoji Override', () => {
     });
 
     it('should pass emoji override through LogEngine.infoRaw()', async () => {
-      const { LogEngine } = await import('../index');
+      const { LogEngine, LogMode } = await import('../index');
 
       LogEngine.configure({
-        mode: 1, // LogMode.INFO
+        mode: LogMode.INFO,
         outputs: [(level: string, message: string) => {
           capturedOutput.push({ level, message });
         }]
@@ -417,10 +417,10 @@ describe('Per-Call Emoji Override', () => {
     });
 
     it('should pass emoji override through LogEngine.withoutRedaction()', async () => {
-      const { LogEngine } = await import('../index');
+      const { LogEngine, LogMode } = await import('../index');
 
       LogEngine.configure({
-        mode: 1, // LogMode.INFO
+        mode: LogMode.INFO,
         outputs: [(level: string, message: string) => {
           capturedOutput.push({ level, message });
         }]
@@ -437,10 +437,10 @@ describe('Per-Call Emoji Override', () => {
     });
 
     it('should allow suppressing emoji via empty string through LogEngine', async () => {
-      const { LogEngine } = await import('../index');
+      const { LogEngine, LogMode } = await import('../index');
 
       LogEngine.configure({
-        mode: 1, // LogMode.INFO
+        mode: LogMode.INFO,
         outputs: [(level: string, message: string) => {
           capturedOutput.push({ level, message });
         }]
