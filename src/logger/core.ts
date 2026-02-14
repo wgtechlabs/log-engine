@@ -6,7 +6,7 @@
  * Includes automatic data redaction for sensitive information
  */
 
-import { LogLevel, LogMode, LoggerConfig, LogOutputHandler, OutputTarget, EnhancedOutputTarget, LogData } from '../types';
+import { LogLevel, LogMode, LoggerConfig, LogOutputHandler, OutputTarget, EnhancedOutputTarget, LogData, LogCallOptions } from '../types';
 import { LogFormatter, EmojiSelector } from '../formatter';
 import { DataRedactor, RedactionController, defaultRedactionConfig } from '../redaction';
 import { LoggerConfigManager } from './config';
@@ -52,11 +52,12 @@ export class Logger {
    * @param level - The log level to format for
    * @param message - The message content to format
    * @param data - Optional data object to include in the log output
+   * @param options - Optional per-call options (e.g., emoji override)
    * @returns Formatted string with appropriate configuration applied
    */
-  private formatMessage(level: LogLevel, message: string, data?: LogData): string {
+  private formatMessage(level: LogLevel, message: string, data?: LogData, options?: LogCallOptions): string {
     const cachedConfig = this.getCachedConfig();
-    return LogFormatter.format(level, message, data, cachedConfig.format);
+    return LogFormatter.format(level, message, data, cachedConfig.format, options);
   }
 
   /**
@@ -297,11 +298,12 @@ export class Logger {
      * Automatically redacts sensitive data when provided
      * @param message - The debug message to log
      * @param data - Optional data object to log (will be redacted)
+     * @param options - Optional per-call options (e.g., emoji override)
      */
-  debug(message: string, data?: LogData): void {
+  debug(message: string, data?: LogData, options?: LogCallOptions): void {
     if (this.shouldLog(LogLevel.DEBUG)) {
       const processedData = DataRedactor.redactData(data);
-      const formatted = this.formatMessage(LogLevel.DEBUG, message, processedData);
+      const formatted = this.formatMessage(LogLevel.DEBUG, message, processedData, options);
       this.writeToOutput('debug', message, formatted, processedData);
     }
   }
@@ -312,11 +314,12 @@ export class Logger {
      * Automatically redacts sensitive data when provided
      * @param message - The info message to log
      * @param data - Optional data object to log (will be redacted)
+     * @param options - Optional per-call options (e.g., emoji override)
      */
-  info(message: string, data?: LogData): void {
+  info(message: string, data?: LogData, options?: LogCallOptions): void {
     if (this.shouldLog(LogLevel.INFO)) {
       const processedData = DataRedactor.redactData(data);
-      const formatted = this.formatMessage(LogLevel.INFO, message, processedData);
+      const formatted = this.formatMessage(LogLevel.INFO, message, processedData, options);
       this.writeToOutput('info', message, formatted, processedData);
     }
   }
@@ -327,11 +330,12 @@ export class Logger {
      * Automatically redacts sensitive data when provided
      * @param message - The warning message to log
      * @param data - Optional data object to log (will be redacted)
+     * @param options - Optional per-call options (e.g., emoji override)
      */
-  warn(message: string, data?: LogData): void {
+  warn(message: string, data?: LogData, options?: LogCallOptions): void {
     if (this.shouldLog(LogLevel.WARN)) {
       const processedData = DataRedactor.redactData(data);
-      const formatted = this.formatMessage(LogLevel.WARN, message, processedData);
+      const formatted = this.formatMessage(LogLevel.WARN, message, processedData, options);
       this.writeToOutput('warn', message, formatted, processedData, false, true);
     }
   }
@@ -342,11 +346,12 @@ export class Logger {
      * Automatically redacts sensitive data when provided
      * @param message - The error message to log
      * @param data - Optional data object to log (will be redacted)
+     * @param options - Optional per-call options (e.g., emoji override)
      */
-  error(message: string, data?: LogData): void {
+  error(message: string, data?: LogData, options?: LogCallOptions): void {
     if (this.shouldLog(LogLevel.ERROR)) {
       const processedData = DataRedactor.redactData(data);
-      const formatted = this.formatMessage(LogLevel.ERROR, message, processedData);
+      const formatted = this.formatMessage(LogLevel.ERROR, message, processedData, options);
       this.writeToOutput('error', message, formatted, processedData, true, false);
     }
   }
@@ -358,11 +363,12 @@ export class Logger {
      * Automatically redacts sensitive data when provided
      * @param message - The log message to output
      * @param data - Optional data object to log (will be redacted)
+     * @param options - Optional per-call options (e.g., emoji override)
      */
-  log(message: string, data?: LogData): void {
+  log(message: string, data?: LogData, options?: LogCallOptions): void {
     if (this.shouldLog(LogLevel.LOG)) {
       const processedData = DataRedactor.redactData(data);
-      const formatted = this.formatMessage(LogLevel.LOG, message, processedData);
+      const formatted = this.formatMessage(LogLevel.LOG, message, processedData, options);
       this.writeToOutput('log', message, formatted, processedData);
     }
   }
@@ -372,10 +378,11 @@ export class Logger {
      * Log a debug message without data redaction
      * @param message - The debug message to log
      * @param data - Optional data object to log (no redaction applied)
+     * @param options - Optional per-call options (e.g., emoji override)
      */
-  debugRaw(message: string, data?: LogData): void {
+  debugRaw(message: string, data?: LogData, options?: LogCallOptions): void {
     if (this.shouldLog(LogLevel.DEBUG)) {
-      const formatted = this.formatMessage(LogLevel.DEBUG, message, data);
+      const formatted = this.formatMessage(LogLevel.DEBUG, message, data, options);
       this.writeToOutput('debug', message, formatted, data);
     }
   }
@@ -384,10 +391,11 @@ export class Logger {
      * Log an info message without data redaction
      * @param message - The info message to log
      * @param data - Optional data object to log (no redaction applied)
+     * @param options - Optional per-call options (e.g., emoji override)
      */
-  infoRaw(message: string, data?: LogData): void {
+  infoRaw(message: string, data?: LogData, options?: LogCallOptions): void {
     if (this.shouldLog(LogLevel.INFO)) {
-      const formatted = this.formatMessage(LogLevel.INFO, message, data);
+      const formatted = this.formatMessage(LogLevel.INFO, message, data, options);
       this.writeToOutput('info', message, formatted, data);
     }
   }
@@ -396,10 +404,11 @@ export class Logger {
      * Log a warning message without data redaction
      * @param message - The warning message to log
      * @param data - Optional data object to log (no redaction applied)
+     * @param options - Optional per-call options (e.g., emoji override)
      */
-  warnRaw(message: string, data?: LogData): void {
+  warnRaw(message: string, data?: LogData, options?: LogCallOptions): void {
     if (this.shouldLog(LogLevel.WARN)) {
-      const formatted = this.formatMessage(LogLevel.WARN, message, data);
+      const formatted = this.formatMessage(LogLevel.WARN, message, data, options);
       this.writeToOutput('warn', message, formatted, data, false, true);
     }
   }
@@ -408,10 +417,11 @@ export class Logger {
      * Log an error message without data redaction
      * @param message - The error message to log
      * @param data - Optional data object to log (no redaction applied)
+     * @param options - Optional per-call options (e.g., emoji override)
      */
-  errorRaw(message: string, data?: LogData): void {
+  errorRaw(message: string, data?: LogData, options?: LogCallOptions): void {
     if (this.shouldLog(LogLevel.ERROR)) {
-      const formatted = this.formatMessage(LogLevel.ERROR, message, data);
+      const formatted = this.formatMessage(LogLevel.ERROR, message, data, options);
       this.writeToOutput('error', message, formatted, data, true, false);
     }
   }
@@ -420,10 +430,11 @@ export class Logger {
      * Log a message without data redaction (always outputs unless mode is OFF)
      * @param message - The log message to output
      * @param data - Optional data object to log (no redaction applied)
+     * @param options - Optional per-call options (e.g., emoji override)
      */
-  logRaw(message: string, data?: LogData): void {
+  logRaw(message: string, data?: LogData, options?: LogCallOptions): void {
     if (this.shouldLog(LogLevel.LOG)) {
-      const formatted = this.formatMessage(LogLevel.LOG, message, data);
+      const formatted = this.formatMessage(LogLevel.LOG, message, data, options);
       this.writeToOutput('log', message, formatted, data);
     }
   }
