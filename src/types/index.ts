@@ -15,7 +15,14 @@ export type LogData = any;
  * Allows per-call customization of log behavior
  */
 export interface LogCallOptions {
-    /** Override the auto-detected emoji for this specific log call */
+    /**
+     * Override the auto-detected emoji for this specific log call
+     * - Set to a specific emoji string to use that emoji
+     * - Set to empty string ('') to suppress emoji for this call
+     * - Leave undefined (or omit) to use auto-detection
+     * @example { emoji: '✅' } // Use check mark emoji for this call
+     * @example { emoji: '' }   // Suppress emoji for this call
+     */
     emoji?: string;
 }
 

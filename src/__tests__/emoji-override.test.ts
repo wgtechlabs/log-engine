@@ -298,4 +298,161 @@ describe('Per-Call Emoji Override', () => {
       expect(clean3).toContain('[🔴]');
     });
   });
+
+  describe('LogEngine wrapper emoji override', () => {
+    let capturedOutput: { level: string; message: string }[];
+
+    beforeEach(() => {
+      capturedOutput = [];
+    });
+
+    it('should pass emoji override through LogEngine.info()', async () => {
+      const { LogEngine } = await import('../index');
+
+      LogEngine.configure({
+        mode: 1, // LogMode.INFO
+        outputs: [(level: string, message: string) => {
+          capturedOutput.push({ level, message });
+        }]
+      });
+
+      LogEngine.info('Database initialized', undefined, { emoji: '✅' });
+
+      expect(capturedOutput).toHaveLength(1);
+      const cleanMessage = capturedOutput[0].message.replace(/\x1b\[[0-9;]*m/g, '');
+      expect(cleanMessage).toContain('[✅]');
+      expect(cleanMessage).toMatch(/\[INFO\]\[✅\]: Database initialized$/);
+    });
+
+    it('should pass emoji override through LogEngine.error()', async () => {
+      const { LogEngine } = await import('../index');
+
+      LogEngine.configure({
+        mode: 1, // LogMode.INFO
+        outputs: [(level: string, message: string) => {
+          capturedOutput.push({ level, message });
+        }]
+      });
+
+      LogEngine.error('Critical failure', undefined, { emoji: '💥' });
+
+      expect(capturedOutput).toHaveLength(1);
+      const cleanMessage = capturedOutput[0].message.replace(/\x1b\[[0-9;]*m/g, '');
+      expect(cleanMessage).toContain('[💥]');
+      expect(cleanMessage).toMatch(/\[ERROR\]\[💥\]: Critical failure$/);
+    });
+
+    it('should pass emoji override through LogEngine.debug()', async () => {
+      const { LogEngine } = await import('../index');
+
+      LogEngine.configure({
+        mode: 0, // LogMode.DEBUG
+        outputs: [(level: string, message: string) => {
+          capturedOutput.push({ level, message });
+        }]
+      });
+
+      LogEngine.debug('Debug info', undefined, { emoji: '🔍' });
+
+      expect(capturedOutput).toHaveLength(1);
+      const cleanMessage = capturedOutput[0].message.replace(/\x1b\[[0-9;]*m/g, '');
+      expect(cleanMessage).toContain('[🔍]');
+      expect(cleanMessage).toMatch(/\[DEBUG\]\[🔍\]: Debug info$/);
+    });
+
+    it('should pass emoji override through LogEngine.warn()', async () => {
+      const { LogEngine } = await import('../index');
+
+      LogEngine.configure({
+        mode: 1, // LogMode.INFO
+        outputs: [(level: string, message: string) => {
+          capturedOutput.push({ level, message });
+        }]
+      });
+
+      LogEngine.warn('Low memory', undefined, { emoji: '💾' });
+
+      expect(capturedOutput).toHaveLength(1);
+      const cleanMessage = capturedOutput[0].message.replace(/\x1b\[[0-9;]*m/g, '');
+      expect(cleanMessage).toContain('[💾]');
+      expect(cleanMessage).toMatch(/\[WARN\]\[💾\]: Low memory$/);
+    });
+
+    it('should pass emoji override through LogEngine.log()', async () => {
+      const { LogEngine } = await import('../index');
+
+      LogEngine.configure({
+        mode: 1, // LogMode.INFO
+        outputs: [(level: string, message: string) => {
+          capturedOutput.push({ level, message });
+        }]
+      });
+
+      LogEngine.log('System started', undefined, { emoji: '🚀' });
+
+      expect(capturedOutput).toHaveLength(1);
+      const cleanMessage = capturedOutput[0].message.replace(/\x1b\[[0-9;]*m/g, '');
+      expect(cleanMessage).toContain('[🚀]');
+      expect(cleanMessage).toMatch(/\[LOG\]\[🚀\]: System started$/);
+    });
+
+    it('should pass emoji override through LogEngine.infoRaw()', async () => {
+      const { LogEngine } = await import('../index');
+
+      LogEngine.configure({
+        mode: 1, // LogMode.INFO
+        outputs: [(level: string, message: string) => {
+          capturedOutput.push({ level, message });
+        }]
+      });
+
+      LogEngine.infoRaw('Raw info', { secret: 'data' }, { emoji: '📝' });
+
+      expect(capturedOutput).toHaveLength(1);
+      const cleanMessage = capturedOutput[0].message.replace(/\x1b\[[0-9;]*m/g, '');
+      expect(cleanMessage).toContain('[📝]');
+      expect(cleanMessage).toMatch(/\[INFO\]\[📝\]: Raw info/);
+      // Raw methods should not redact
+      expect(cleanMessage).toContain('secret');
+    });
+
+    it('should pass emoji override through LogEngine.withoutRedaction()', async () => {
+      const { LogEngine } = await import('../index');
+
+      LogEngine.configure({
+        mode: 1, // LogMode.INFO
+        outputs: [(level: string, message: string) => {
+          capturedOutput.push({ level, message });
+        }]
+      });
+
+      LogEngine.withoutRedaction().info('Unredacted', { password: 'secret' }, { emoji: '🔓' });
+
+      expect(capturedOutput).toHaveLength(1);
+      const cleanMessage = capturedOutput[0].message.replace(/\x1b\[[0-9;]*m/g, '');
+      expect(cleanMessage).toContain('[🔓]');
+      expect(cleanMessage).toMatch(/\[INFO\]\[🔓\]: Unredacted/);
+      // withoutRedaction should not redact
+      expect(cleanMessage).toContain('password');
+    });
+
+    it('should allow suppressing emoji via empty string through LogEngine', async () => {
+      const { LogEngine } = await import('../index');
+
+      LogEngine.configure({
+        mode: 1, // LogMode.INFO
+        outputs: [(level: string, message: string) => {
+          capturedOutput.push({ level, message });
+        }]
+      });
+
+      LogEngine.info('Plain message', undefined, { emoji: '' });
+
+      expect(capturedOutput).toHaveLength(1);
+      const cleanMessage = capturedOutput[0].message.replace(/\x1b\[[0-9;]*m/g, '');
+      // Should not have emoji brackets (like [✅]) between [INFO] and the colon
+      expect(cleanMessage).not.toMatch(/\[INFO\]\[.+\]:/);
+      expect(cleanMessage).toMatch(/\[INFO\]: Plain message$/);
+    });
+  });
 });
