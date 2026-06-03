@@ -1,0 +1,215 @@
+---
+title: LogEngine
+description: Complete API reference for the LogEngine singleton
+icon: code
+---
+
+The `LogEngine` object is the main interface for all logging operations. It's a singleton that provides a simple, intuitive API with security-first design.
+
+```typescript
+import { LogEngine } from '@wgtechlabs/log-engine';
+```
+
+## Configuration
+
+### configure
+
+Configure the logger with new settings.
+
+```typescript
+LogEngine.configure(config: Partial<LoggerConfig>): void
+```
+
+<ParamField body="config" type="Partial<LoggerConfig>" required>
+  Configuration object. See [LoggerConfig](/api-reference/types#loggerconfig) for all options.
+</ParamField>
+
+```typescript
+LogEngine.configure({
+  mode: LogMode.DEBUG,
+  format: {
+    includeIsoTimestamp: true,
+    includeLocalTime: true,
+    includeEmoji: true
+  }
+});
+```
+
+---
+
+## Logging Methods
+
+All standard logging methods accept the same parameters:
+
+<ParamField body="message" type="string" required>
+  The log message to display.
+</ParamField>
+
+<ParamField body="data" type="LogData">
+  Optional data object to log. Sensitive fields are automatically redacted.
+</ParamField>
+
+<ParamField body="options" type="LogCallOptions">
+  Optional per-call options (e.g., emoji override).
+</ParamField>
+
+### debug
+
+Log a debug message. Only shown in DEBUG mode.
+
+```typescript
+LogEngine.debug(message: string, data?: LogData, options?: LogCallOptions): void
+```
+
+### info
+
+Log an info message. Shown in DEBUG and INFO modes.
+
+```typescript
+LogEngine.info(message: string, data?: LogData, options?: LogCallOptions): void
+```
+
+### warn
+
+Log a warning message. Shown in DEBUG, INFO, and WARN modes.
+
+```typescript
+LogEngine.warn(message: string, data?: LogData, options?: LogCallOptions): void
+```
+
+### error
+
+Log an error message. Shown in DEBUG, INFO, WARN, and ERROR modes.
+
+```typescript
+LogEngine.error(message: string, data?: LogData, options?: LogCallOptions): void
+```
+
+### log
+
+Log a critical message. Always shown regardless of mode (except OFF).
+
+```typescript
+LogEngine.log(message: string, data?: LogData, options?: LogCallOptions): void
+```
+
+---
+
+## Raw Logging Methods
+
+<Warning>
+  Raw methods bypass all data redaction. Use with caution.
+</Warning>
+
+### debugRaw / infoRaw / warnRaw / errorRaw / logRaw
+
+Same signature as standard methods, but without automatic redaction:
+
+```typescript
+LogEngine.debugRaw(message: string, data?: LogData, options?: LogCallOptions): void
+LogEngine.infoRaw(message: string, data?: LogData, options?: LogCallOptions): void
+LogEngine.warnRaw(message: string, data?: LogData, options?: LogCallOptions): void
+LogEngine.errorRaw(message: string, data?: LogData, options?: LogCallOptions): void
+LogEngine.logRaw(message: string, data?: LogData, options?: LogCallOptions): void
+```
+
+### withoutRedaction
+
+Returns a LogEngine instance with redaction bypassed.
+
+```typescript
+LogEngine.withoutRedaction(): ILogEngineWithoutRedaction
+```
+
+```typescript
+LogEngine.withoutRedaction().info('Debug data', sensitiveObject);
+```
+
+---
+
+## Redaction Configuration
+
+### configureRedaction
+
+Configure data redaction settings.
+
+```typescript
+LogEngine.configureRedaction(config: Partial<RedactionConfig>): void
+```
+
+```typescript
+LogEngine.configureRedaction({
+  redactionText: '***HIDDEN***',
+  maxContentLength: 200,
+  sensitiveFields: ['myCustomField', 'internalSecret']
+});
+```
+
+### getRedactionConfig
+
+Get the current redaction configuration.
+
+```typescript
+LogEngine.getRedactionConfig(): RedactionConfig
+```
+
+### refreshRedactionConfig
+
+Refresh redaction configuration from environment variables.
+
+```typescript
+LogEngine.refreshRedactionConfig(): void
+```
+
+### resetRedactionConfig
+
+Reset redaction configuration to defaults.
+
+```typescript
+LogEngine.resetRedactionConfig(): void
+```
+
+### addCustomRedactionPatterns
+
+Add custom regex patterns for advanced field detection.
+
+```typescript
+LogEngine.addCustomRedactionPatterns(patterns: RegExp[]): void
+```
+
+```typescript
+LogEngine.addCustomRedactionPatterns([/internal.*/i, /company.*/i]);
+```
+
+### clearCustomRedactionPatterns
+
+Clear all custom redaction patterns.
+
+```typescript
+LogEngine.clearCustomRedactionPatterns(): void
+```
+
+### addSensitiveFields
+
+Add custom sensitive field names to the existing list.
+
+```typescript
+LogEngine.addSensitiveFields(fields: string[]): void
+```
+
+```typescript
+LogEngine.addSensitiveFields(['companySecret', 'internalToken']);
+```
+
+### testFieldRedaction
+
+Test if a field name would be redacted with the current configuration.
+
+```typescript
+LogEngine.testFieldRedaction(fieldName: string): boolean
+```
+
+```typescript
+LogEngine.testFieldRedaction('password');  // true
+LogEngine.testFieldRedaction('username');  // false
+```

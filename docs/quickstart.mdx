@@ -1,0 +1,122 @@
+---
+title: Quick Start
+description: Install Log Engine and start logging in under a minute
+icon: rocket
+---
+
+## Installation
+
+Install the package using your preferred package manager:
+
+<CodeGroup>
+```bash pnpm
+pnpm add @wgtechlabs/log-engine
+```
+
+```bash npm
+npm install @wgtechlabs/log-engine
+```
+
+```bash yarn
+yarn add @wgtechlabs/log-engine
+```
+</CodeGroup>
+
+<Info>
+  This project uses **pnpm** as the primary package manager for development. If you're contributing to the project, please use pnpm to ensure consistency.
+</Info>
+
+## Basic Usage
+
+```typescript
+import { LogEngine, LogMode } from '@wgtechlabs/log-engine';
+
+// Basic usage with auto-configuration based on NODE_ENV
+LogEngine.debug('This is a debug message');
+LogEngine.info('This is an info message');
+LogEngine.warn('This is a warning message');
+LogEngine.error('This is an error message');
+LogEngine.log('This is a critical message that always shows');
+```
+
+## Automatic Data Redaction
+
+Sensitive data is automatically redacted — no configuration needed:
+
+```typescript
+LogEngine.info('User login', {
+  username: 'john_doe',        // Visible
+  password: 'secret123',       // [REDACTED]
+  email: 'john@example.com',   // [REDACTED]
+  apiKey: 'apikey123'          // [REDACTED]
+});
+```
+
+## Configure Log Mode
+
+```typescript
+import { LogEngine, LogMode } from '@wgtechlabs/log-engine';
+
+// Configure using LogMode (recommended)
+LogEngine.configure({ mode: LogMode.DEBUG });  // Most verbose
+LogEngine.configure({ mode: LogMode.INFO });   // Balanced
+LogEngine.configure({ mode: LogMode.WARN });   // Focused
+LogEngine.configure({ mode: LogMode.ERROR });  // Minimal
+LogEngine.configure({ mode: LogMode.SILENT }); // Critical only
+LogEngine.configure({ mode: LogMode.OFF });    // Complete silence
+```
+
+## Custom Output Routing
+
+Route logs anywhere — files, APIs, databases, or multiple destinations:
+
+```typescript
+// Custom output handler
+LogEngine.configure({
+  outputHandler: (level, message, data) => {
+    myCustomHandler(level, message, data);
+  },
+  suppressConsoleOutput: true
+});
+
+// Multiple outputs simultaneously
+LogEngine.configure({
+  outputs: [
+    'console',
+    myFileHandler,
+    myMonitoringHandler
+  ]
+});
+```
+
+## Advanced Redaction Features
+
+```typescript
+// Add custom redaction patterns
+LogEngine.addCustomRedactionPatterns([/internal.*/i, /company.*/i]);
+LogEngine.addSensitiveFields(['companySecret', 'internalToken']);
+
+// Test field redaction
+console.log(LogEngine.testFieldRedaction('password')); // true
+console.log(LogEngine.testFieldRedaction('username')); // false
+
+// Raw logging for debugging (bypasses redaction)
+LogEngine.withoutRedaction().info('Debug data', { password: 'visible-in-debug' });
+```
+
+## What's Next?
+
+<CardGroup cols={2}>
+  <Card title="Log Modes" icon="sliders" href="/features/log-modes">
+    Learn about the mode-based configuration system
+  </Card>
+  <Card title="Data Redaction" icon="shield-halved" href="/features/data-redaction">
+    Deep dive into PII protection and custom patterns
+  </Card>
+  <Card title="Output Handlers" icon="arrow-right-arrow-left" href="/features/output-handlers">
+    Route logs to custom destinations
+  </Card>
+  <Card title="Emoji Support" icon="face-smile" href="/features/emoji-support">
+    Configure context-aware emoji in your logs
+  </Card>
+</CardGroup>

@@ -1,0 +1,59 @@
+---
+title: Auto-Configuration
+description: Automatic environment detection and log level configuration
+icon: gear
+---
+
+Log Engine automatically configures itself based on the `NODE_ENV` environment variable — no manual setup required.
+
+## Environment Defaults
+
+| Environment | Mode | Verbosity |
+|-------------|------|-----------|
+| `development` | `LogMode.DEBUG` | Most verbose |
+| `production` | `LogMode.INFO` | Balanced |
+| `staging` | `LogMode.WARN` | Focused |
+| `test` | `LogMode.ERROR` | Minimal |
+| Default (unset) | `LogMode.INFO` | Balanced |
+
+## How It Works
+
+When Log Engine initializes, it reads `NODE_ENV` and automatically sets the appropriate log mode:
+
+```typescript
+import { LogEngine } from '@wgtechlabs/log-engine';
+
+// No configuration needed - just start logging
+LogEngine.debug('This is a debug message');
+LogEngine.info('This is an info message');
+LogEngine.warn('This is a warning message');
+LogEngine.error('This is an error message');
+```
+
+In **development** (`NODE_ENV=development`), all messages are visible. In **production** (`NODE_ENV=production`), only INFO and above are shown.
+
+## Overriding Auto-Configuration
+
+You can always override the automatic configuration:
+
+```typescript
+import { LogEngine, LogMode } from '@wgtechlabs/log-engine';
+
+// Override the auto-detected mode
+LogEngine.configure({ mode: LogMode.DEBUG });
+
+// Or configure based on your own logic
+const env = process.env.NODE_ENV || 'development';
+
+if (env === 'production') {
+  LogEngine.configure({ mode: LogMode.INFO });
+} else if (env === 'staging') {
+  LogEngine.configure({ mode: LogMode.WARN });
+} else {
+  LogEngine.configure({ mode: LogMode.DEBUG });
+}
+```
+
+## Environment Variable Reference
+
+See the [Environment Variables](/guides/environment-variables) guide for all available environment variables that control Log Engine behavior.

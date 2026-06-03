@@ -1,0 +1,191 @@
+---
+title: Emoji Support
+description: Context-aware emoji that automatically enhance log readability
+icon: face-smile
+---
+
+Log Engine features intelligent emoji support that enhances log readability by adding visual context to each log message. The emoji engine analyzes your log content (level + message + data) and automatically selects the most relevant emoji.
+
+## Quick Start
+
+Emoji are enabled by default — just start logging:
+
+```typescript
+import { LogEngine } from '@wgtechlabs/log-engine';
+
+LogEngine.error('Database connection failed');
+// [ERROR][🗃️]: Database connection failed
+
+LogEngine.info('Deployed to production successfully');
+// [INFO][🚀]: Deployed to production successfully
+
+LogEngine.warn('Performance degradation detected');
+// [WARN][⚡️]: Performance degradation detected
+
+LogEngine.info('Unknown event happened');
+// [INFO][ℹ️]: Unknown event happened (fallback)
+```
+
+## Context-Aware Mappings
+
+Log Engine intelligently matches keywords in your log messages to select appropriate emoji:
+
+| Context | Keywords | Emoji |
+|---------|----------|-------|
+| **Database** | database, db, sql, query, mongo, postgres | 🗃️ |
+| **Deployment** | deploy, release, launched, production | 🚀 |
+| **Performance** | performance, speed, optimize, latency | ⚡️ |
+| **Security** | security, vulnerability, auth, permission | 🔒️ |
+| **Critical** | critical, urgent, emergency, crash | 🚑️ |
+| **Bugs** | bug, fix, defect, issue | 🐛 |
+| **Network** | network, http, api, endpoint | 🌐 |
+| **Testing** | tests, testing, validation | ✅ |
+
+## Fallback Emoji by Level
+
+When no context-specific emoji matches, Log Engine uses these fallbacks:
+
+| Log Level | Emoji | Description |
+|-----------|-------|-------------|
+| `DEBUG` | 🐞 | Debugging information |
+| `INFO` | ℹ️ | General information |
+| `WARN` | ⚠️ | Warning messages |
+| `ERROR` | ❌ | Error messages |
+| `LOG` | ✅ | Critical log messages |
+
+## Custom Emoji Configuration
+
+### Custom Context Mappings
+
+Add your own emoji mappings for custom contexts:
+
+```typescript
+LogEngine.configure({
+  format: {
+    emoji: {
+      customMappings: [
+        {
+          emoji: '🎯',
+          code: ':dart:',
+          description: 'Goal achieved',
+          keywords: ['goal', 'target', 'achieved', 'milestone']
+        },
+        {
+          emoji: '💰',
+          code: ':moneybag:',
+          description: 'Payment operations',
+          keywords: ['payment', 'transaction', 'billing', 'invoice']
+        }
+      ]
+    }
+  }
+});
+
+LogEngine.info('Payment processed successfully');
+// [INFO][💰]: Payment processed successfully
+
+LogEngine.info('Sales target achieved');
+// [INFO][🎯]: Sales target achieved
+```
+
+### Custom Fallback Emoji
+
+Override the default fallback emoji for each log level:
+
+```typescript
+LogEngine.configure({
+  format: {
+    emoji: {
+      customFallbacks: {
+        DEBUG: '🔍',
+        INFO: '📢',
+        WARN: '🚨',
+        ERROR: '💀',
+        LOG: '🎉'
+      }
+    }
+  }
+});
+
+LogEngine.info('Generic info message');
+// [INFO][📢]: Generic info message
+```
+
+### Use Custom Mappings Exclusively
+
+Ignore the built-in set and use only your custom mappings:
+
+```typescript
+LogEngine.configure({
+  format: {
+    emoji: {
+      useCustomOnly: true,
+      customMappings: [
+        // Your custom mappings only
+      ]
+    }
+  }
+});
+```
+
+## Data Context Analysis
+
+The emoji selector also analyzes data objects for context:
+
+```typescript
+LogEngine.info('Operation completed', {
+  database: 'postgres',
+  table: 'users',
+  rows: 1000
+});
+// [INFO][🗃️]: Operation completed { database: 'postgres', ... }
+
+LogEngine.warn('Issue detected', {
+  performance: 'degraded',
+  latency: '500ms'
+});
+// [WARN][⚡️]: Issue detected { performance: 'degraded', ... }
+```
+
+## Programmatic Access
+
+Access emoji utilities directly for advanced use cases:
+
+```typescript
+import { EmojiSelector, EMOJI_MAPPINGS, FALLBACK_EMOJI } from '@wgtechlabs/log-engine';
+
+// Check all available emoji mappings
+console.log(EMOJI_MAPPINGS);
+
+// Check fallback emoji
+console.log(FALLBACK_EMOJI);
+// { DEBUG: '🐞', INFO: 'ℹ️', WARN: '⚠️', ERROR: '❌', LOG: '✅' }
+
+// Configure emoji selector directly
+EmojiSelector.configure({
+  customMappings: [...]
+});
+```
+
+## Disabling Emoji
+
+```typescript
+LogEngine.configure({
+  format: {
+    includeEmoji: false
+  }
+});
+```
+
+## Output Format
+
+With emoji enabled (default):
+
+```
+[ISO_TIMESTAMP][LOCAL_TIME][LEVEL][EMOJI]: message [data]
+```
+
+Example:
+```
+[2026-02-11T14:00:00.000Z][2:00PM][ERROR][🗃️]: Database connection failed
+```
