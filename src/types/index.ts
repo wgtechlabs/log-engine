@@ -379,18 +379,26 @@ export interface FieldRedactionResult {
  * Documents all supported environment variables
  */
 export interface EnvironmentConfig {
+    /** NODE_ENV - Node.js environment mode */
+    NODE_ENV?: string;
+    /** DEBUG_FULL_PAYLOADS - Enable full payload debugging */
+    DEBUG_FULL_PAYLOADS?: string;
+    /** LOG_LEVEL - Global log level */
+    LOG_LEVEL?: string;
+    /** LOG_REDACTION_ENABLED - Explicitly enable/disable redaction */
+    LOG_REDACTION_ENABLED?: string;
     /** LOG_REDACTION_DISABLED - Disable all redaction */
     LOG_REDACTION_DISABLED?: string;
     /** LOG_REDACTION_TEXT - Custom redaction text */
     LOG_REDACTION_TEXT?: string;
-    /** LOG_REDACTION_SENSITIVE_FIELDS - Comma-separated sensitive field names */
-    LOG_REDACTION_SENSITIVE_FIELDS?: string;
+    /** LOG_SENSITIVE_FIELDS - Comma-separated sensitive field names */
+    LOG_SENSITIVE_FIELDS?: string;
     /** LOG_REDACTION_CONTENT_FIELDS - Comma-separated content field names */
     LOG_REDACTION_CONTENT_FIELDS?: string;
-    /** LOG_REDACTION_MAX_CONTENT_LENGTH - Maximum length for content fields */
-    LOG_REDACTION_MAX_CONTENT_LENGTH?: string;
-    /** LOG_REDACTION_TRUNCATION_TEXT - Text for truncated content */
-    LOG_REDACTION_TRUNCATION_TEXT?: string;
+    /** LOG_MAX_CONTENT_LENGTH - Maximum length for content fields */
+    LOG_MAX_CONTENT_LENGTH?: string;
+    /** LOG_TRUNCATION_TEXT - Text for truncated content */
+    LOG_TRUNCATION_TEXT?: string;
     /** LOG_REDACTION_DEEP - Enable deep redaction */
     LOG_REDACTION_DEEP?: string;
 }
