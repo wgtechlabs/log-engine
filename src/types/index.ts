@@ -383,8 +383,8 @@ export interface EnvironmentConfig {
     LOG_REDACTION_DISABLED?: string;
     /** LOG_REDACTION_TEXT - Custom redaction text */
     LOG_REDACTION_TEXT?: string;
-    /** LOG_REDACTION_SENSITIVE_FIELDS - Comma-separated sensitive field names */
-    LOG_REDACTION_SENSITIVE_FIELDS?: string;
+    /** LOG_SENSITIVE_FIELDS - Comma-separated sensitive field names */
+    LOG_SENSITIVE_FIELDS?: string;
     /** LOG_REDACTION_CONTENT_FIELDS - Comma-separated content field names */
     LOG_REDACTION_CONTENT_FIELDS?: string;
     /** LOG_REDACTION_MAX_CONTENT_LENGTH - Maximum length for content fields */
