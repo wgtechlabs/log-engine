@@ -1,0 +1,184 @@
+---
+title: Output Handlers
+description: Route logs to files, HTTP endpoints, databases, or custom destinations
+icon: arrow-right-arrow-left
+---
+
+Log Engine v2.0+ introduces output routing capabilities that transform how and where your logs are delivered. Route to custom destinations, use multiple simultaneous outputs, and leverage production-ready handlers — all with the same simple API.
+
+## Custom Output Handler
+
+Redirect logs anywhere with a single configuration:
+
+```typescript
+import { LogEngine } from '@wgtechlabs/log-engine';
+
+// Redirect to GUI application
+LogEngine.configure({
+  outputHandler: (level, message, data) => {
+    updateReactUI({ level, message, timestamp: new Date() });
+  },
+  suppressConsoleOutput: true
+});
+
+// Testing framework integration
+const capturedLogs = [];
+LogEngine.configure({
+  outputHandler: (level, message, data) => {
+    capturedLogs.push({ level, message, data });
+  },
+  suppressConsoleOutput: true
+});
+
+LogEngine.info('User logged in', { userId: 123 });
+```
+
+## Multiple Simultaneous Outputs
+
+Log to multiple destinations at once:
+
+```typescript
+LogEngine.configure({
+  outputs: [
+    'console',
+    'silent',
+    (level, message, data) => {
+      // Custom file handler
+      fs.appendFileSync('./app.log',
+        `${new Date().toISOString()} [${level}] ${message}\n`
+      );
+    },
+    (level, message, data) => {
+      // Custom network handler
+      if (level === 'error') {
+        sendToMonitoringService({ level, message, data });
+      }
+    }
+  ]
+});
+
+// Single log call outputs to all configured destinations
+LogEngine.error('Database connection failed', { retries: 3 });
+```
+
+## Advanced Handlers
+
+Enterprise-grade file and HTTP outputs with advanced features:
+
+### File Output
+
+```typescript
+LogEngine.configure({
+  enhancedOutputs: [
+    'console',
+    {
+      type: 'file',
+      config: {
+        filePath: './logs/app.log',
+        maxFileSize: 10485760,     // 10MB rotation
+        maxBackupFiles: 5,         // Keep 5 backup files
+        append: true,
+        formatter: (level, message, data) => {
+          const timestamp = new Date().toISOString();
+          const dataStr = data ? ` | ${JSON.stringify(data)}` : '';
+          return `[${timestamp}] ${level.toUpperCase()}: ${message}${dataStr}\n`;
+        }
+      }
+    }
+  ]
+});
+```
+
+### HTTP Output
+
+```typescript
+LogEngine.configure({
+  enhancedOutputs: [
+    'console',
+    {
+      type: 'http',
+      config: {
+        url: 'https://api.datadog.com/v1/logs',
+        method: 'POST',
+        batchSize: 10,
+        timeout: 5000,
+        headers: {
+          'Authorization': 'Bearer your-api-key',
+          'Content-Type': 'application/json'
+        },
+        formatter: (logs) => ({
+          service: 'my-app',
+          environment: process.env.NODE_ENV,
+          logs: logs.map(log => ({
+            timestamp: log.timestamp,
+            level: log.level,
+            message: log.message,
+            metadata: log.data
+          }))
+        })
+      }
+    }
+  ]
+});
+```
+
+## Configuration Priority
+
+Log Engine uses an intelligent priority system for output configuration:
+
+```
+outputs > enhancedOutputs > outputHandler > default console
+```
+
+```typescript
+// Single handler (legacy compatibility)
+LogEngine.configure({
+  outputHandler: myHandler,
+  suppressConsoleOutput: true
+});
+
+// Multiple basic outputs - takes priority over outputHandler
+LogEngine.configure({
+  outputs: ['console', myFileHandler, myNetworkHandler]
+});
+
+// Advanced outputs - used when outputs not specified
+LogEngine.configure({
+  enhancedOutputs: [
+    'console',
+    { type: 'file', config: { filePath: './app.log' } }
+  ]
+});
+```
+
+## Error Handling
+
+Robust error handling ensures logging never breaks your application:
+
+```typescript
+LogEngine.configure({
+  outputs: [
+    'console',
+    (level, message) => {
+      throw new Error('Handler failed');
+      // This failure won't break other outputs
+    },
+    (level, message) => {
+      fs.writeFileSync('./logs/app.log', message);
+      // This still works
+    }
+  ]
+});
+
+// If any handler fails, others continue + fallback to console
+LogEngine.error('Critical error');
+```
+
+## Built-in Handler Types
+
+| Handler | Description |
+|---------|-------------|
+| `'console'` | Default console output with colors |
+| `'silent'` | No output (useful for testing) |
+| `'file'` | File output with rotation (enhanced only) |
+| `'http'` | HTTP endpoint delivery (enhanced only) |

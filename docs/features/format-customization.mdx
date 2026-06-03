@@ -1,0 +1,100 @@
+---
+title: Format Customization
+description: Control which elements appear in your log output
+icon: wand-magic-sparkles
+---
+
+Log Engine v2.1+ lets you customize which elements are included in your log output while keeping log levels mandatory for clarity and consistency.
+
+## Available Elements
+
+| Element | Example | Default |
+|---------|---------|---------|
+| **ISO Timestamp** | `[2025-05-29T16:57:45.678Z]` | Enabled |
+| **Local Time** | `[4:57PM]` | Enabled |
+| **Emoji** | `[🚀]` | Enabled |
+| **Log Level** | `[INFO]` | Always included |
+
+<Note>
+  Log levels (`[DEBUG]`, `[INFO]`, `[WARN]`, `[ERROR]`, `[LOG]`) are always included regardless of configuration to maintain log clarity and filtering capabilities.
+</Note>
+
+## Configuration Examples
+
+### Default Format (backward compatible)
+
+```typescript
+LogEngine.configure({ mode: LogMode.DEBUG });
+LogEngine.info('Server started');
+// [2025-05-29T16:57:45.678Z][4:57PM][INFO][🚀]: Server started
+```
+
+### ISO Timestamp Only
+
+```typescript
+LogEngine.configure({
+  mode: LogMode.DEBUG,
+  format: {
+    includeIsoTimestamp: true,
+    includeLocalTime: false
+  }
+});
+LogEngine.info('Database connected');
+// [2025-05-29T16:57:45.678Z][INFO][🗃️]: Database connected
+```
+
+### Local Time Only
+
+```typescript
+LogEngine.configure({
+  mode: LogMode.DEBUG,
+  format: {
+    includeIsoTimestamp: false,
+    includeLocalTime: true
+  }
+});
+LogEngine.warn('Rate limit approaching');
+// [4:57PM][WARN][⚡️]: Rate limit approaching
+```
+
+### Minimal Format (no timestamps, no emoji)
+
+```typescript
+LogEngine.configure({
+  mode: LogMode.DEBUG,
+  format: {
+    includeIsoTimestamp: false,
+    includeLocalTime: false,
+    includeEmoji: false
+  }
+});
+LogEngine.error('Connection failed');
+// [ERROR]: Connection failed
+```
+
+## Color Scheme
+
+Log Engine uses ANSI color codes for instant severity recognition:
+
+| Level | Color | Description |
+|-------|-------|-------------|
+| **DEBUG** | Purple/Magenta | Detailed debugging information |
+| **INFO** | Blue | General informational messages |
+| **WARN** | Yellow | Warning messages that need attention |
+| **ERROR** | Red | Error messages requiring immediate action |
+| **LOG** | Green | Critical messages that always display |
+| **Timestamps** | Gray (ISO) / Cyan (local) | Easy scanning |
+
+## Per-Call Emoji Override
+
+Override the auto-detected emoji for individual log calls:
+
+```typescript
+LogEngine.debug('Starting process', undefined, { emoji: '🔍' });
+LogEngine.info('Database initialized', undefined, { emoji: '✅' });
+LogEngine.warn('Low disk space', undefined, { emoji: '💾' });
+LogEngine.error('Critical failure', undefined, { emoji: '💥' });
+
+// Suppress emoji for a single call
+LogEngine.info('Plain message', undefined, { emoji: '' });
+```

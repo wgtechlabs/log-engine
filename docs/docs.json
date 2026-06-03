@@ -1,0 +1,66 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "maple",
+  "name": "Log Engine",
+  "colors": {
+    "primary": "#016EEA",
+    "light": "#4A9AF5",
+    "dark": "#0155B5"
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "favicon": "/favicon.svg",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "introduction",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Features",
+            "pages": [
+              "features/log-modes",
+              "features/data-redaction",
+              "features/output-handlers",
+              "features/emoji-support",
+              "features/format-customization",
+              "features/auto-configuration"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/migration",
+              "guides/environment-variables"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "API Reference",
+            "pages": [
+              "api-reference/log-engine",
+              "api-reference/types",
+              "api-reference/enums"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "footerSocials": {
+    "github": "https://github.com/wgtechlabs/log-engine",
+    "x": "https://x.com/paborito"
+  }
+}

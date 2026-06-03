@@ -1,0 +1,81 @@
+---
+title: Environment Variables
+description: All environment variables that control Log Engine behavior
+icon: terminal
+---
+
+Log Engine can be configured through environment variables for flexible deployment across different environments.
+
+## Core Configuration
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `NODE_ENV` | Controls automatic log mode selection | `undefined` (uses INFO) |
+
+### NODE_ENV Mapping
+
+| Value | Log Mode |
+|-------|----------|
+| `development` | `LogMode.DEBUG` |
+| `production` | `LogMode.INFO` |
+| `staging` | `LogMode.WARN` |
+| `test` | `LogMode.ERROR` |
+| Unset / other | `LogMode.INFO` |
+
+## Redaction Configuration
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `LOG_REDACTION_DISABLED` | Set to `true` to disable redaction | `false` |
+| `LOG_REDACTION_ENABLED` | Set to `false` to disable redaction | `true` |
+| `DEBUG_FULL_PAYLOADS` | Set to `true` to disable redaction | `false` |
+| `LOG_LEVEL` | Set to `debug` to disable redaction | — |
+| `LOG_REDACTION_TEXT` | Custom replacement text for redacted fields | `[REDACTED]` |
+| `LOG_TRUNCATION_TEXT` | Custom text appended to truncated content | `... [TRUNCATED]` |
+| `LOG_MAX_CONTENT_LENGTH` | Maximum character length before truncation | `100` |
+| `LOG_SENSITIVE_FIELDS` | Comma-separated list of additional sensitive field names | — |
+
+## Redaction Disable Conditions
+
+Redaction is automatically disabled when **any** of these conditions is true:
+
+```bash
+NODE_ENV=development
+LOG_REDACTION_DISABLED=true
+DEBUG_FULL_PAYLOADS=true
+LOG_LEVEL=debug
+LOG_REDACTION_ENABLED=false
+```
+
+## Usage Examples
+
+### Development Environment
+
+```bash
+# Full debugging, all data visible
+NODE_ENV=development
+```
+
+### Production Environment
+
+```bash
+# Balanced logging with full redaction
+NODE_ENV=production
+```
+
+### Custom Redaction
+
+```bash
+# Custom redaction text and additional fields
+LOG_REDACTION_TEXT="***CONFIDENTIAL***"
+LOG_MAX_CONTENT_LENGTH=200
+LOG_SENSITIVE_FIELDS="customField,companySecret,internalData"
+LOG_TRUNCATION_TEXT="... [CUSTOM_TRUNCATED]"
+```
+
+### CI/CD Environment
+
+```bash
+# Minimal logging for automated pipelines
+NODE_ENV=test
+```
