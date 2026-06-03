@@ -25,7 +25,7 @@ export class MessageFormatter {
 
   /**
      * Formats a log message with timestamp, level indicator, and appropriate coloring
-     * Creates a structured log entry: [ISO_TIMESTAMP][LOCAL_TIME][LEVEL]: message [data]
+     * Creates a structured log entry: [ISO_TIMESTAMP][LOCAL_TIME][LEVEL][EMOJI]: message [data]
      * @param level - The log level to format for
      * @param message - The message content to format
      * @param data - Optional data object to include in the log output
