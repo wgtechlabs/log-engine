@@ -1,0 +1,110 @@
+---
+title: Migration Guide
+description: Migrate from LogLevel to LogMode for future-proof configuration
+icon: arrow-up-right-dots
+---
+
+<Warning>
+  The `level` configuration is **deprecated as of v2.0.0** and will be **removed in v3.0.0**. Please migrate to the new `mode` configuration.
+</Warning>
+
+## Quick Migration
+
+```typescript
+// Before (deprecated)
+import { LogEngine, LogLevel } from '@wgtechlabs/log-engine';
+LogEngine.configure({ level: LogLevel.DEBUG });
+
+// After (recommended)
+import { LogEngine, LogMode } from '@wgtechlabs/log-engine';
+LogEngine.configure({ mode: LogMode.DEBUG });
+```
+
+## Level Mapping
+
+| Old (LogLevel) | New (LogMode) |
+|----------------|---------------|
+| `LogLevel.DEBUG` | `LogMode.DEBUG` |
+| `LogLevel.INFO` | `LogMode.INFO` |
+| `LogLevel.WARN` | `LogMode.WARN` |
+| `LogLevel.ERROR` | `LogMode.ERROR` |
+| — | `LogMode.SILENT` (new) |
+| — | `LogMode.OFF` (new) |
+
+## Why Migrate?
+
+<CardGroup cols={2}>
+  <Card title="No Deprecation Warnings" icon="circle-check">
+    Clean console output without deprecation notices
+  </Card>
+  <Card title="Future-Proof" icon="shield-check">
+    Won't be removed — guaranteed API stability
+  </Card>
+  <Card title="New Features" icon="sparkles">
+    Access to SILENT/OFF modes, output handlers, and all v2.0+ features
+  </Card>
+  <Card title="Clearer API" icon="lightbulb">
+    Better separation between message severity and output control
+  </Card>
+</CardGroup>
+
+## Key Differences
+
+### LogLevel (Deprecated)
+
+- Represents **message severity** — how important a single log message is
+- Values: `DEBUG` (0), `INFO` (1), `WARN` (2), `ERROR` (3), `LOG` (99)
+- Used with: `LogEngine.configure({ level: LogLevel.DEBUG })`
+
+### LogMode (Recommended)
+
+- Represents **output control** — what messages are displayed
+- Values: `DEBUG` (0), `INFO` (1), `WARN` (2), `ERROR` (3), `SILENT` (4), `OFF` (5)
+- Used with: `LogEngine.configure({ mode: LogMode.DEBUG })`
+- Adds `SILENT` (LOG messages only) and `OFF` (complete silence)
+
+## Backward Compatibility
+
+The legacy `level` API is still fully functional in v2.x:
+
+```typescript
+// This still works (with deprecation warning)
+LogEngine.configure({ level: LogLevel.DEBUG });
+
+// If both are provided, mode takes precedence
+LogEngine.configure({
+  level: LogLevel.INFO,    // Ignored
+  mode: LogMode.DEBUG      // Used
+});
+```
+
+## Step-by-Step Migration
+
+<Steps>
+  <Step title="Update Imports">
+    Replace `LogLevel` with `LogMode` in your import statements:
+    ```typescript
+    // Before
+    import { LogEngine, LogLevel } from '@wgtechlabs/log-engine';
+
+    // After
+    import { LogEngine, LogMode } from '@wgtechlabs/log-engine';
+    ```
+  </Step>
+  <Step title="Update Configuration Calls">
+    Replace `level` with `mode` in your configure calls:
+    ```typescript
+    // Before
+    LogEngine.configure({ level: LogLevel.DEBUG });
+
+    // After
+    LogEngine.configure({ mode: LogMode.DEBUG });
+    ```
+  </Step>
+  <Step title="Remove LogLevel References">
+    Search your codebase for remaining `LogLevel` references and update them. You can still import `LogLevel` for type checking purposes, but configuration should use `LogMode`.
+  </Step>
+  <Step title="Test">
+    Run your test suite to verify logging behavior is unchanged.
+  </Step>
+</Steps>

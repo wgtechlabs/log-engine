@@ -1,0 +1,167 @@
+---
+title: Data Redaction
+description: Built-in PII protection with automatic sensitive data redaction
+icon: shield-halved
+---
+
+Log Engine features comprehensive built-in PII protection that automatically redacts sensitive information from your logs. This security-first approach prevents accidental exposure of passwords, tokens, emails, and other sensitive data.
+
+## Zero Configuration Security
+
+Just use Log Engine normally — sensitive data is automatically protected:
+
+```typescript
+import { LogEngine } from '@wgtechlabs/log-engine';
+
+LogEngine.info('User authentication', {
+  username: 'john_doe',        // Visible
+  password: 'secret123',       // [REDACTED]
+  email: 'john@example.com',   // [REDACTED]
+  apiKey: 'apikey123',         // [REDACTED]
+  timestamp: new Date()        // Visible
+});
+```
+
+## Protected Data Types
+
+**50+ sensitive patterns automatically detected:**
+
+| Category | Fields |
+|----------|--------|
+| **Authentication** | `password`, `token`, `apiKey`, `secret`, `jwt`, `auth`, `sessionId`, `csrf` |
+| **Personal Info** | `email`, `phone`, `ssn`, `firstName`, `lastName`, `address`, `dateOfBirth` |
+| **Financial** | `creditCard`, `cvv`, `bankAccount`, `routingNumber`, `pin` |
+| **System** | `clientSecret`, `privateKey`, `webhookSecret`, `internalId` |
+
+## Deep Object Scanning
+
+Automatically scans nested objects and arrays:
+
+```typescript
+LogEngine.warn('Payment processing', {
+  order: {
+    id: 'order-123',              // Visible
+    customer: {
+      username: 'customer1',      // Visible
+      email: 'user@example.com',  // [REDACTED]
+      creditCard: '4532-****'     // [REDACTED]
+    }
+  },
+  metadata: {
+    processor: 'stripe',
+    apiSecret: 'sk_live_...'      // [REDACTED]
+  }
+});
+```
+
+## Content Truncation
+
+Large content fields are automatically truncated to prevent log bloat:
+
+```typescript
+LogEngine.debug('Large payload', {
+  content: 'Very long content...'.repeat(100), // Truncated at 100 chars
+  size: 'large',
+  processed: true
+});
+```
+
+Default content fields: `content`, `text`, `message`, `body`, `data`, `payload`, `response`, `request`, `description`.
+
+## Custom Configuration
+
+### Custom Redaction Settings
+
+```typescript
+LogEngine.configureRedaction({
+  redactionText: '***HIDDEN***',
+  maxContentLength: 200,
+  sensitiveFields: ['myCustomField', 'internalSecret']
+});
+
+// Get current configuration
+const config = LogEngine.getRedactionConfig();
+```
+
+### Custom Regex Patterns
+
+```typescript
+// Add custom regex patterns for enterprise-specific data
+LogEngine.addCustomRedactionPatterns([
+  /internal.*/i,        // Matches fields starting with "internal"
+  /company.*/i,         // Matches fields starting with "company"
+  /^config[A-Z]/        // Matches camelCase config fields
+]);
+
+// Add custom sensitive field names dynamically
+LogEngine.addSensitiveFields(['companySecret', 'internalToken', 'proprietaryData']);
+```
+
+### Test Field Redaction
+
+```typescript
+// Test if a field name would be redacted
+if (LogEngine.testFieldRedaction('myField')) {
+  console.log('Field will be redacted');
+}
+```
+
+### Configuration Management
+
+```typescript
+LogEngine.refreshRedactionConfig();       // Refresh from environment
+LogEngine.resetRedactionConfig();         // Reset to defaults
+LogEngine.clearCustomRedactionPatterns(); // Clear custom patterns
+```
+
+## Development-Friendly Features
+
+### Raw Methods (Bypass Redaction)
+
+<Warning>
+  Use raw methods with caution — they bypass all redaction protections.
+</Warning>
+
+```typescript
+// Direct raw methods
+LogEngine.debugRaw('Full debug data', {
+  password: 'secret123',    // Visible (not redacted)
+  apiKey: 'full-key'        // Visible (not redacted)
+});
+
+// Helper method
+LogEngine.withoutRedaction().info('Debug mode', sensitiveData);
+
+// Compare outputs during development
+LogEngine.info('With redaction', data);                       // [REDACTED]
+LogEngine.withoutRedaction().info('Without redaction', data);  // Visible
+```
+
+### Environment-Based Control
+
+```bash
+# Development - show everything (redaction disabled)
+NODE_ENV=development
+
+# Explicitly disable redaction
+LOG_REDACTION_DISABLED=true
+DEBUG_FULL_PAYLOADS=true
+
+# Custom redaction configuration
+LOG_REDACTION_TEXT="***CONFIDENTIAL***"
+LOG_MAX_CONTENT_LENGTH=200
+LOG_SENSITIVE_FIELDS="customField,companySecret,internalData"
+LOG_TRUNCATION_TEXT="... [CUSTOM_TRUNCATED]"
+
+# Alternative disable method
+LOG_REDACTION_ENABLED=false
+```
+
+## Environment Behavior
+
+| Environment | Redaction Status | Use Case |
+|-------------|-----------------|----------|
+| **Production** | Active | Full protection for live systems |
+| **Development** | Disabled | Full data visibility for debugging |
+| **Staging** | Active | Test with production-like security |
+| **Test** | Active | Consistent test environment |

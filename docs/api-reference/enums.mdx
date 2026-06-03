@@ -1,0 +1,76 @@
+---
+title: Enums
+description: LogMode and LogLevel enum reference
+icon: list-ol
+---
+
+## LogMode
+
+Controls output behavior and filtering. Determines what messages are displayed based on verbosity requirements.
+
+```typescript
+import { LogMode } from '@wgtechlabs/log-engine';
+```
+
+| Member | Value | Description |
+|--------|-------|-------------|
+| `LogMode.DEBUG` | `0` | Most verbose — shows DEBUG, INFO, WARN, ERROR, LOG |
+| `LogMode.INFO` | `1` | Balanced — shows INFO, WARN, ERROR, LOG |
+| `LogMode.WARN` | `2` | Focused — shows WARN, ERROR, LOG |
+| `LogMode.ERROR` | `3` | Minimal — shows ERROR, LOG |
+| `LogMode.SILENT` | `4` | Critical only — shows LOG only |
+| `LogMode.OFF` | `5` | Complete silence — shows nothing |
+
+### Usage
+
+```typescript
+// Recommended configuration approach
+LogEngine.configure({ mode: LogMode.DEBUG });
+LogEngine.configure({ mode: LogMode.INFO });
+LogEngine.configure({ mode: LogMode.WARN });
+LogEngine.configure({ mode: LogMode.ERROR });
+LogEngine.configure({ mode: LogMode.SILENT });
+LogEngine.configure({ mode: LogMode.OFF });
+```
+
+### Visibility Matrix
+
+| Method | DEBUG | INFO | WARN | ERROR | SILENT | OFF |
+|--------|:-----:|:----:|:----:|:-----:|:------:|:---:|
+| `debug()` | Yes | — | — | — | — | — |
+| `info()` | Yes | Yes | — | — | — | — |
+| `warn()` | Yes | Yes | Yes | — | — | — |
+| `error()` | Yes | Yes | Yes | Yes | — | — |
+| `log()` | Yes | Yes | Yes | Yes | Yes | — |
+
+---
+
+## LogLevel
+
+<Warning>
+  `LogLevel` is **deprecated** for configuration purposes. Use `LogMode` instead. `LogLevel` will be removed in v3.0.0. See the [Migration Guide](/guides/migration).
+</Warning>
+
+Represents message severity — how important a single log message is.
+
+```typescript
+import { LogLevel } from '@wgtechlabs/log-engine';
+```
+
+| Member | Value | Description |
+|--------|-------|-------------|
+| `LogLevel.DEBUG` | `0` | Detailed diagnostic information |
+| `LogLevel.INFO` | `1` | General information about application flow |
+| `LogLevel.WARN` | `2` | Potentially harmful situations |
+| `LogLevel.ERROR` | `3` | Error events |
+| `LogLevel.LOG` | `99` | Critical messages that always output (except OFF) |
+
+### Legacy Usage (Deprecated)
+
+```typescript
+// Deprecated - shows warning in console
+LogEngine.configure({ level: LogLevel.DEBUG });
+
+// Recommended replacement
+LogEngine.configure({ mode: LogMode.DEBUG });
+```

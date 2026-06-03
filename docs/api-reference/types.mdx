@@ -1,0 +1,264 @@
+---
+title: Types & Interfaces
+description: TypeScript type definitions and interfaces for Log Engine
+icon: brackets-curly
+---
+
+Log Engine includes 15+ type definitions and interfaces for complete IDE support and type safety.
+
+```typescript
+import {
+  LogEngine,
+  LogMode,
+  LogLevel,
+  ILogEngine,
+  ILogEngineWithoutRedaction,
+  RedactionConfig,
+  LoggerConfig,
+  LogOutputHandler,
+  FileOutputConfig,
+  HttpOutputConfig,
+  IDataRedactor
+} from '@wgtechlabs/log-engine';
+```
+
+## LoggerConfig
+
+Configuration options for the logger.
+
+```typescript
+interface LoggerConfig {
+  mode?: LogMode;
+  level?: LogLevel;                        // Deprecated
+  environment?: string;
+  outputHandler?: LogOutputHandler;
+  outputs?: OutputTarget[];
+  enhancedOutputs?: EnhancedOutputTarget[];
+  suppressConsoleOutput?: boolean;
+  advancedOutputConfig?: AdvancedOutputConfig;
+  format?: LogFormatConfig;
+}
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `mode` | `LogMode` | Log mode controlling output behavior (recommended) |
+| `level` | `LogLevel` | Legacy minimum log level (deprecated, use `mode`) |
+| `environment` | `string` | Optional environment identifier |
+| `outputHandler` | `LogOutputHandler` | Custom output handler function |
+| `outputs` | `OutputTarget[]` | Array of output targets |
+| `enhancedOutputs` | `EnhancedOutputTarget[]` | Enhanced outputs with advanced configuration |
+| `suppressConsoleOutput` | `boolean` | Whether to suppress default console output |
+| `advancedOutputConfig` | `AdvancedOutputConfig` | Advanced built-in handler configuration |
+| `format` | `LogFormatConfig` | Format customization options |
+
+## RedactionConfig
+
+Configuration for automatic data redaction.
+
+```typescript
+interface RedactionConfig {
+  enabled: boolean;
+  sensitiveFields: string[];
+  contentFields: string[];
+  maxContentLength: number;
+  redactionText: string;
+  truncationText: string;
+  deepRedaction: boolean;
+  customPatterns?: RegExp[];
+}
+```
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `enabled` | `boolean` | `true` | Whether redaction is enabled globally |
+| `sensitiveFields` | `string[]` | 50+ fields | Field names to redact (case-insensitive) |
+| `contentFields` | `string[]` | 9 fields | Field names to truncate |
+| `maxContentLength` | `number` | `100` | Max length before truncation |
+| `redactionText` | `string` | `[REDACTED]` | Replacement text for redacted values |
+| `truncationText` | `string` | `... [TRUNCATED]` | Text appended to truncated content |
+| `deepRedaction` | `boolean` | `true` | Recursively scan nested objects |
+| `customPatterns` | `RegExp[]` | `undefined` | Custom regex patterns for field detection |
+
+## LogFormatConfig
+
+Configuration for log message formatting.
+
+```typescript
+interface LogFormatConfig {
+  includeIsoTimestamp?: boolean;
+  includeLocalTime?: boolean;
+  includeEmoji?: boolean;
+  emoji?: EmojiConfig;
+}
+```
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `includeIsoTimestamp` | `boolean` | `true` | Include ISO timestamp |
+| `includeLocalTime` | `boolean` | `true` | Include local time |
+| `includeEmoji` | `boolean` | `true` | Include emoji in output |
+| `emoji` | `EmojiConfig` | `undefined` | Emoji customization config |
+
+## EmojiConfig
+
+Configuration for customizing emoji mappings and fallbacks.
+
+```typescript
+interface EmojiConfig {
+  customMappings?: EmojiMapping[];
+  customFallbacks?: Partial<Record<'DEBUG' | 'INFO' | 'WARN' | 'ERROR' | 'LOG', string>>;
+  useCustomOnly?: boolean;
+}
+```
+
+## EmojiMapping
+
+Definition for a context-aware emoji mapping.
+
+```typescript
+interface EmojiMapping {
+  emoji: string;
+  code: string;
+  description?: string;
+  keywords: string[];
+}
+```
+
+## LogCallOptions
+
+Options for individual log method calls.
+
+```typescript
+interface LogCallOptions {
+  emoji?: string;
+}
+```
+
+Set `emoji` to a specific string to override, or `''` to suppress for that call.
+
+## LogEntry
+
+Represents a single log entry.
+
+```typescript
+interface LogEntry {
+  timestamp: Date;
+  level: LogLevel;
+  message: string;
+}
+```
+
+## LogOutputHandler
+
+Custom output handler function type.
+
+```typescript
+type LogOutputHandler = (level: string, message: string, data?: LogData) => void;
+```
+
+## FileOutputConfig
+
+Configuration for file output handler.
+
+```typescript
+interface FileOutputConfig {
+  filePath: string;
+  append?: boolean;
+  maxFileSize?: number;
+  maxBackupFiles?: number;
+  formatter?: (level: string, message: string, data?: LogData) => string;
+}
+```
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `filePath` | `string` | — | File path to write logs to |
+| `append` | `boolean` | `true` | Whether to append to existing file |
+| `maxFileSize` | `number` | — | Max file size before rotation (bytes) |
+| `maxBackupFiles` | `number` | `3` | Number of backup files to keep |
+| `formatter` | `function` | — | Custom format function |
+
+## HttpOutputConfig
+
+Configuration for HTTP output handler.
+
+```typescript
+interface HttpOutputConfig {
+  url: string;
+  method?: 'POST' | 'PUT' | 'PATCH';
+  headers?: Record<string, string>;
+  batchSize?: number;
+  timeout?: number;
+  formatter?: (logs: Array<{
+    level: string;
+    message: string;
+    data?: LogData;
+    timestamp: string;
+  }>) => LogData;
+}
+```
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `url` | `string` | — | HTTP endpoint URL |
+| `method` | `string` | `'POST'` | HTTP method |
+| `headers` | `Record<string, string>` | — | Custom headers |
+| `batchSize` | `number` | `1` | Batch size for requests |
+| `timeout` | `number` | `5000` | Timeout in milliseconds |
+| `formatter` | `function` | — | Custom payload format function |
+
+## ILogEngine
+
+Complete LogEngine API interface.
+
+```typescript
+interface ILogEngine {
+  configure(config: Partial<LoggerConfig>): void;
+  debug(message: string, data?: LogData, options?: LogCallOptions): void;
+  info(message: string, data?: LogData, options?: LogCallOptions): void;
+  warn(message: string, data?: LogData, options?: LogCallOptions): void;
+  error(message: string, data?: LogData, options?: LogCallOptions): void;
+  log(message: string, data?: LogData, options?: LogCallOptions): void;
+  debugRaw(message: string, data?: LogData, options?: LogCallOptions): void;
+  infoRaw(message: string, data?: LogData, options?: LogCallOptions): void;
+  warnRaw(message: string, data?: LogData, options?: LogCallOptions): void;
+  errorRaw(message: string, data?: LogData, options?: LogCallOptions): void;
+  logRaw(message: string, data?: LogData, options?: LogCallOptions): void;
+  configureRedaction(config: Partial<RedactionConfig>): void;
+  refreshRedactionConfig(): void;
+  resetRedactionConfig(): void;
+  getRedactionConfig(): RedactionConfig;
+  addCustomRedactionPatterns(patterns: RegExp[]): void;
+  clearCustomRedactionPatterns(): void;
+  addSensitiveFields(fields: string[]): void;
+  testFieldRedaction(fieldName: string): boolean;
+  withoutRedaction(): ILogEngineWithoutRedaction;
+}
+```
+
+## ILogEngineWithoutRedaction
+
+Interface for the redaction-bypassed logger.
+
+```typescript
+interface ILogEngineWithoutRedaction {
+  debug(message: string, data?: LogData, options?: LogCallOptions): void;
+  info(message: string, data?: LogData, options?: LogCallOptions): void;
+  warn(message: string, data?: LogData, options?: LogCallOptions): void;
+  error(message: string, data?: LogData, options?: LogCallOptions): void;
+  log(message: string, data?: LogData, options?: LogCallOptions): void;
+}
+```
+
+## Output Target Types
+
+```typescript
+type BuiltInOutputHandler = 'console' | 'silent' | 'file' | 'http';
+type OutputTarget = BuiltInOutputHandler | LogOutputHandler;
+type EnhancedOutputTarget =
+  | BuiltInOutputHandler
+  | LogOutputHandler
+  | { type: 'file'; config: FileOutputConfig }
+  | { type: 'http'; config: HttpOutputConfig };
+```
